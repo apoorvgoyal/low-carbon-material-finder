@@ -1,0 +1,54 @@
+name: Update Manufacturer Database
+
+on:
+  # Run every Monday at 6am UTC
+  schedule:
+    - cron: '0 6 * * 1'
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      sync_ec3:
+        description: 'Sync from EC3 API'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  update-database:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run database update script
+        env:
+          # EC3_API_KEY is a repository secret — set it in:
+          # GitHub repo → Settings → Secrets and variables → Actions → New repository secret
+          EC3_API_KEY: ${{ secrets.EC3_API_KEY }}
+        run: node scripts/update-db.js
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if git diff --quiet data/database.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit and push if changed
+        if: steps.check-changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/database.json
+          git commit -m "Auto-update manufacturer database [skip ci]"
+          git push

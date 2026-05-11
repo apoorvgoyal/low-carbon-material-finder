@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Submit Manufacturer Data — Low-Carbon Material Finder</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:14px;color:#1a2035;background:#f0f2f7;min-height:100%}
+a{color:#3b6fd4}
+
+#topbar{
+  background:linear-gradient(135deg,#1a2035 0%,#1e3a5f 100%);
+  color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;
+}
+#topbar h1{font-size:16px;font-weight:700}
+#topbar a{color:#93b4d9;font-size:13px}
+
+.container{max-width:780px;margin:0 auto;padding:24px 16px 60px}
+
+.intro-card{
+  background:#fff;border-radius:10px;padding:18px 20px;
+  border-left:4px solid #3b82f6;margin-bottom:24px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.intro-card h2{font-size:16px;color:#1a2035;margin-bottom:8px}
+.intro-card p{font-size:13px;color:#4b5563;line-height:1.6}
+.intro-card ul{margin:8px 0 0 18px;font-size:13px;color:#4b5563;line-height:1.8}
+
+.section{
+  background:#fff;border-radius:10px;padding:18px 20px;
+  margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.section h3{font-size:14px;font-weight:700;color:#1a2035;margin-bottom:14px;
+  padding-bottom:8px;border-bottom:1px solid #e5e8f0}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px}
+.field input,.field select,.field textarea{
+  width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;
+  font-size:13px;font-family:inherit;color:#1a2035;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);
+}
+.field textarea{resize:vertical;min-height:80px}
+.field small{display:block;font-size:11px;color:#9ca3af;margin-top:4px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.field-row{grid-template-columns:1fr}}
+
+.product-entry{
+  border:1px solid #e5e8f0;border-radius:8px;padding:14px;
+  margin-bottom:12px;background:#f9fafe;
+}
+.product-entry h4{font-size:13px;font-weight:600;color:#1a2035;margin-bottom:10px}
+
+.add-btn{
+  padding:7px 16px;border-radius:6px;border:1px dashed #3b82f6;
+  background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .15s;
+}
+.add-btn:hover{background:#dbeafe}
+.remove-btn{
+  padding:3px 10px;border-radius:4px;border:1px solid #fca5a5;
+  background:#fff;color:#dc2626;font-size:11px;cursor:pointer;float:right;
+}
+
+.submit-btn{
+  width:100%;padding:13px;border-radius:8px;border:none;
+  background:linear-gradient(135deg,#2563eb,#1e40af);color:#fff;
+  font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s;
+  margin-top:4px;
+}
+.submit-btn:hover{opacity:.9}
+
+/* Result panel */
+#result-panel{display:none;background:#fff;border-radius:10px;padding:20px;margin-top:20px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#result-panel h3{color:#15803d;margin-bottom:12px;font-size:15px}
+.json-preview{
+  background:#0f172a;color:#e2e8f0;padding:14px;border-radius:8px;
+  font-size:11px;font-family:monospace;overflow-x:auto;white-space:pre;max-height:320px;overflow-y:auto;
+  margin-bottom:14px;
+}
+.action-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:500px){.action-cards{grid-template-columns:1fr}}
+.action-card{
+  border:1px solid #e5e8f0;border-radius:8px;padding:14px;text-align:center;
+}
+.action-card h4{font-size:13px;font-weight:600;margin-bottom:6px;color:#1a2035}
+.action-card p{font-size:11px;color:#6b7280;line-height:1.5;margin-bottom:10px}
+.action-card a,.action-card button{
+  display:inline-block;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;
+  text-decoration:none;cursor:pointer;border:none;
+}
+.action-card .primary{background:#2563eb;color:#fff}
+.action-card .secondary{background:#f3f4f6;color:#374151;border:1px solid #d1d5db}
+.copy-note{font-size:10px;color:#9ca3af;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>Submit Manufacturer Data</h1>
+  <a href="index.html">&larr; Back to Map</a>
+</div>
+
+<div class="container">
+
+  <div class="intro-card">
+    <h2>Help grow the low-carbon database</h2>
+    <p>Submit your company's plant data, EPD values, and product information to be included in the Low-Carbon Material Finder. All submissions are reviewed before publishing.</p>
+    <ul>
+      <li>Concrete manufacturers, precast plants, technology providers</li>
+      <li>Steel producers (EAF or BOF with verified EPDs)</li>
+      <li>You'll need: plant address, GWP value or EPD document, product specs</li>
+    </ul>
+  </div>
+
+  <form id="submit-form">
+
+    <!-- Company Info -->
+    <div class="section">
+      <h3>Company Information</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Company Name *</label>
+          <input id="company" type="text" placeholder="e.g. Acme Concrete Co." required>
+        </div>
+        <div class="field">
+          <label>Material Type *</label>
+          <select id="material-type" required>
+            <option value="">Select...</option>
+            <option value="concrete">Ready-Mix Concrete</option>
+            <option value="concrete">Precast Concrete</option>
+            <option value="concrete">Concrete Masonry (CMU)</option>
+            <option value="steel">Structural Steel</option>
+            <option value="steel">Rebar / Long Products</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Company Website</label>
+          <input id="website" type="url" placeholder="https://...">
+        </div>
+        <div class="field">
+          <label>Product Line / Brand Name *</label>
+          <input id="product-line" type="text" placeholder="e.g. EcoMix Green" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Technology / Approach *</label>
+        <select id="technology" required>
+          <option value="">Select the primary low-carbon approach...</option>
+          <option value="scm-substitution">SCM Substitution (fly ash, slag, silica fume)</option>
+          <option value="plc">Portland Limestone Cement (PLC / ASTM C595)</option>
+          <option value="co2-mineralization">CO₂ Mineralization (e.g. CarbonCure)</option>
+          <option value="co2-curing">CO₂ Curing (precast)</option>
+          <option value="novel-binder">Novel Binder / Alternative Cement</option>
+          <option value="eaf-steel">Electric Arc Furnace (EAF) Steel</option>
+          <option value="other">Other (describe in notes)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Coverage</label>
+        <select id="coverage">
+          <option value="national">National (plants in most US states)</option>
+          <option value="regional">Regional (specific states)</option>
+          <option value="local">Local (single plant / metro area)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Service States (if regional — comma-separated abbreviations)</label>
+        <input id="service-states" type="text" placeholder="e.g. CA, OR, WA, NV">
+      </div>
+      <div class="field">
+        <label>Brief Description *</label>
+        <textarea id="about" rows="3" placeholder="Describe the company, technology, and what makes the product low-carbon. 2-3 sentences." required></textarea>
+      </div>
+    </div>
+
+    <!-- Plant Location -->
+    <div class="section">
+      <h3>Primary Plant / HQ Location</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Street Address</label>
+          <input id="hq-address" type="text" placeholder="123 Main St">
+        </div>
+        <div class="field">
+          <label>City *</label>
+          <input id="hq-city" type="text" placeholder="City" required>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>State *</label>
+          <input id="hq-state" type="text" placeholder="e.g. TX" maxlength="2" required>
+        </div>
+        <div class="field">
+          <label>ZIP Code</label>
+          <input id="hq-zip" type="text" placeholder="XXXXX" maxlength="5" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label>Total US Plant Count</label>
+        <input id="plant-count" type="text" placeholder="e.g. 12 plants in Western US">
+      </div>
+      <div class="field">
+        <label>Plant Locator URL (if available)</label>
+        <input id="plant-locator" type="url" placeholder="https://...">
+      </div>
+    </div>
+
+    <!-- Products -->
+    <div class="section">
+      <h3>Products &amp; GWP Data</h3>
+      <div id="products-container">
+        <div class="product-entry" id="product-0">
+          <h4>Product 1 <button type="button" class="remove-btn" onclick="removeProduct(0)" style="display:none">Remove</button></h4>
+          <div class="field-row">
+            <div class="field">
+              <label>Product Name *</label>
+              <input type="text" name="p-name" placeholder="e.g. GreenMix 4000" required>
+            </div>
+            <div class="field">
+              <label>GWP Value (A1-A3)</label>
+              <input type="number" name="p-gwp" placeholder="e.g. 185" min="0" step="1">
+              <small>In kg CO₂e/m³ (concrete) or kg CO₂e/metric ton (steel)</small>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>GWP Data Type</label>
+              <select name="p-gwp-type">
+                <option value="verified">Verified EPD value</option>
+                <option value="estimate">Manufacturer estimate / claim</option>
+                <option value="none">No GWP data available</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>CO₂ Reduction Claim</label>
+              <input type="text" name="p-reduction" placeholder="e.g. 40% vs NRMCA industry average">
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>EPD URL (if publicly available)</label>
+              <input type="url" name="p-epd-url" placeholder="https://...">
+            </div>
+            <div class="field">
+              <label>EPD Info Page URL</label>
+              <input type="url" name="p-epd-info" placeholder="https://...">
+            </div>
+          </div>
+          <div class="field">
+            <label>Product Description</label>
+            <input type="text" name="p-desc" placeholder="Brief description of mix design, specifications, use case">
+          </div>
+        </div>
+      </div>
+      <button type="button" class="add-btn" onclick="addProduct()">+ Add Another Product</button>
+    </div>
+
+    <!-- Contact -->
+    <div class="section">
+      <h3>Contact Information</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Contact Name *</label>
+          <input id="contact-name" type="text" placeholder="Your name" required>
+        </div>
+        <div class="field">
+          <label>Contact Email *</label>
+          <input id="contact-email" type="email" placeholder="you@company.com" required>
+        </div>
+      </div>
+      <div class="field">
+        <label>Contact URL (for the map popup)</label>
+        <input id="contact-url" type="url" placeholder="https://yourcompany.com/contact">
+      </div>
+      <div class="field">
+        <label>Additional Notes</label>
+        <textarea id="notes" rows="3" placeholder="Certifications, standards compliance, special notes, anything else we should know..."></textarea>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn">Generate Submission JSON</button>
+  </form>
+
+  <!-- Result panel (shown after submit) -->
+  <div id="result-panel">
+    <h3>&#10003; Submission ready — choose a submission method</h3>
+    <p style="font-size:13px;color:#4b5563;margin-bottom:12px">
+      Your data has been formatted as JSON below. Copy it and submit using one of the options.
+    </p>
+    <div class="json-preview" id="json-output"></div>
+    <div class="action-cards">
+      <div class="action-card">
+        <h4>Option A: GitHub Issue</h4>
+        <p>Open a GitHub Issue and paste the JSON. This is the recommended method — submissions are tracked publicly and reviewed by the maintainer.</p>
+        <a class="primary" id="github-issue-link" href="https://github.com/apoorvgoyal/low-carbon-material-finder/issues/new?title=New+Manufacturer+Submission&body=Please+paste+your+JSON+here" target="_blank" rel="noopener">Open GitHub Issue &rarr;</a>
+      </div>
+      <div class="action-card">
+        <h4>Option B: Copy JSON</h4>
+        <p>Copy the JSON to your clipboard and email it to the maintainer, or use it to manually edit database.json.</p>
+        <button class="secondary" onclick="copyJson()">Copy JSON to Clipboard</button>
+        <div class="copy-note" id="copy-note"></div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:#9ca3af;margin-top:16px;text-align:center">
+      Submissions are reviewed for accuracy before being added to the public database. You will be contacted at the email provided.
+    </p>
+    <div style="text-align:center;margin-top:14px">
+      <a href="index.html" style="font-size:13px;color:#3b6fd4">&larr; Return to the map</a>
+    </div>
+  </div>
+
+</div><!-- .container -->
+
+<script>
+var productCount = 1;
+
+function addProduct() {
+  var container = document.getElementById('products-container');
+  var idx = productCount++;
+  var div = document.createElement('div');
+  div.className = 'product-entry';
+  div.id = 'product-' + idx;
+  div.innerHTML = '<h4>Product ' + (idx + 1) + ' <button type="button" class="remove-btn" onclick="removeProduct(' + idx + ')">Remove</button></h4>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>Product Name *</label><input type="text" name="p-name" placeholder="e.g. EcoMix 5000" required></div>' +
+      '<div class="field"><label>GWP Value (A1-A3)</label><input type="number" name="p-gwp" placeholder="e.g. 160" min="0" step="1"><small>kg CO₂e/m³ or kg CO₂e/metric ton</small></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>GWP Data Type</label><select name="p-gwp-type"><option value="verified">Verified EPD value</option><option value="estimate">Manufacturer estimate</option><option value="none">No GWP data</option></select></div>' +
+      '<div class="field"><label>CO₂ Reduction Claim</label><input type="text" name="p-reduction" placeholder="e.g. 40% vs industry avg"></div>' +
+    '</div>' +
+    '<div class="field-row">' +
+      '<div class="field"><label>EPD URL</label><input type="url" name="p-epd-url" placeholder="https://..."></div>' +
+      '<div class="field"><label>EPD Info Page</label><input type="url" name="p-epd-info" placeholder="https://..."></div>' +
+    '</div>' +
+    '<div class="field"><label>Description</label><input type="text" name="p-desc" placeholder="Brief description"></div>';
+  container.appendChild(div);
+  // Show remove buttons when >1 product
+  document.querySelectorAll('.remove-btn').forEach(function(b){ b.style.display=''; });
+}
+
+function removeProduct(idx) {
+  var el = document.getElementById('product-' + idx);
+  if (el) el.remove();
+  var remaining = document.querySelectorAll('.product-entry');
+  if (remaining.length === 1) remaining[0].querySelector('.remove-btn').style.display = 'none';
+}
+
+document.getElementById('submit-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  var states = document.getElementById('service-states').value
+    .split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
+
+  var products = [];
+  document.querySelectorAll('.product-entry').forEach(function(entry, i) {
+    var gwpRaw = entry.querySelector('[name="p-gwp"]').value;
+    var gwpNum = gwpRaw ? parseFloat(gwpRaw) : null;
+    var gwpType = entry.querySelector('[name="p-gwp-type"]').value;
+    products.push({
+      id: 'submitted-p-' + i,
+      name: entry.querySelector('[name="p-name"]').value || '',
+      description: entry.querySelector('[name="p-desc"]').value || '',
+      gwpVerified: gwpType === 'verified' ? gwpNum : null,
+      gwpEstimate: gwpType === 'estimate' ? gwpNum : null,
+      gwpLabel: gwpNum != null ? (gwpNum + ' kg CO₂e') : 'No data found',
+      gwpUnit: document.getElementById('material-type').value === 'steel' ? 'kg CO₂e/metric ton' : 'kg CO₂e/m³',
+      gwpEstimateNote: gwpType === 'estimate' ? 'Manufacturer estimate' : null,
+      reductionClaim: entry.querySelector('[name="p-reduction"]').value || 'No data found',
+      epdAvailable: !!(entry.querySelector('[name="p-epd-url"]').value || entry.querySelector('[name="p-epd-info"]').value),
+      epdUrl: entry.querySelector('[name="p-epd-url"]').value || null,
+      epdInfoUrl: entry.querySelector('[name="p-epd-info"]').value || null,
+      epdNote: 'See EPD URL or info page',
+      ec3Searchable: false,
+      costBase: 'No data found', costPremium: 'No data found', costNote: 'Contact manufacturer for pricing'
+    });
+  });
+
+  var hqCity = document.getElementById('hq-city').value;
+  var hqState = document.getElementById('hq-state').value.toUpperCase();
+
+  var submission = {
+    id: 'community-' + Date.now(),
+    status: 'pending',
+    submittedAt: new Date().toISOString(),
+    submittedBy: document.getElementById('contact-email').value,
+    company: document.getElementById('company').value,
+    productLine: document.getElementById('product-line').value,
+    type: document.getElementById('material-type').value,
+    coverage: document.getElementById('coverage').value,
+    serviceStates: states.length ? states : null,
+    serviceRegion: states.length ? states.join(', ') : 'Contact manufacturer',
+    plantCount: document.getElementById('plant-count').value || 'No data found',
+    hq: {
+      lat: 0,
+      lng: 0,
+      label: hqCity + ', ' + hqState + ' (coordinates to be added by admin)'
+    },
+    technology: document.getElementById('technology').value,
+    plantLocatorUrl: document.getElementById('plant-locator').value || null,
+    about: document.getElementById('about').value,
+    products: products,
+    sources: [{ label: document.getElementById('company').value, url: document.getElementById('website').value || '#' }],
+    contactUrl: document.getElementById('contact-url').value || document.getElementById('website').value || '#',
+    ec3SearchUrl: 'https://www.buildingtransparency.org/',
+    submitterNotes: document.getElementById('notes').value || null
+  };
+
+  document.getElementById('json-output').textContent = JSON.stringify(submission, null, 2);
+  document.getElementById('result-panel').style.display = 'block';
+  document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth' });
+});
+
+function copyJson() {
+  var text = document.getElementById('json-output').textContent;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function(){
+      document.getElementById('copy-note').textContent = 'Copied!';
+      setTimeout(function(){ document.getElementById('copy-note').textContent = ''; }, 2000);
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    document.getElementById('copy-note').textContent = 'Copied!';
+  }
+}
+</script>
+</body>
+</html>
