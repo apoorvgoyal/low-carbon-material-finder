@@ -385,60 +385,110 @@ select,input{font-family:inherit;font-size:12px}
    MOBILE STYLES
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  /* Topbar: 2-row stacked layout */
+  /* Topbar: explicit 3-row layout using flex-basis:100% trick */
   #topbar{
-    min-height:auto;padding:8px 10px;gap:6px;
+    min-height:auto;padding:0;gap:0;
     flex-direction:row;flex-wrap:wrap;align-items:center;
   }
-  .brand{flex:1}
-  .brand-sub{display:none}
   .topbar-sep{display:none}
 
-  /* Hide desktop controls by default on mobile */
+  /* Row 1: brand (left) + Options button (right) */
+  .brand{
+    flex:1;order:1;
+    padding:10px 12px;
+    min-width:0;
+  }
+  .brand-title{font-size:13px}
+  .brand-sub{display:none}
+  #mobile-opts-btn{
+    display:flex!important;
+    order:2;
+    padding:10px 12px;
+    border:none;
+    border-radius:0;
+    background:rgba(255,255,255,.08);
+    font-size:13px;font-weight:600;
+  }
+
+  /* Row 2: material toggle — full width, forced onto its own row */
+  .mat-toggle{
+    order:3;
+    flex-basis:100%;
+    width:100%;
+    padding:6px 10px 8px;
+    gap:6px;
+    background:rgba(0,0,0,.15);
+    border-radius:0;
+  }
+  .mat-btn{
+    flex:1;
+    padding:11px 8px;
+    font-size:14px;font-weight:700;
+    border-radius:8px;
+    min-height:44px;
+    text-align:center;
+  }
+  .mat-btn:not(.active){
+    background:rgba(255,255,255,.1);
+    color:rgba(255,255,255,.75);
+  }
+  .mat-btn.active{
+    background:#3b82f6;
+    color:#fff;
+    box-shadow:0 2px 8px rgba(59,130,246,.5);
+  }
+
+  /* Hide desktop-only controls */
   .mode-toggle,
   #finder-controls,
   #gwp-controls,
-  #ec3-btn{
+  #ec3-btn,
+  #mobile-search-row{
     display:none!important;
   }
 
-  /* Show mobile opts button */
-  #mobile-opts-btn{display:flex;align-items:center;gap:4px}
-
-  /* Mobile options panel (shown when toggled) */
+  /* Row 3 (when options open): options panel full width */
   #mobile-opts-panel{
     display:none;
-    width:100%;padding:8px 0 4px;
-    border-top:1px solid rgba(255,255,255,.15);
-    flex-direction:column;gap:8px;
+    order:4;
+    flex-basis:100%;
+    width:100%;
+    padding:10px 12px;
+    border-top:1px solid rgba(255,255,255,.12);
+    flex-direction:column;gap:10px;
+    background:rgba(0,0,0,.2);
   }
   #mobile-opts-panel.open{display:flex}
 
-  /* Inside mobile panel: show all the controls stacked */
-  #mobile-opts-panel .mode-toggle,
-  #mobile-opts-panel #finder-controls,
-  #mobile-opts-panel #gwp-controls,
-  #mobile-opts-panel #ec3-btn{
-    display:flex!important;flex-wrap:wrap;gap:6px;
+  /* Controls inside options panel */
+  #mobile-opts-panel .mode-toggle{
+    display:flex!important;width:100%;
   }
-  #mobile-opts-panel #finder-controls{flex-direction:column;align-items:flex-start}
-  #mobile-opts-panel .radius-group{width:100%}
-  #mobile-opts-panel #radius-slider{width:140px}
-  #mobile-opts-panel .filter-group{width:100%}
-  #mobile-opts-panel #product-sel{max-width:220px}
-  #mobile-opts-panel #gwp-target-slider{width:160px}
-  #mobile-opts-panel #ec3-btn{margin-left:0}
-
-  /* Search bar always visible on mobile (outside panel) */
-  #mobile-search-row{
-    display:flex!important;
-    width:100%;align-items:center;gap:6px;
+  #mobile-opts-panel .mode-btn{
+    flex:1;padding:9px 8px;font-size:13px;font-weight:600;min-height:40px;
   }
-  #zip-input{flex:1;min-width:0}
-  #search-btn{flex-shrink:0}
-
-  /* Mat toggle always visible */
-  .mat-toggle{order:-1}
+  #finder-controls-m,
+  #gwp-controls-m{padding:0}
+  #mobile-opts-panel .radius-group,
+  #mobile-opts-panel .filter-group,
+  #mobile-opts-panel .gwp-group{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  }
+  #mobile-opts-panel label{color:rgba(255,255,255,.7);font-size:11px}
+  #radius-slider-m{width:150px;accent-color:#3b82f6}
+  #radius-label-m{color:#cbd5e1;font-size:12px;font-weight:600}
+  #product-sel-m{
+    padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);
+    background:rgba(255,255,255,.1);color:#fff;font-size:12px;max-width:100%;
+  }
+  #product-sel-m option{background:#1a2035}
+  #gwp-target-slider-m{width:150px;accent-color:#22d3ee}
+  #gwp-target-label-m{color:#22d3ee;font-size:12px;font-weight:700}
+  #ec3-btn-m{
+    align-self:flex-start;padding:8px 14px;border-radius:6px;
+    border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
+    color:rgba(255,255,255,.8);font-size:12px;
+  }
 
   /* Sidebar: bottom sheet on mobile */
   #sidebar{
