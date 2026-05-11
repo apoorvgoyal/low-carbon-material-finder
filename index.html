@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Low-Carbon Material Finder — USA</title>
-
-<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
@@ -15,7 +13,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   font-size:13px;color:#1a2035;background:#f0f2f7}
-
 a{color:#3b6fd4;text-decoration:none}
 a:hover{text-decoration:underline}
 button{cursor:pointer;font-family:inherit;font-size:12px}
@@ -25,72 +22,109 @@ select,input{font-family:inherit;font-size:12px}
    TOP BAR
 ═══════════════════════════════════════════════════════ */
 #topbar{
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
   background:linear-gradient(135deg,#1a2035 0%,#1e3a5f 100%);
-  color:#fff;padding:0 16px;height:52px;flex-shrink:0;
+  color:#fff;padding:0 12px;min-height:52px;flex-shrink:0;
   box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:1000;position:relative;
 }
 
-.brand{display:flex;align-items:baseline;gap:8px;flex-shrink:0}
-.brand-title{font-size:15px;font-weight:600;letter-spacing:-.3px;white-space:nowrap}
+.brand{display:flex;align-items:baseline;gap:6px;flex-shrink:0}
+.brand-title{font-size:14px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
 .brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#93b4d9;white-space:nowrap}
 
-.topbar-sep{width:1px;height:28px;background:rgba(255,255,255,.15);flex-shrink:0}
+.topbar-sep{width:1px;height:24px;background:rgba(255,255,255,.15);flex-shrink:0}
+
+/* Mode toggle */
+.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:2px;flex-shrink:0}
+.mode-btn{
+  padding:4px 10px;border:none;border-radius:4px;background:transparent;
+  color:rgba(255,255,255,.65);font-weight:500;font-size:11px;transition:all .15s;white-space:nowrap;
+}
+.mode-btn.active{background:rgba(59,130,246,.85);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 
 /* Material toggle */
-.mat-toggle{display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:3px}
+.mat-toggle{display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:2px;flex-shrink:0}
 .mat-btn{
-  padding:4px 14px;border:none;border-radius:4px;background:transparent;
+  padding:4px 12px;border:none;border-radius:4px;background:transparent;
   color:rgba(255,255,255,.7);font-weight:500;font-size:12px;transition:all .15s;
 }
 .mat-btn.active{background:#fff;color:#1a2035;box-shadow:0 1px 3px rgba(0,0,0,.2)}
 
+/* Finder controls group */
+#finder-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
 /* Search */
-.search-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.search-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .search-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
 #zip-input{
-  width:90px;padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
+  width:88px;padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
   background:rgba(255,255,255,.12);color:#fff;
 }
 #zip-input::placeholder{color:rgba(255,255,255,.4)}
 #zip-input:focus{outline:none;border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.18)}
 #search-btn{
-  padding:5px 14px;border-radius:5px;border:none;
-  background:#3b82f6;color:#fff;font-weight:600;
-  transition:background .15s;white-space:nowrap;
+  padding:5px 12px;border-radius:5px;border:none;
+  background:#3b82f6;color:#fff;font-weight:600;font-size:12px;
+  transition:background .15s;white-space:nowrap;min-height:30px;
 }
 #search-btn:hover{background:#2563eb}
 #search-btn:disabled{background:#4b5563;cursor:not-allowed}
 
 /* Radius */
-.radius-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.radius-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .radius-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
-#radius-slider{width:90px;accent-color:#3b82f6}
+#radius-slider{width:80px;accent-color:#3b82f6}
 #radius-label{font-size:11px;font-weight:600;min-width:40px;color:#cbd5e1}
 
 /* Product filter */
-.filter-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.filter-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .filter-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
 #product-sel{
-  padding:4px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.12);color:#fff;max-width:200px;
+  padding:4px 5px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.12);color:#fff;max-width:160px;
 }
 #product-sel option{background:#1a2035;color:#fff}
 
+/* GWP Target controls */
+#gwp-controls{display:none;align-items:center;gap:8px;flex-wrap:wrap}
+.gwp-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.gwp-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
+#gwp-target-slider{width:120px;accent-color:#22d3ee}
+#gwp-target-label{font-size:12px;font-weight:700;color:#22d3ee;min-width:130px;white-space:nowrap}
+.gwp-hint{font-size:10px;color:rgba(255,255,255,.45);white-space:nowrap}
+
 /* EC3 button */
 #ec3-btn{
-  margin-left:auto;padding:4px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
+  margin-left:auto;padding:4px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
   background:transparent;color:rgba(255,255,255,.7);font-size:11px;white-space:nowrap;
   transition:all .15s;flex-shrink:0;
 }
 #ec3-btn:hover,#ec3-btn.active{background:rgba(59,130,246,.3);border-color:#3b82f6;color:#fff}
 #ec3-btn.active::before{content:'● ';color:#22c55e}
 
+/* Mobile options toggle */
+#mobile-opts-btn{
+  display:none;padding:5px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.1);color:#fff;font-size:12px;flex-shrink:0;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAP CLICK HINT
+═══════════════════════════════════════════════════════ */
+#map-click-hint{
+  position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:800;
+  background:rgba(26,32,53,.82);color:#fff;font-size:11px;
+  padding:5px 14px;border-radius:20px;pointer-events:none;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);white-space:nowrap;
+  transition:opacity .4s;
+}
+#map-click-hint.hidden{opacity:0}
+
 /* ═══════════════════════════════════════════════════════
    STATUS BAR
 ═══════════════════════════════════════════════════════ */
 .status-bar{
-  height:22px;flex-shrink:0;padding:0 16px;font-size:11px;
+  height:22px;flex-shrink:0;padding:0 12px;font-size:11px;
   display:flex;align-items:center;background:#e8edf5;color:#4b5563;
   border-bottom:1px solid #d1d9e8;
 }
@@ -109,21 +143,43 @@ select,input{font-family:inherit;font-size:12px}
 ═══════════════════════════════════════════════════════ */
 #map{flex:1;min-height:0;z-index:1}
 
+/* City labels */
+.city-label{
+  display:block;white-space:nowrap;
+  font-size:10px;font-weight:600;color:#374151;
+  background:rgba(255,255,255,.82);
+  padding:1px 5px;border-radius:3px;
+  box-shadow:0 1px 3px rgba(0,0,0,.12);
+  border:1px solid rgba(0,0,0,.07);
+  transform:translate(-50%,-50%);
+  pointer-events:none;user-select:none;
+}
+
 /* ═══════════════════════════════════════════════════════
    GWP LEGEND OVERLAY
 ═══════════════════════════════════════════════════════ */
 #gwp-legend{
-  position:absolute;bottom:32px;left:12px;z-index:1000;
+  position:absolute;bottom:32px;left:12px;z-index:800;
   background:rgba(255,255,255,.96);border-radius:8px;
   padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.15);
-  min-width:150px;font-size:11px;
+  min-width:145px;font-size:11px;
 }
+#gwp-legend.hidden{display:none}
 .leg-title{font-weight:700;font-size:10px;color:#4b5563;text-transform:uppercase;
   letter-spacing:.5px;margin-bottom:6px}
 .leg-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .leg-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.leg-est{margin-top:4px;font-size:10px;color:#9ca3af}
+.leg-est{margin-top:4px;font-size:9px;color:#9ca3af}
 .leg-bench{margin-top:4px;font-size:9px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:4px}
+.leg-target{margin-top:4px;font-size:9px;color:#0e7490;border-top:1px solid #e5e7eb;padding-top:4px;font-weight:600}
+
+/* Legend toggle on mobile */
+#legend-toggle{
+  position:absolute;bottom:32px;left:12px;z-index:801;
+  display:none;
+  background:#fff;border:1px solid #d1d9e8;border-radius:6px;
+  padding:5px 9px;font-size:11px;color:#4b5563;box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
 
 /* ═══════════════════════════════════════════════════════
    SIDEBAR
@@ -137,36 +193,41 @@ select,input{font-family:inherit;font-size:12px}
 #sidebar.collapsed{width:0;overflow:hidden;opacity:0}
 
 #sidebar-header{
-  padding:10px 14px 8px;border-bottom:1px solid #e8ecf3;
+  padding:8px 12px;border-bottom:1px solid #e8ecf3;
   display:flex;align-items:center;gap:8px;flex-shrink:0;
 }
 #result-count{font-weight:700;font-size:13px;color:#1a2035;flex:1}
-#sort-sel{padding:3px 6px;border:1px solid #d1d5db;border-radius:4px;font-size:11px}
+#sort-sel{padding:3px 5px;border:1px solid #d1d5db;border-radius:4px;font-size:11px}
 
 .sidebar-data-note{
-  padding:5px 14px;font-size:10px;color:#6b7280;
-  background:#f8f9fc;border-bottom:1px solid #e8ecf3;flex-shrink:0;
+  padding:5px 12px;font-size:10px;color:#6b7280;
+  background:#f8f9fc;border-bottom:1px solid #e8ecf3;flex-shrink:0;line-height:1.5;
 }
 .sidebar-data-note a{color:#4a6fa5;font-size:10px}
 
-#result-list{flex:1;overflow-y:auto;padding:6px}
+#result-list{flex:1;overflow-y:auto;padding:6px;-webkit-overflow-scrolling:touch}
 
 /* Result card */
 .result-card{
-  display:flex;gap:0;border-radius:7px;border:1px solid #e5e8f0;
-  margin-bottom:6px;overflow:hidden;transition:box-shadow .15s;cursor:default;
+  display:flex;border-radius:7px;border:1px solid #e5e8f0;
+  margin-bottom:6px;overflow:hidden;transition:box-shadow .15s;
 }
 .result-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.10)}
-.rc-left{flex:1;padding:8px 10px;border-right:1px solid #e5e8f0}
+.rc-left{flex:1;padding:8px 10px;border-right:1px solid #e5e8f0;min-width:0}
 .rc-company{font-weight:600;font-size:12px;color:#1a2035;line-height:1.3}
-.rc-line{font-size:11px;color:#4b5563;margin-top:1px}
-.sbadge{display:inline-block;margin-top:4px;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600}
+.rc-line{font-size:11px;color:#4b5563;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbadge{display:inline-block;margin-top:3px;margin-right:2px;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600}
 .sbadge.nat{background:#dbeafe;color:#1d4ed8}
 .sbadge.reg{background:#dcfce7;color:#15803d}
+.sbadge.dist{background:#f3f4f6;color:#6b7280}
+.sbadge.tech-licensed{background:#ede9fe;color:#7c3aed}
+.sbadge.tech-precommercial{background:#fef3c7;color:#92400e}
+.sbadge.tech-commercial{background:#dcfce7;color:#15803d}
+.sbadge.tech-emerging{background:#e0f2fe;color:#0369a1}
 
 .rc-right{
-  width:100px;flex-shrink:0;padding:8px 8px;
-  display:flex;flex-direction:column;align-items:flex-end;gap:4px;
+  width:96px;flex-shrink:0;padding:7px 8px;
+  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
 }
 .rc-gwp{text-align:right;line-height:1.2}
 .rc-gwp strong{font-size:14px}
@@ -174,11 +235,11 @@ select,input{font-family:inherit;font-size:12px}
 .rc-gwp .nd{font-size:11px;color:#9ca3af}
 .rc-epd{font-size:10px;color:#6b7280}
 .rc-actions{display:flex;gap:3px;margin-top:auto}
-.rc-view{padding:3px 8px;border-radius:4px;border:1px solid #d1d5db;background:#fff;
-  font-size:10px;color:#374151;transition:all .12s}
+.rc-view{padding:4px 8px;border-radius:4px;border:1px solid #d1d5db;background:#fff;
+  font-size:10px;color:#374151;transition:all .12s;min-height:28px;}
 .rc-view:hover{background:#f0f4ff;border-color:#3b6fd4;color:#3b6fd4}
-.rc-cmp{padding:3px 7px;border-radius:4px;border:1px solid #d1d5db;
-  background:#fff;font-size:11px;font-weight:700;color:#6b7280;transition:all .12s}
+.rc-cmp{padding:4px 7px;border-radius:4px;border:1px solid #d1d5db;
+  background:#fff;font-size:11px;font-weight:700;color:#6b7280;transition:all .12s;min-height:28px;}
 .rc-cmp:hover{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
 .rc-cmp.active{background:#dcfce7;border-color:#16a34a;color:#16a34a}
 
@@ -191,8 +252,6 @@ select,input{font-family:inherit;font-size:12px}
   border-radius:6px 0 0 6px;padding:8px 5px;box-shadow:-2px 0 6px rgba(0,0,0,.08);
   font-size:14px;color:#6b7280;cursor:pointer;transition:right .2s;
 }
-#sidebar.collapsed ~ * #sidebar-toggle,
-#sidebar.collapsed + #sidebar-toggle{right:0}
 
 /* ═══════════════════════════════════════════════════════
    POPUP STYLES
@@ -204,7 +263,6 @@ select,input{font-family:inherit;font-size:12px}
 .lcmf-popup .leaflet-popup-tip-container{margin-top:-1px}
 
 .popup-inner{display:flex;flex-direction:column;max-height:70vh;overflow:hidden}
-
 .popup-header{
   display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
   padding:12px 14px;background:#f8faff;border-bottom:1px solid #e5e8f0;
@@ -212,24 +270,26 @@ select,input{font-family:inherit;font-size:12px}
 .popup-company{font-weight:700;font-size:14px;color:#1a2035}
 .popup-line{font-size:11px;color:#4b5563;margin-top:1px}
 
-.badge{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.badge{display:inline-block;margin-top:4px;margin-right:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
 .badge.national{background:#dbeafe;color:#1d4ed8}
 .badge.regional{background:#dcfce7;color:#15803d}
+.badge.tech-licensed{background:#ede9fe;color:#7c3aed}
+.badge.tech-precommercial{background:#fef3c7;color:#92400e}
+.badge.tech-commercial{background:#dcfce7;color:#15803d}
 
 .cmp-btn{
   flex-shrink:0;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:600;
   border:1px solid #d1d5db;background:#fff;color:#374151;white-space:nowrap;
-  transition:all .12s;
+  transition:all .12s;min-height:32px;
 }
 .cmp-btn:hover{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
 .cmp-btn.active{background:#dcfce7;border-color:#16a34a;color:#15803d}
 
-.popup-about{padding:10px 14px;font-size:11px;color:#4b5563;line-height:1.5;border-bottom:1px solid #e5e8f0}
+.popup-about{padding:9px 14px;font-size:11px;color:#4b5563;line-height:1.5;border-bottom:1px solid #e5e8f0;overflow-y:auto}
 .popup-note{padding:3px 14px 6px;font-size:10px;color:#9ca3af;background:#fffbf0;border-bottom:1px solid #fef3c7}
 
-.popup-products{
-  width:100%;border-collapse:collapse;font-size:11px;overflow-y:auto;
-}
+.popup-scroll{overflow-y:auto;flex:1}
+.popup-products{width:100%;border-collapse:collapse;font-size:11px}
 .popup-products thead th{
   padding:6px 10px;background:#f0f3fb;color:#6b7280;font-weight:600;
   font-size:10px;text-transform:uppercase;letter-spacing:.4px;text-align:left;
@@ -241,36 +301,25 @@ select,input{font-family:inherit;font-size:12px}
 .p-name strong{font-size:12px;color:#1a2035}
 .p-name small{color:#6b7280;font-size:10px;margin-top:1px;display:block}
 
-.gwp-tag{
-  display:inline-block;padding:2px 7px;border-radius:4px;
-  font-weight:600;font-size:11px;white-space:nowrap;
-}
+.gwp-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-weight:600;font-size:11px;white-space:nowrap}
 .gwp-tag.estimate{font-style:italic}
 .gwp-tag.nodata{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;font-weight:400}
 
-.reduction-badge{
-  display:inline-block;padding:2px 6px;border-radius:4px;
-  background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;font-size:10px;
-}
-
+.reduction-badge{display:inline-block;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;font-size:10px}
 .cost-tag{font-size:10px;color:#6b7280}
 
-.epd-btn{
-  display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;
-  font-weight:600;margin:1px 0;text-decoration:none;white-space:nowrap;
-}
+.epd-btn{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;margin:1px 0;text-decoration:none;white-space:nowrap}
 .epd-btn.view{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
 .epd-btn.view:hover{background:#bfdbfe}
 .epd-btn.info{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
 .epd-btn.info:hover{background:#dcfce7}
 .epd-btn.ec3{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;font-size:9px}
 .epd-btn.ec3:hover{background:#ede9fe}
-
 .p-actions{white-space:nowrap}
 
 .popup-footer{
   padding:8px 14px;background:#f8faff;border-top:1px solid #e5e8f0;
-  font-size:10px;color:#6b7280;
+  font-size:10px;color:#6b7280;flex-shrink:0;
 }
 .popup-sources{margin-bottom:3px}
 .popup-sources a,.popup-links a{color:#3b6fd4;font-size:10px}
@@ -286,9 +335,8 @@ select,input{font-family:inherit;font-size:12px}
   max-height:55vh;display:flex;flex-direction:column;
 }
 #compare-panel.open{transform:translateY(0)}
-
 #compare-header{
-  display:flex;align-items:center;padding:8px 16px;
+  display:flex;align-items:center;padding:8px 14px;
   border-bottom:1px solid #e5e8f0;flex-shrink:0;gap:12px;background:#f0f4ff;
 }
 #compare-header strong{font-size:13px;color:#1a2035;flex:1}
@@ -297,25 +345,17 @@ select,input{font-family:inherit;font-size:12px}
   background:#fff;color:#6b7280;font-size:11px;transition:all .12s;
 }
 #compare-clear:hover{border-color:#ef4444;color:#ef4444}
-
 .compare-scroll{overflow:auto;flex:1}
-
-#compare-table{
-  width:100%;border-collapse:collapse;font-size:11px;min-width:500px;
-}
+#compare-table{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
 #compare-table th{
-  position:sticky;top:0;padding:8px 14px;background:#f8faff;
-  border-bottom:2px solid #e5e8f0;text-align:left;font-weight:600;
-  white-space:nowrap;
+  position:sticky;top:0;padding:8px 12px;background:#f8faff;
+  border-bottom:2px solid #e5e8f0;text-align:left;font-weight:600;white-space:nowrap;
 }
 .cth-co{font-size:12px;color:#1a2035;font-weight:700}
 .cth-pl{font-size:10px;color:#6b7280}
-#compare-table td{padding:7px 14px;border-bottom:1px solid #f0f2f7;vertical-align:middle}
+#compare-table td{padding:7px 12px;border-bottom:1px solid #f0f2f7;vertical-align:middle}
 .ctr-label{font-weight:600;color:#4b5563;background:#f8f9fc;white-space:nowrap;position:sticky;left:0}
-.section-head td{
-  background:#e8ecf7;font-size:10px;font-weight:700;color:#4b5563;
-  text-transform:uppercase;letter-spacing:.5px;padding:5px 14px;
-}
+.section-head td{background:#e8ecf7;font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px}
 .nd{color:#9ca3af}
 
 /* ═══════════════════════════════════════════════════════
@@ -327,36 +367,118 @@ select,input{font-family:inherit;font-size:12px}
 }
 #ec3-modal.show{display:flex}
 .modal-box{
-  background:#fff;border-radius:10px;padding:24px;width:440px;max-width:90vw;
+  background:#fff;border-radius:10px;padding:24px;width:440px;max-width:92vw;
   box-shadow:0 20px 60px rgba(0,0,0,.3);
 }
 .modal-box h2{font-size:16px;color:#1a2035;margin-bottom:6px}
 .modal-box p{font-size:12px;color:#4b5563;line-height:1.6;margin-bottom:14px}
 .modal-box label{display:block;font-size:11px;font-weight:600;color:#374151;margin-bottom:5px}
-.modal-box input{
-  width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;
-  font-size:13px;margin-bottom:14px;
-}
+.modal-box input{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-bottom:14px}
 .modal-box input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end}
-.modal-actions button{padding:7px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600}
+.modal-actions button{padding:7px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600;min-height:36px}
 #ec3-close-btn{background:#f3f4f6;color:#374151}
 #ec3-save-btn{background:#3b82f6;color:#fff}
 .modal-note{font-size:10px;color:#9ca3af;margin-top:10px;line-height:1.5}
 
 /* ═══════════════════════════════════════════════════════
-   RESPONSIVE
+   MOBILE STYLES
 ═══════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  #topbar{height:auto;padding:8px 12px;gap:8px}
+  /* Topbar: 2-row stacked layout */
+  #topbar{
+    min-height:auto;padding:8px 10px;gap:6px;
+    flex-direction:row;flex-wrap:wrap;align-items:center;
+  }
+  .brand{flex:1}
   .brand-sub{display:none}
   .topbar-sep{display:none}
-  #sidebar{width:100%;border-left:none;border-top:1px solid #d1d9e8;
-    position:absolute;bottom:0;height:45%;left:0;right:0;z-index:600}
-  #sidebar.collapsed{height:0;width:100%}
+
+  /* Hide desktop controls by default on mobile */
+  .mode-toggle,
+  #finder-controls,
+  #gwp-controls,
+  #ec3-btn{
+    display:none!important;
+  }
+
+  /* Show mobile opts button */
+  #mobile-opts-btn{display:flex;align-items:center;gap:4px}
+
+  /* Mobile options panel (shown when toggled) */
+  #mobile-opts-panel{
+    display:none;
+    width:100%;padding:8px 0 4px;
+    border-top:1px solid rgba(255,255,255,.15);
+    flex-direction:column;gap:8px;
+  }
+  #mobile-opts-panel.open{display:flex}
+
+  /* Inside mobile panel: show all the controls stacked */
+  #mobile-opts-panel .mode-toggle,
+  #mobile-opts-panel #finder-controls,
+  #mobile-opts-panel #gwp-controls,
+  #mobile-opts-panel #ec3-btn{
+    display:flex!important;flex-wrap:wrap;gap:6px;
+  }
+  #mobile-opts-panel #finder-controls{flex-direction:column;align-items:flex-start}
+  #mobile-opts-panel .radius-group{width:100%}
+  #mobile-opts-panel #radius-slider{width:140px}
+  #mobile-opts-panel .filter-group{width:100%}
+  #mobile-opts-panel #product-sel{max-width:220px}
+  #mobile-opts-panel #gwp-target-slider{width:160px}
+  #mobile-opts-panel #ec3-btn{margin-left:0}
+
+  /* Search bar always visible on mobile (outside panel) */
+  #mobile-search-row{
+    display:flex!important;
+    width:100%;align-items:center;gap:6px;
+  }
+  #zip-input{flex:1;min-width:0}
+  #search-btn{flex-shrink:0}
+
+  /* Mat toggle always visible */
+  .mat-toggle{order:-1}
+
+  /* Sidebar: bottom sheet on mobile */
+  #sidebar{
+    width:100%!important;border-left:none;
+    border-top:2px solid #3b6fd4;
+    position:absolute;bottom:0;left:0;right:0;z-index:600;
+    transition:height .25s ease;
+    height:46%;
+    box-shadow:0 -4px 20px rgba(0,0,0,.12);
+  }
+  #sidebar.collapsed{height:44px;overflow:hidden}
+  #sidebar-header{
+    cursor:pointer;
+    border-bottom:1px solid #e8ecf3;
+  }
   #sidebar-toggle{display:none}
-  .lcmf-popup .leaflet-popup-content{width:300px!important}
-  #compare-panel{max-height:70vh}
+
+  /* Map click hint: smaller on mobile */
+  #map-click-hint{font-size:10px;padding:4px 10px}
+
+  /* Legend: hide by default, show via toggle button */
+  #gwp-legend{display:none}
+  #legend-toggle{display:flex;align-items:center;gap:4px}
+
+  /* Popup: full width on mobile */
+  .lcmf-popup .leaflet-popup-content{width:min(92vw, 400px)!important}
+
+  /* Comparison panel: smaller */
+  #compare-panel{max-height:60vh}
+  #compare-header strong{font-size:12px}
+
+  /* Status bar: compact */
+  .status-bar{height:auto;min-height:20px;padding:3px 10px;font-size:10px}
+}
+
+/* Tiny screens */
+@media (max-width: 380px) {
+  .brand-title{font-size:12px}
+  #sidebar{height:40%}
+  #sidebar.collapsed{height:40px}
 }
 </style>
 </head>
@@ -370,9 +492,7 @@ select,input{font-family:inherit;font-size:12px}
       <span class="brand-sub">USA · Concrete &amp; Steel</span>
     </div>
 
-    <div class="topbar-sep"></div>
-
-    <!-- Material toggle -->
+    <!-- Material toggle (always visible) -->
     <div class="mat-toggle">
       <button class="mat-btn active" data-mat="concrete">Concrete</button>
       <button class="mat-btn" data-mat="steel">Steel</button>
@@ -380,37 +500,93 @@ select,input{font-family:inherit;font-size:12px}
 
     <div class="topbar-sep"></div>
 
-    <!-- ZIP search -->
-    <div class="search-group">
-      <label for="zip-input">Project ZIP</label>
-      <input id="zip-input" type="text" placeholder="e.g. 10001" maxlength="5" inputmode="numeric" pattern="[0-9]{5}">
-      <button id="search-btn">Search</button>
+    <!-- Mode toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="finder">&#128269; Finder</button>
+      <button class="mode-btn" data-mode="gwp-target">&#127919; GWP Target</button>
     </div>
 
     <div class="topbar-sep"></div>
 
-    <!-- Radius -->
-    <div class="radius-group">
-      <label for="radius-slider">Radius</label>
-      <input id="radius-slider" type="range" min="25" max="500" value="100" step="25">
-      <span id="radius-label">100 mi</span>
+    <!-- Finder controls (ZIP + radius + product) -->
+    <div id="finder-controls">
+      <div class="search-group">
+        <label for="zip-input">Project ZIP</label>
+        <input id="zip-input" type="text" placeholder="e.g. 10001" maxlength="5" inputmode="numeric" pattern="[0-9]{5}">
+        <button id="search-btn">Search</button>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="radius-group">
+        <label for="radius-slider">Radius</label>
+        <input id="radius-slider" type="range" min="25" max="500" value="100" step="25">
+        <span id="radius-label">100 mi</span>
+      </div>
+      <div class="topbar-sep"></div>
+      <div class="filter-group">
+        <label for="product-sel">Product</label>
+        <select id="product-sel"><option value="all">All Products</option></select>
+      </div>
     </div>
 
-    <div class="topbar-sep"></div>
-
-    <!-- Product filter -->
-    <div class="filter-group">
-      <label for="product-sel">Product</label>
-      <select id="product-sel"><option value="all">All Products</option></select>
+    <!-- GWP Target controls (shown in GWP mode) -->
+    <div id="gwp-controls">
+      <div class="gwp-group">
+        <label for="gwp-target-slider">GWP Target</label>
+        <input id="gwp-target-slider" type="range" min="0" max="500" value="250" step="10">
+        <span id="gwp-target-label">250 kg CO&#8322;e/m&#179;</span>
+      </div>
+      <span class="gwp-hint">Click map or enter ZIP for distance</span>
     </div>
 
     <!-- EC3 API button -->
-    <button id="ec3-btn" title="Connect to EC3 (Building Transparency) for live plant data">⬡ EC3 Live Data</button>
+    <button id="ec3-btn" title="Connect to EC3 (Building Transparency) for live plant data">&#x2B21; EC3 Live Data</button>
+
+    <!-- Mobile: always-visible search row (via CSS injection) -->
+    <div id="mobile-search-row" style="display:none">
+      <!-- populated by mobile CSS layout — uses same #zip-input via clone or flexbox order -->
+    </div>
+
+    <!-- Mobile options toggle -->
+    <button id="mobile-opts-btn">&#9776; Options</button>
+
+    <!-- Mobile options panel (toggle) -->
+    <div id="mobile-opts-panel">
+      <div class="mode-toggle">
+        <button class="mode-btn active" data-mode="finder" data-mobile="1">&#128269; Finder</button>
+        <button class="mode-btn" data-mode="gwp-target" data-mobile="1">&#127919; GWP Target</button>
+      </div>
+      <div id="finder-controls-m">
+        <div class="radius-group">
+          <label for="radius-slider-m">Radius</label>
+          <input id="radius-slider-m" type="range" min="25" max="500" value="100" step="25">
+          <span id="radius-label-m">100 mi</span>
+        </div>
+        <div class="filter-group" style="margin-top:4px">
+          <label for="product-sel-m">Product</label>
+          <select id="product-sel-m"><option value="all">All Products</option></select>
+        </div>
+      </div>
+      <div id="gwp-controls-m" style="display:none">
+        <div class="gwp-group">
+          <label for="gwp-target-slider-m">GWP Target</label>
+          <input id="gwp-target-slider-m" type="range" min="0" max="500" value="250" step="10">
+          <span id="gwp-target-label-m">250 kg CO&#8322;e/m&#179;</span>
+        </div>
+      </div>
+      <button id="ec3-btn-m" style="margin-top:4px;padding:5px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.7);font-size:11px">&#x2B21; EC3 Live Data</button>
+    </div>
   </header>
+
+  <!-- Mobile search row (always visible on mobile, hidden on desktop) -->
+  <div id="mobile-search-bar" style="display:none;background:linear-gradient(135deg,#1a2035,#1e3a5f);padding:6px 10px;gap:6px;align-items:center;flex-shrink:0;z-index:999">
+    <input id="zip-input-m" type="text" placeholder="Project ZIP (5 digits)" maxlength="5" inputmode="numeric" pattern="[0-9]{5}"
+      style="flex:1;padding:7px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:13px">
+    <button id="search-btn-m" style="padding:7px 16px;border-radius:5px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:13px;min-height:36px;flex-shrink:0">Search</button>
+  </div>
 
   <!-- ── STATUS BAR ───────────────────────────────────────────── -->
   <div id="status-bar" class="status-bar">
-    Enter a US ZIP code and click Search to find nearby low-carbon manufacturers.
+    Tap the map to set a project location, or enter a ZIP code to search nearby manufacturers.
   </div>
 
   <!-- ── MAIN (map + sidebar) ────────────────────────────────── -->
@@ -419,46 +595,53 @@ select,input{font-family:inherit;font-size:12px}
     <!-- MAP -->
     <div id="map"></div>
 
+    <!-- Map click hint -->
+    <div id="map-click-hint">Tap map to set project location</div>
+
     <!-- GWP LEGEND (overlay on map) -->
     <div id="gwp-legend">
-      <div class="leg-title">GWP (A1–A3)</div>
+      <div class="leg-title">GWP (A1-A3)</div>
     </div>
+
+    <!-- Legend toggle button (mobile only) -->
+    <button id="legend-toggle">Legend</button>
 
     <!-- SIDEBAR -->
     <aside id="sidebar">
       <div id="sidebar-header">
         <span id="result-count">0 found</span>
         <select id="sort-sel" title="Sort results">
-          <option value="name">Sort: Name</option>
-          <option value="gwp">Sort: GWP ↑</option>
-          <option value="distance">Sort: Distance</option>
+          <option value="name">Name</option>
+          <option value="gwp">GWP ↑</option>
+          <option value="distance">Distance</option>
         </select>
       </div>
 
       <div class="sidebar-data-note">
         Curated from manufacturer websites &amp; published EPDs.
-        No data is fabricated — gaps are marked "No data found."
-        For live plant data connect <a href="#" id="ec3-link">EC3</a> or use
-        <a href="https://climateearth.com/plant-locator" target="_blank" rel="noopener">Climate Earth</a> /
-        <a href="https://www.nrmca.org/association-resources/sustainability/environmental-product-declarations/epd-ready-mix-usa-materials-lookup/" target="_blank" rel="noopener">NRMCA EPD Lookup</a>.
+        No data is fabricated &mdash; gaps are marked "No data found."
+        <a href="#" id="ec3-link">Connect EC3</a> for live data &middot;
+        <a href="https://climateearth.com/plant-locator" target="_blank" rel="noopener">Climate Earth</a> &middot;
+        <a href="submit.html" target="_blank">Submit Data</a>
       </div>
 
       <div id="result-list">
         <div class="empty-state">
-          Enter a ZIP code above to find low-carbon concrete and steel manufacturers in your area.
+          Tap the map or enter a ZIP code to find low-carbon manufacturers in your area.<br><br>
+          Switch to <strong>GWP Target</strong> mode to find all plants that can meet a specific carbon target.
         </div>
       </div>
     </aside>
 
-    <!-- Sidebar toggle -->
-    <button id="sidebar-toggle" title="Toggle sidebar">◀</button>
+    <!-- Sidebar toggle (desktop) -->
+    <button id="sidebar-toggle" title="Toggle sidebar">&#9664;</button>
   </div>
 
   <!-- ── COMPARISON PANEL ─────────────────────────────────────── -->
   <div id="compare-panel">
     <div id="compare-header">
       <strong>Manufacturer Comparison</strong>
-      <span style="font-size:11px;color:#6b7280">Select up to 4 manufacturers using + Compare</span>
+      <span style="font-size:11px;color:#6b7280">Select up to 4 using + Compare</span>
       <button id="compare-clear">Clear All</button>
     </div>
     <div class="compare-scroll">
@@ -469,57 +652,91 @@ select,input{font-family:inherit;font-size:12px}
   <!-- ── EC3 MODAL ──────────────────────────────────────────── -->
   <div id="ec3-modal" role="dialog" aria-modal="true" aria-label="EC3 API Key">
     <div class="modal-box">
-      <h2>⬡ EC3 (Building Transparency) Live Data</h2>
-      <p>
-        Connect to the <a href="https://www.buildingtransparency.org/" target="_blank" rel="noopener">EC3 database</a>
+      <h2>&#x2B21; EC3 (Building Transparency) Live Data</h2>
+      <p>Connect to the <a href="https://www.buildingtransparency.org/" target="_blank" rel="noopener">EC3 database</a>
         to overlay real plant locations and verified EPD data on the map.
-        EC3 contains 90,000+ active EPDs for concrete, steel, and other materials.
-      </p>
+        EC3 contains 90,000+ active EPDs for concrete, steel, and other materials.</p>
       <label for="ec3-key-input">EC3 API Key (Bearer token)</label>
       <input id="ec3-key-input" type="password" placeholder="Paste your EC3 API key here">
       <p style="font-size:11px;color:#6b7280">
         Get your free API key at
-        <a href="https://www.buildingtransparency.org/ec3/settings" target="_blank" rel="noopener">buildingtransparency.org → Settings → API &amp; Integrations</a>.
+        <a href="https://www.buildingtransparency.org/ec3/settings" target="_blank" rel="noopener">buildingtransparency.org &rarr; Settings &rarr; API &amp; Integrations</a>.
         Your key is stored only in this browser session.
       </p>
       <div class="modal-actions">
         <button id="ec3-close-btn">Cancel</button>
         <button id="ec3-save-btn">Save &amp; Enable</button>
       </div>
-      <p class="modal-note">
-        Without an API key, the tool uses a curated database of verified manufacturers.
-        EPD values are sourced from publicly available documents; estimates are labeled as such.
-      </p>
+      <p class="modal-note">Without an API key the tool uses a curated database of verified manufacturers. EPD values are sourced from publicly available documents; estimates are labeled as such.</p>
     </div>
   </div>
 
 </div><!-- #shell -->
 
-<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- Data -->
 <script src="data/manufacturers.js"></script>
-
-<!-- App -->
 <script src="js/app.js"></script>
 
 <script>
-  // EC3 link shortcut in sidebar
-  document.getElementById('ec3-link').addEventListener('click', e => {
+(function(){
+  // Show mobile search bar on small screens
+  function checkMobile(){
+    const isMobile = window.innerWidth <= 768;
+    document.getElementById('mobile-search-bar').style.display = isMobile ? 'flex' : 'none';
+  }
+  checkMobile();
+  window.addEventListener('resize', checkMobile);
+
+  // Mobile opts toggle
+  document.getElementById('mobile-opts-btn').addEventListener('click', function(){
+    const panel = document.getElementById('mobile-opts-panel');
+    panel.classList.toggle('open');
+    this.textContent = panel.classList.contains('open') ? '✕ Close' : '☰ Options';
+  });
+
+  // EC3 link in sidebar
+  document.getElementById('ec3-link').addEventListener('click', function(e){
     e.preventDefault();
     document.getElementById('ec3-modal').classList.add('show');
   });
 
-  // Sidebar toggle updates button position
-  const sbToggle = document.getElementById('sidebar-toggle');
-  const sidebar = document.getElementById('sidebar');
-  const observer = new MutationObserver(() => {
-    sbToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+  // EC3 mobile button
+  document.getElementById('ec3-btn-m').addEventListener('click', function(){
+    document.getElementById('ec3-modal').classList.add('show');
+  });
+
+  // Sidebar toggle (desktop)
+  var sbToggle = document.getElementById('sidebar-toggle');
+  var sidebar = document.getElementById('sidebar');
+  var observer = new MutationObserver(function(){
+    sbToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◄';
     sbToggle.style.right = sidebar.classList.contains('collapsed') ? '0px' : '320px';
   });
   observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-</script>
 
+  // Sidebar tap to collapse/expand on mobile (tap header)
+  document.getElementById('sidebar-header').addEventListener('click', function(){
+    if(window.innerWidth <= 768){
+      sidebar.classList.toggle('collapsed');
+    }
+  });
+
+  // Legend toggle (mobile)
+  var legendToggle = document.getElementById('legend-toggle');
+  var legend = document.getElementById('gwp-legend');
+  legendToggle.addEventListener('click', function(){
+    var vis = legend.style.display !== 'none' && !legend.classList.contains('hidden');
+    if(vis){ legend.style.display = 'none'; legendToggle.textContent = 'Legend'; }
+    else { legend.style.display = ''; legendToggle.textContent = 'Hide'; }
+  });
+
+  // Map click hint: hide after first interaction or after 8s
+  var hint = document.getElementById('map-click-hint');
+  setTimeout(function(){ hint.classList.add('hidden'); }, 8000);
+  document.getElementById('map').addEventListener('click', function(){
+    hint.classList.add('hidden');
+  }, { once: true });
+})();
+</script>
 </body>
 </html>

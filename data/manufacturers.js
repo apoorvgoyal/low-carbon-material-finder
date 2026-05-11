@@ -444,6 +444,265 @@ window.MANUFACTURERS = {
       ],
       contactUrl: 'https://thomasconcrete.com/contact/',
       ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    /* ─── Emerging & Licensed Technologies ─────────────────── */
+
+    {
+      id: 'carboncure',
+      company: 'CarbonCure Technologies',
+      productLine: 'CO₂ Mineralization (Licensed)',
+      type: 'concrete',
+      coverage: 'national',
+      serviceStates: null,
+      serviceRegion: 'National — 400+ licensed ready-mix plants in North America',
+      plantCount: '400+ licensed plants in NA',
+      technologyStatus: 'licensed',
+      hq: { lat: 44.6488, lng: -63.5752, label: 'Halifax, NS (HQ) · Licensed plants nationwide — see Carbon Map' },
+      plantLocatorUrl: 'https://carbonmap.carboncure.com/',
+      logoColor: '#2d9e3a',
+      about: 'CarbonCure licenses CO₂ mineralization technology to 400+ ready-mix plants across North America. Recycled industrial CO₂ is injected during mixing and permanently mineralizes as calcium carbonate (CaCO₃), reducing carbon footprint 4–8% per batch while improving strength. Use the CarbonCure Carbon Map to find a licensed plant near you.',
+      products: [
+        {
+          id: 'carboncure-mix',
+          name: 'CarbonCure Ready Mix (Licensed Technology)',
+          description: '4–8% CO₂ reduction per batch via CO₂ mineralization injection',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: 225,
+          gwpEstimateNote: 'Est. ~225 kg CO₂e/m³ based on 4–8% reduction from ~245 NRMCA baseline. Actual GWP depends on mix design — contact licensed plant for EPD.',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '4–8% CO₂ reduction via permanent CO₂ mineralization',
+          epdAvailable: true,
+          epdNote: 'Plant-specific EPDs available from licensed plants via EC3',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.carboncure.com/product-epdx',
+          ec3Searchable: true,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact licensed plant for pricing'
+        }
+      ],
+      sources: [
+        { label: 'CarbonCure Carbon Map', url: 'https://carbonmap.carboncure.com/' },
+        { label: 'CarbonCure EPD Program', url: 'https://www.carboncure.com/product-epdx' }
+      ],
+      contactUrl: 'https://www.carboncure.com/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'solidia',
+      company: 'Solidia Technologies',
+      productLine: 'Solidia Cement and Concrete',
+      type: 'concrete',
+      coverage: 'regional',
+      serviceStates: ['NJ', 'NY', 'PA', 'CT', 'MA', 'DE', 'MD', 'VA', 'NC', 'OH', 'IN', 'IL', 'TX', 'GA', 'FL'],
+      serviceRegion: 'Northeast, Southeast, Midwest — licensed precast partners',
+      plantCount: 'Licensed precast partners (contact for locations)',
+      technologyStatus: 'licensed',
+      hq: { lat: 40.5532, lng: -74.4653, label: 'Piscataway, NJ (Company HQ)' },
+      plantLocatorUrl: 'https://solidiatech.com/contact/',
+      logoColor: '#0099cc',
+      about: 'Solidia Technologies (Piscataway, NJ) produces calcium silicate cement requiring 30% less energy than OPC, generating 30% fewer CO₂ emissions. Cured with captured CO₂ instead of water, the concrete absorbs additional CO₂ during curing, achieving up to 70% total lifecycle reduction. Precast products only — CO₂ curing chambers required.',
+      products: [
+        {
+          id: 'solidia-concrete',
+          name: 'Solidia Concrete (CO2-cured precast)',
+          description: 'Precast panels, pavers, pipe — CO₂-cured calcium silicate binder',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: 74,
+          gwpEstimateNote: 'Est. 74 kg CO2e/m3 based on Solidia published 70%+ reduction claim vs NRMCA ~245 kg CO2e/m3',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: 'Up to 70% CO₂ reduction vs OPC (cement manufacturing + CO₂ curing)',
+          epdAvailable: false,
+          epdNote: 'No publicly available EPD found — contact Solidia for EPD data',
+          epdUrl: null,
+          epdInfoUrl: 'https://solidiatech.com/sustainability/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Solidia for pricing; precast only'
+        }
+      ],
+      sources: [
+        { label: 'Solidia Technologies', url: 'https://solidiatech.com/' },
+        { label: 'Solidia Sustainability', url: 'https://solidiatech.com/sustainability/' }
+      ],
+      contactUrl: 'https://solidiatech.com/contact/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'carbonbuilt',
+      company: 'CarbonBuilt',
+      productLine: 'Reversa CO2-Cured CMU Blocks',
+      type: 'concrete',
+      coverage: 'regional',
+      serviceStates: ['AL', 'CT', 'GA', 'FL', 'TN', 'MS', 'SC', 'NC', 'NY', 'NJ', 'MA'],
+      serviceRegion: 'Southeast US + Connecticut',
+      plantCount: '2 commercial plants (Tuscaloosa, AL and Danielson, CT)',
+      technologyStatus: 'commercial',
+      hq: { lat: 33.2098, lng: -87.5692, label: 'Tuscaloosa, AL (Commercial Plant)' },
+      plantLocatorUrl: 'https://carbonbuilt.com/contact/',
+      logoColor: '#5c2d91',
+      about: 'CarbonBuilt (LA, CA HQ) operates CO₂-cured concrete masonry unit plants. Their Reversa technology uses low-calcium binder (10x less cement) cured with industrial CO₂ emissions. Commercial plants in Tuscaloosa, AL and Danielson, CT produce ASTM C90 CMU blocks with carbon-neutral to carbon-negative lifecycle emissions per measured EPDs.',
+      products: [
+        {
+          id: 'carbonbuilt-cmu',
+          name: 'Reversa CMU Block (CO2-cured)',
+          description: 'ASTM C90 concrete masonry units — low-cement binder + industrial CO₂ curing',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: -50,
+          gwpEstimateNote: 'CarbonBuilt measured EPDs show net-negative GWP (net CO2 sequestration). Specific values not publicly available — contact CarbonBuilt.',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: 'Carbon-neutral to carbon-negative (net CO₂ sequestration per measured EPDs)',
+          epdAvailable: true,
+          epdNote: 'Measured EPDs available — contact CarbonBuilt for documentation',
+          epdUrl: null,
+          epdInfoUrl: 'https://carbonbuilt.com/technology/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact CarbonBuilt for pricing'
+        }
+      ],
+      sources: [
+        { label: 'CarbonBuilt Technology', url: 'https://carbonbuilt.com/technology/' },
+        { label: 'CarbonBuilt Projects', url: 'https://carbonbuilt.com/projects/' }
+      ],
+      contactUrl: 'https://carbonbuilt.com/contact/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'carbicrete',
+      company: 'CarbiCrete',
+      productLine: 'Steel Slag + CO2 CMU (Zero Cement)',
+      type: 'concrete',
+      coverage: 'regional',
+      serviceStates: ['PA', 'OH', 'IN', 'IL', 'MI', 'WI', 'MN', 'NY', 'NJ', 'MA', 'MD', 'VA', 'WV'],
+      serviceRegion: 'Northeast & Midwest — US licensing in progress near steel mills',
+      plantCount: 'US licensing in progress — contact for locations',
+      technologyStatus: 'licensed',
+      hq: { lat: 45.5017, lng: -73.5673, label: 'Montreal, QC (HQ) — US licensing underway' },
+      plantLocatorUrl: 'https://carbicrete.com/contact/',
+      logoColor: '#2563eb',
+      about: 'CarbiCrete (Montreal) replaces cement with steel slag binder and cures CMU blocks with captured CO₂, permanently sequestering it. No cement is used — slag (a steel industry byproduct) is the sole binder. Published EPD shows negative GWP. 90%+ carbon reduction vs OPC CMU. US licensing to precast/CMU producers near steel mills is underway.',
+      products: [
+        {
+          id: 'carbicrete-cmu',
+          name: 'CarbiCrete CMU Block (slag + CO2, zero cement)',
+          description: 'ASTM C90 CMU blocks — zero-cement steel slag binder + CO₂ curing',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: -100,
+          gwpEstimateNote: 'Published EPD shows negative GWP (net CO2 sequestration). Specific value varies by plant. 90%+ reduction vs OPC concrete.',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '90%+ vs OPC concrete + net CO₂ sequestration (published EPD)',
+          epdAvailable: true,
+          epdNote: 'Published EPD available — contact CarbiCrete',
+          epdUrl: null,
+          epdInfoUrl: 'https://carbicrete.com/sustainability/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact CarbiCrete for US licensing / pricing'
+        }
+      ],
+      sources: [
+        { label: 'CarbiCrete Technology', url: 'https://carbicrete.com/technology/' },
+        { label: 'CarbiCrete Sustainability', url: 'https://carbicrete.com/sustainability/' }
+      ],
+      contactUrl: 'https://carbicrete.com/contact/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'brimstone',
+      company: 'Brimstone',
+      productLine: 'Carbon-Neutral Portland Cement (Pre-Commercial)',
+      type: 'concrete',
+      coverage: 'regional',
+      serviceStates: ['CA', 'NV', 'OR', 'WA', 'AZ'],
+      serviceRegion: 'Western US (Oakland, CA — pilot stage)',
+      plantCount: 'Pilot scale — not yet commercially available',
+      technologyStatus: 'precommercial',
+      hq: { lat: 37.8044, lng: -122.2711, label: 'Oakland, CA (Company HQ — pilot stage)' },
+      plantLocatorUrl: 'https://www.brimstone.com/',
+      logoColor: '#f59e0b',
+      about: 'Brimstone (Oakland, CA) produces Portland cement from calcium silicate rocks instead of limestone, eliminating process CO₂ emissions. The resulting cement meets ASTM C150 specs with claimed net-zero carbon. A byproduct magnesium silicate can further sequester CO₂. Currently at pilot scale; commercial production expected 2026-2027. Not yet commercially available.',
+      products: [
+        {
+          id: 'brimstone-cement',
+          name: 'Carbon-Neutral Portland Cement (ASTM C150)',
+          description: 'Net-zero Portland cement from calcium silicate rocks — pilot scale 2025',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: 0,
+          gwpEstimateNote: 'Brimstone claims net-zero carbon Portland cement per ASTM C150. No published EPD yet — pilot stage. Not commercially available as of 2025.',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: 'Net-zero carbon Portland cement (zero process CO₂ + renewable energy)',
+          epdAvailable: false,
+          epdNote: 'No EPD available — pilot stage. Commercial launch expected 2026-2027.',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.brimstone.com/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Not commercially available yet — contact for updates'
+        }
+      ],
+      sources: [
+        { label: 'Brimstone Website', url: 'https://www.brimstone.com/' }
+      ],
+      contactUrl: 'https://www.brimstone.com/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'sublime-systems',
+      company: 'Sublime Systems',
+      productLine: 'Electrochemical Low-Carbon Cement (Pre-Commercial)',
+      type: 'concrete',
+      coverage: 'regional',
+      serviceStates: ['MA', 'CT', 'RI', 'NH', 'VT', 'ME', 'NY', 'NJ'],
+      serviceRegion: 'Northeast US (Somerville, MA — demo scale)',
+      plantCount: 'Demo scale — Somerville, MA facility',
+      technologyStatus: 'precommercial',
+      hq: { lat: 42.3876, lng: -71.0995, label: 'Somerville, MA (Company HQ — demo scale)' },
+      plantLocatorUrl: 'https://www.sublime.systems/',
+      logoColor: '#7c3aed',
+      about: 'Sublime Systems (Somerville, MA) uses an electrochemical process to produce low-carbon cement without burning fossil fuels. Only electricity and common minerals required. Claims 90%+ CO₂ reduction vs OPC. Currently at demo scale; commercial production targeted 2026+. Backed by ARPA-E, DOE, and private investors.',
+      products: [
+        {
+          id: 'sublime-cement',
+          name: 'Sublime Cement (Electrochemical)',
+          description: 'Electrochemical cement — 90%+ CO₂ reduction vs OPC — demo scale',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: 25,
+          gwpEstimateNote: 'Est. ~25 kg CO2e/m3 based on 90%+ reduction vs ~245 NRMCA baseline. No published EPD — demo stage.',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '90%+ CO₂ reduction vs OPC (electrochemical process + renewable electricity)',
+          epdAvailable: false,
+          epdNote: 'No EPD available — demo scale. Commercial launch expected 2026+.',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.sublime.systems/technology',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Not commercially available yet — contact for updates'
+        }
+      ],
+      sources: [
+        { label: 'Sublime Systems Technology', url: 'https://www.sublime.systems/technology' },
+        { label: 'Sublime Systems', url: 'https://www.sublime.systems/' }
+      ],
+      contactUrl: 'https://www.sublime.systems/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
     }
 
   ],

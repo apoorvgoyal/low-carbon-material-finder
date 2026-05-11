@@ -1,0 +1,50 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2025-05-11",
+  "description": "Community-submitted low-carbon material manufacturers. Submitted via submit.html and reviewed by admin before status is set to 'approved'.",
+  "autoSync": {
+    "enabled": false,
+    "source": "EC3",
+    "frequency": "weekly",
+    "lastSync": null
+  },
+  "manufacturers": [],
+  "technologies": [
+    {
+      "id": "co2-mineralization",
+      "name": "CO₂ Mineralization",
+      "description": "Injection of recycled CO₂ into wet concrete during mixing, permanently sequestering it as calcium carbonate.",
+      "examples": ["CarbonCure", "Carbon8"]
+    },
+    {
+      "id": "co2-curing",
+      "name": "CO₂ Curing",
+      "description": "Curing precast concrete elements with captured CO₂ instead of steam/water, absorbing CO₂ into the matrix.",
+      "examples": ["Solidia", "CarbonBuilt", "CarbiCrete"]
+    },
+    {
+      "id": "scm-substitution",
+      "name": "SCM Substitution",
+      "description": "Replacing Portland cement clinker with supplementary cementitious materials (fly ash, slag, silica fume, calcined clay).",
+      "examples": ["Holcim ECOPact", "CEMEX Vertua", "Heidelberg EvoBuild"]
+    },
+    {
+      "id": "plc",
+      "name": "Portland Limestone Cement (PLC)",
+      "description": "ASTM C595 inter-ground limestone cement replacing a portion of clinker (5-15% CO₂ reduction).",
+      "examples": ["CalPortland ADVANCEMENT PLC", "Heidelberg EcoCemPLC"]
+    },
+    {
+      "id": "novel-binder",
+      "name": "Novel Binder / Alternative Cement",
+      "description": "Non-Portland cement binders including geopolymers, calcium sulfoaluminate, and electrochemical cements.",
+      "examples": ["Sublime Systems", "Brimstone", "Calix"]
+    },
+    {
+      "id": "eaf-steel",
+      "name": "Electric Arc Furnace (EAF) Steel",
+      "description": "Steel production using 100% recycled scrap melted by electric arc, avoiding iron ore reduction and producing ~60-75% less CO₂ than BOF.",
+      "examples": ["Nucor", "Big River Steel", "Steel Dynamics", "CMC", "Gerdau"]
+    }
+  ]
+}
