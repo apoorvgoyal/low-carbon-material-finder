@@ -25,6 +25,7 @@ const App = (() => {
     comparison: [],
     ec3ApiKey: null,
     communityData: [],
+    manufacturers: null,   // populated from API; falls back to window.MANUFACTURERS
     projectPin: null,
     isMobile: false
   };
@@ -81,7 +82,7 @@ const App = (() => {
     initMap();
     bindEvents();
     renderLegend();
-    loadCommunityDb();
+    loadManufacturers();
     setStatus('Tap the map to set a project location, or enter a ZIP code to search nearby manufacturers.');
   }
 
@@ -425,8 +426,10 @@ const App = (() => {
      FILTERING
   ══════════════════════════════════════════════════════════ */
   function getAllManufacturers() {
-    const curated = MANUFACTURERS[S.material] || [];
-    const community = S.communityData.filter(m => m.type === S.material);
+    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
+    const curated = db[S.material] || [];
+    // communityData only used when API not available (static fallback mode)
+    const community = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
     return [...curated, ...community];
   }
 
@@ -443,8 +446,10 @@ const App = (() => {
 
   function runGwpTargetFilter() {
     const cfg = GWP_CONFIG[S.material];
-    S.results = (MANUFACTURERS[S.material] || [])
-      .concat(S.communityData.filter(m => m.type === S.material))
+    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
+    const communityFallback = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
+    S.results = (db[S.material] || [])
+      .concat(communityFallback)
       .filter(m => m.products.some(p => {
         const g = p.gwpVerified != null ? p.gwpVerified : p.gwpEstimate;
         return g != null && g <= S.gwpTarget;
@@ -825,21 +830,34 @@ const App = (() => {
   /* ══════════════════════════════════════════════════════════
      COMMUNITY DATABASE
   ══════════════════════════════════════════════════════════ */
-  async function loadCommunityDb() {
+  async function loadManufacturers() {
     try {
-      const res = await fetch('data/database.json');
-      if (!res.ok) return;
-      const db = await res.json();
-      if (db && Array.isArray(db.manufacturers)) {
-        S.communityData = db.manufacturers.filter(m => m.status === 'approved');
-        if (S.communityData.length) {
+      const res = await fetch('/api/manufacturers');
+      if (res.ok) {
+        const payload = await res.json();
+        if (payload && Array.isArray(payload.manufacturers) && payload.manufacturers.length > 0) {
+          // Split by type and store in S.manufacturers, replacing the static file
+          S.manufacturers = { concrete: [], steel: [] };
+          for (const m of payload.manufacturers) {
+            if (S.manufacturers[m.type]) S.manufacturers[m.type].push(m);
+          }
           updateProductDropdown();
-          setStatus(`Loaded ${S.communityData.length} community-submitted manufacturer${S.communityData.length !== 1 ? 's' : ''}.`);
+          return;
         }
       }
-    } catch {
-      // database.json not yet created — that's fine
-    }
+    } catch { /* API not available — fall through to static fallback */ }
+
+    // Fallback: static data/manufacturers.js + data/database.json
+    S.manufacturers = null;
+    try {
+      const res = await fetch('data/database.json');
+      if (res.ok) {
+        const db = await res.json();
+        if (db && Array.isArray(db.manufacturers)) {
+          S.communityData = db.manufacturers.filter(m => m.status === 'approved');
+        }
+      }
+    } catch { /* database.json missing — fine */ }
     updateProductDropdown();
   }
 
