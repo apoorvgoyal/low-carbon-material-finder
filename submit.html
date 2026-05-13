@@ -285,33 +285,23 @@ a{color:#3b6fd4}
       </div>
     </div>
 
-    <button type="submit" class="submit-btn">Generate Submission JSON</button>
+    <div id="submit-error" style="display:none;padding:12px 14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;color:#b91c1c;font-size:13px;margin-bottom:12px"></div>
+    <button type="submit" class="submit-btn" id="submit-btn">Submit Manufacturer</button>
   </form>
 
-  <!-- Result panel (shown after submit) -->
+  <!-- Success panel (shown after successful submission) -->
   <div id="result-panel">
-    <h3>&#10003; Submission ready — choose a submission method</h3>
-    <p style="font-size:13px;color:#4b5563;margin-bottom:12px">
-      Your data has been formatted as JSON below. Copy it and submit using one of the options.
-    </p>
-    <div class="json-preview" id="json-output"></div>
-    <div class="action-cards">
-      <div class="action-card">
-        <h4>Option A: GitHub Issue</h4>
-        <p>Open a GitHub Issue and paste the JSON. This is the recommended method — submissions are tracked publicly and reviewed by the maintainer.</p>
-        <a class="primary" id="github-issue-link" href="https://github.com/apoorvgoyal/low-carbon-material-finder/issues/new?title=New+Manufacturer+Submission&body=Please+paste+your+JSON+here" target="_blank" rel="noopener">Open GitHub Issue &rarr;</a>
-      </div>
-      <div class="action-card">
-        <h4>Option B: Copy JSON</h4>
-        <p>Copy the JSON to your clipboard and email it to the maintainer, or use it to manually edit database.json.</p>
-        <button class="secondary" onclick="copyJson()">Copy JSON to Clipboard</button>
-        <div class="copy-note" id="copy-note"></div>
-      </div>
+    <div style="text-align:center;padding:16px 0 8px">
+      <div style="font-size:40px;margin-bottom:8px">&#10003;</div>
+      <h3 style="font-size:18px;color:#15803d;margin-bottom:8px">Submission received!</h3>
+      <p style="font-size:13px;color:#4b5563;max-width:480px;margin:0 auto 16px;line-height:1.6">
+        Thank you. Your submission will appear on the map after admin review, typically within 1–3 business days.
+      </p>
     </div>
-    <p style="font-size:11px;color:#9ca3af;margin-top:16px;text-align:center">
-      Submissions are reviewed for accuracy before being added to the public database. You will be contacted at the email provided.
+    <p style="font-size:11px;color:#9ca3af;text-align:center">
+      Submissions are reviewed for accuracy before being added to the public database.
     </p>
-    <div style="text-align:center;margin-top:14px">
+    <div style="text-align:center;margin-top:20px">
       <a href="index.html" style="font-size:13px;color:#3b6fd4">&larr; Return to the map</a>
     </div>
   </div>
@@ -330,7 +320,7 @@ function addProduct() {
   div.innerHTML = '<h4>Product ' + (idx + 1) + ' <button type="button" class="remove-btn" onclick="removeProduct(' + idx + ')">Remove</button></h4>' +
     '<div class="field-row">' +
       '<div class="field"><label>Product Name *</label><input type="text" name="p-name" placeholder="e.g. EcoMix 5000" required></div>' +
-      '<div class="field"><label>GWP Value (A1-A3)</label><input type="number" name="p-gwp" placeholder="e.g. 160" min="0" step="1"><small>kg CO₂e/m³ or kg CO₂e/metric ton</small></div>' +
+      '<div class="field"><label>GWP Value (A1-A3)</label><input type="number" name="p-gwp" placeholder="e.g. 160" step="any"><small>kg CO₂e/m³ or kg CO₂e/metric ton</small></div>' +
     '</div>' +
     '<div class="field-row">' +
       '<div class="field"><label>GWP Data Type</label><select name="p-gwp-type"><option value="verified">Verified EPD value</option><option value="estimate">Manufacturer estimate</option><option value="none">No GWP data</option></select></div>' +
@@ -342,7 +332,6 @@ function addProduct() {
     '</div>' +
     '<div class="field"><label>Description</label><input type="text" name="p-desc" placeholder="Brief description"></div>';
   container.appendChild(div);
-  // Show remove buttons when >1 product
   document.querySelectorAll('.remove-btn').forEach(function(b){ b.style.display=''; });
 }
 
@@ -353,88 +342,127 @@ function removeProduct(idx) {
   if (remaining.length === 1) remaining[0].querySelector('.remove-btn').style.display = 'none';
 }
 
-document.getElementById('submit-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-
-  var states = document.getElementById('service-states').value
-    .split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
-
-  var products = [];
-  document.querySelectorAll('.product-entry').forEach(function(entry, i) {
-    var gwpRaw = entry.querySelector('[name="p-gwp"]').value;
-    var gwpNum = gwpRaw ? parseFloat(gwpRaw) : null;
-    var gwpType = entry.querySelector('[name="p-gwp-type"]').value;
-    products.push({
-      id: 'submitted-p-' + i,
-      name: entry.querySelector('[name="p-name"]').value || '',
-      description: entry.querySelector('[name="p-desc"]').value || '',
-      gwpVerified: gwpType === 'verified' ? gwpNum : null,
-      gwpEstimate: gwpType === 'estimate' ? gwpNum : null,
-      gwpLabel: gwpNum != null ? (gwpNum + ' kg CO₂e') : 'No data found',
-      gwpUnit: document.getElementById('material-type').value === 'steel' ? 'kg CO₂e/metric ton' : 'kg CO₂e/m³',
-      gwpEstimateNote: gwpType === 'estimate' ? 'Manufacturer estimate' : null,
-      reductionClaim: entry.querySelector('[name="p-reduction"]').value || 'No data found',
-      epdAvailable: !!(entry.querySelector('[name="p-epd-url"]').value || entry.querySelector('[name="p-epd-info"]').value),
-      epdUrl: entry.querySelector('[name="p-epd-url"]').value || null,
-      epdInfoUrl: entry.querySelector('[name="p-epd-info"]').value || null,
-      epdNote: 'See EPD URL or info page',
-      ec3Searchable: false,
-      costBase: 'No data found', costPremium: 'No data found', costNote: 'Contact manufacturer for pricing'
-    });
-  });
-
-  var hqCity = document.getElementById('hq-city').value;
-  var hqState = document.getElementById('hq-state').value.toUpperCase();
-
-  var submission = {
-    id: 'community-' + Date.now(),
-    status: 'pending',
-    submittedAt: new Date().toISOString(),
-    submittedBy: document.getElementById('contact-email').value,
-    company: document.getElementById('company').value,
-    productLine: document.getElementById('product-line').value,
-    type: document.getElementById('material-type').value,
-    coverage: document.getElementById('coverage').value,
-    serviceStates: states.length ? states : null,
-    serviceRegion: states.length ? states.join(', ') : 'Contact manufacturer',
-    plantCount: document.getElementById('plant-count').value || 'No data found',
-    hq: {
-      lat: 0,
-      lng: 0,
-      label: hqCity + ', ' + hqState + ' (coordinates to be added by admin)'
-    },
-    technology: document.getElementById('technology').value,
-    plantLocatorUrl: document.getElementById('plant-locator').value || null,
-    about: document.getElementById('about').value,
-    products: products,
-    sources: [{ label: document.getElementById('company').value, url: document.getElementById('website').value || '#' }],
-    contactUrl: document.getElementById('contact-url').value || document.getElementById('website').value || '#',
-    ec3SearchUrl: 'https://www.buildingtransparency.org/',
-    submitterNotes: document.getElementById('notes').value || null
-  };
-
-  document.getElementById('json-output').textContent = JSON.stringify(submission, null, 2);
-  document.getElementById('result-panel').style.display = 'block';
-  document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth' });
-});
-
-function copyJson() {
-  var text = document.getElementById('json-output').textContent;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(function(){
-      document.getElementById('copy-note').textContent = 'Copied!';
-      setTimeout(function(){ document.getElementById('copy-note').textContent = ''; }, 2000);
-    });
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    document.getElementById('copy-note').textContent = 'Copied!';
-  }
+function showError(msg) {
+  var el = document.getElementById('submit-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
+function hideError() {
+  document.getElementById('submit-error').style.display = 'none';
+}
+
+async function geocodeAddress(city, state) {
+  var q = [city, state, 'USA'].filter(Boolean).join(', ');
+  var url = 'https://nominatim.openstreetmap.org/search?' +
+    new URLSearchParams({ q: q, format: 'json', limit: 1, addressdetails: 1 });
+  var res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
+  if (!res.ok) throw new Error('Geocoding failed');
+  var data = await res.json();
+  if (!data.length) throw new Error('Could not find location: ' + q + '. Check city and state.');
+  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+}
+
+document.getElementById('submit-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  hideError();
+
+  var btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    var hqCity  = document.getElementById('hq-city').value.trim();
+    var hqState = document.getElementById('hq-state').value.trim().toUpperCase();
+    var materialType = document.getElementById('material-type').value;
+
+    // Geocode the HQ address
+    var coords;
+    try {
+      coords = await geocodeAddress(hqCity, hqState);
+    } catch (geoErr) {
+      showError(geoErr.message);
+      return;
+    }
+
+    var states = document.getElementById('service-states').value
+      .split(',').map(function(s){ return s.trim().toUpperCase(); }).filter(Boolean);
+
+    var products = [];
+    document.querySelectorAll('.product-entry').forEach(function(entry, i) {
+      var gwpRaw  = entry.querySelector('[name="p-gwp"]').value;
+      var gwpNum  = gwpRaw !== '' ? parseFloat(gwpRaw) : null;
+      var gwpType = entry.querySelector('[name="p-gwp-type"]').value;
+      var hasEpd  = !!(entry.querySelector('[name="p-epd-url"]').value || entry.querySelector('[name="p-epd-info"]').value);
+      products.push({
+        name:             entry.querySelector('[name="p-name"]').value || '',
+        description:      entry.querySelector('[name="p-desc"]').value || '',
+        gwpVerified:      gwpType === 'verified' ? gwpNum : null,
+        gwpEstimate:      gwpType === 'estimate' ? gwpNum : null,
+        gwpLabel:         gwpNum != null ? (gwpNum + ' ' + (materialType === 'steel' ? 'kg CO₂e/metric ton' : 'kg CO₂e/m³')) : 'No data found',
+        gwpUnit:          materialType === 'steel' ? 'kg CO₂e/metric ton' : 'kg CO₂e/m³',
+        gwpEstimateNote:  gwpType === 'estimate' ? 'Manufacturer estimate' : null,
+        reductionClaim:   entry.querySelector('[name="p-reduction"]').value || 'No data found',
+        epdAvailable:     hasEpd,
+        epdUrl:           entry.querySelector('[name="p-epd-url"]').value || null,
+        epdInfoUrl:       entry.querySelector('[name="p-epd-info"]').value || null,
+        epdNote:          hasEpd ? 'See EPD URL' : 'No data found',
+        ec3Searchable:    false,
+        costBase:         'No data found',
+        costPremium:      'No data found',
+        costNote:         'Contact manufacturer for pricing'
+      });
+    });
+
+    var payload = {
+      company:         document.getElementById('company').value,
+      productLine:     document.getElementById('product-line').value || null,
+      type:            materialType,
+      coverage:        document.getElementById('coverage').value,
+      serviceStates:   states.length ? states : null,
+      serviceRegion:   states.length ? states.join(', ') : (hqCity + ', ' + hqState),
+      plantCount:      document.getElementById('plant-count').value || null,
+      hq_lat:          coords.lat,
+      hq_lng:          coords.lng,
+      hq_label:        hqCity + ', ' + hqState,
+      technologyStatus: document.getElementById('technology').value || null,
+      plantLocatorUrl: document.getElementById('plant-locator').value || null,
+      about:           document.getElementById('about').value || null,
+      products:        products,
+      sources:         [{ label: document.getElementById('company').value, url: document.getElementById('website').value || null }],
+      contactUrl:      document.getElementById('contact-url').value || document.getElementById('website').value || null,
+      ec3SearchUrl:    'https://www.buildingtransparency.org/'
+    };
+
+    var res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    var result = await res.json();
+
+    if (!res.ok) {
+      var msg = result.error || 'Submission failed. Please try again.';
+      if (result.details) msg += ' (' + result.details.join(', ') + ')';
+      showError(msg);
+      return;
+    }
+
+    // Success
+    document.getElementById('submit-form').style.display = 'none';
+    document.getElementById('result-panel').style.display = 'block';
+    document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    showError('Network error — please check your connection and try again.');
+    console.error(err);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Manufacturer';
+  }
+});
 </script>
 </body>
 </html>
