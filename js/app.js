@@ -937,16 +937,44 @@ const App = (() => {
     setStatus('Fetching live data from EC3…');
     try {
       const category = S.material === 'concrete' ? 'ReadyMixConcrete' : 'StructuralSteel';
-      const url = `https://buildingtransparency.org/api/materials/plants/public?` +
-        new URLSearchParams({ category, page_size: 100 });
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${S.ec3ApiKey}`, 'Accept': 'application/json' }
-      });
-      if (!res.ok) { setStatus(`EC3 API error ${res.status}. Using curated data only.`, 'warn'); return; }
-      const data = await res.json();
-      if (data && data.results) {
-        mergeEC3Results(data.results);
-        setStatus(`Showing ${S.results.length} results (curated + EC3 live data).`);
+
+      // EC3 supports geocode filtering: US state (e.g. "US-CA"), country code (e.g. "DE"),
+      // or M49 region codes. Use the most specific scope we have.
+      const geocode = S.userCountry
+        ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
+        : null;
+
+      const params = { category, page_size: 200 };
+      if (geocode) params.geocode = geocode;
+
+      // Paginate up to 3 pages (600 plants) to cover large countries
+      let allPlants = [];
+      for (let page = 1; page <= 3; page++) {
+        const url = 'https://buildingtransparency.org/api/materials/plants/public?' +
+          new URLSearchParams({ ...params, page });
+        const res = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${S.ec3ApiKey}`, 'Accept': 'application/json' }
+        });
+        if (!res.ok) {
+          if (page === 1) {
+            setStatus(`EC3 API error ${res.status}. Using curated data only.`, 'warn');
+            return;
+          }
+          break;
+        }
+        const data = await res.json();
+        const batch = Array.isArray(data) ? data : (data.results || []);
+        allPlants = allPlants.concat(batch);
+        if (!data.next || batch.length < 200) break;
+      }
+
+      if (allPlants.length > 0) {
+        const before = S.results.length;
+        mergeEC3Results(allPlants);
+        const added = S.results.filter(r => r.fromEC3).length;
+        setStatus(`${S.results.length} results — ${added} from EC3 live data, ${before} curated.`);
+      } else {
+        setStatus('EC3 returned no plants in this area. Showing curated data only.', 'warn');
       }
     } catch {
       setStatus('EC3 fetch failed. Using curated data only.', 'warn');
@@ -958,19 +986,28 @@ const App = (() => {
     plants.forEach(plant => {
       if (!plant.latitude || !plant.longitude) return;
       const dist = haversine(S.center.lat, S.center.lng, plant.latitude, plant.longitude);
-      if (dist > S.radiusMiles * 1.5) return;
-      const exists = S.results.some(r => r.company.toLowerCase().includes((plant.plant_name || '').toLowerCase().slice(0, 6)));
+      if (dist > S.radiusMiles) return;
+
+      // Deduplicate against curated results by rough name match
+      const plantKey = (plant.plant_name || '').toLowerCase().replace(/\s+/g, '').slice(0, 10);
+      const exists = plantKey && S.results.some(r =>
+        r.company.toLowerCase().replace(/\s+/g, '').startsWith(plantKey)
+      );
       if (exists) return;
+
       const gwpVal = plant.gwp_A1A3 ?? null;
+      const addr = [plant.address, plant.city, plant.country].filter(Boolean).join(', ') || 'See EC3';
       S.results.push({
         id: `ec3-${plant.id || Math.random()}`,
         company: plant.plant_name || 'Unknown Plant (EC3)',
         productLine: plant.category || S.material,
         type: S.material,
         coverage: 'local',
-        serviceRegion: plant.address || 'No data found',
+        serviceRegion: addr,
+        country: plant.country || S.userCountry || null,
+        countryCode: plant.country_code || S.userCountry || null,
         plantCount: '1',
-        hq: { lat: plant.latitude, lng: plant.longitude, label: plant.address || 'See EC3' },
+        hq: { lat: plant.latitude, lng: plant.longitude, label: addr },
         plantLocatorUrl: 'https://www.buildingtransparency.org/',
         about: `Live data from EC3. Declared GWP: ${gwpVal != null ? gwpVal + ' ' + cfg.unit : 'No data found'}.`,
         products: [{
