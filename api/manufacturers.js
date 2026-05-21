@@ -20,7 +20,10 @@ function toFrontendFormat(m) {
     type: m.type,
     coverage: m.coverage,
     serviceStates: m.service_states,
+    serviceCountries: m.service_countries,
     serviceRegion: m.service_region,
+    country: m.country,
+    countryCode: m.country_code,
     plantCount: m.plant_count,
     hq: { lat: parseFloat(m.hq_lat), lng: parseFloat(m.hq_lng), label: m.hq_label },
     plantLocatorUrl: m.plant_locator_url,
@@ -62,10 +65,13 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { type } = req.query;
+  const { type, country } = req.query;
   const validTypes = ['concrete', 'steel'];
   if (type && !validTypes.includes(type)) {
     return res.status(400).json({ error: 'type must be "concrete" or "steel"' });
+  }
+  if (country && !/^[A-Z]{2}$/.test(country)) {
+    return res.status(400).json({ error: 'country must be a 2-letter ISO country code' });
   }
 
   try {
@@ -82,6 +88,7 @@ module.exports = async function handler(req, res) {
       .order('company');
 
     if (type) query = query.eq('type', type);
+    if (country) query = query.or(`country_code.eq.${country},coverage.eq.national`);
 
     const { data, error } = await query;
 
