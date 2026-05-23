@@ -918,13 +918,12 @@ const App = (() => {
     dom.ec3SaveBtn.disabled = true;
     dom.ec3SaveBtn.textContent = 'Verifying…';
     try {
-      const res = await fetch(
-        'https://buildingtransparency.org/api/materials/plants/public?' +
-          new URLSearchParams({ category: 'ReadyMixConcrete', page_size: 1 }),
-        { headers: { 'Authorization': `Bearer ${key}`, 'Accept': 'application/json' } }
-      );
+      const res = await fetch('/api/ec3-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: key, category: 'ReadyMixConcrete', page_size: 1 })
+      });
       if (res.ok || res.status === 400) {
-        // 400 means the key was accepted but the query was invalid — still a valid key
         S.ec3ApiKey = key;
         dom.ec3Btn.classList.add('active');
         dom.ec3Modal.classList.remove('show');
@@ -957,16 +956,17 @@ const App = (() => {
         ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
         : null;
 
-      const params = { category, page_size: 200 };
-      if (geocode) params.geocode = geocode;
-
-      // Paginate up to 3 pages (600 plants) to cover large countries
+      // Paginate up to 3 pages (600 plants) via server-side proxy to avoid CORS
       let allPlants = [];
       for (let page = 1; page <= 3; page++) {
-        const url = 'https://buildingtransparency.org/api/materials/plants/public?' +
-          new URLSearchParams({ ...params, page });
-        const res = await fetch(url, {
-          headers: { 'Authorization': `Bearer ${S.ec3ApiKey}`, 'Accept': 'application/json' }
+        const res = await fetch('/api/ec3-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiKey: S.ec3ApiKey, category,
+            ...(geocode && { geocode }),
+            page, page_size: 200
+          })
         });
         if (!res.ok) {
           if (page === 1) {
