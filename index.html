@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Low-Carbon Material Finder — USA</title>
+<title>Low-Carbon Material Finder — Global</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
@@ -75,6 +75,12 @@ select,input{font-family:inherit;font-size:12px}
 .radius-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
 #radius-slider{width:80px;accent-color:#3b82f6}
 #radius-label{font-size:11px;font-weight:600;min-width:40px;color:#cbd5e1}
+#unit-toggle{
+  padding:3px 7px;border-radius:4px;border:1px solid rgba(255,255,255,.25);
+  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
+  font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;
+}
+#unit-toggle:hover{background:rgba(255,255,255,.2);color:#fff}
 
 /* Product filter */
 .filter-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
@@ -539,7 +545,7 @@ select,input{font-family:inherit;font-size:12px}
   <header id="topbar">
     <div class="brand">
       <span class="brand-title">Low-Carbon Material Finder</span>
-      <span class="brand-sub">USA · Concrete &amp; Steel</span>
+      <span class="brand-sub">Global · Concrete &amp; Steel</span>
     </div>
 
     <!-- Material toggle (always visible) -->
@@ -558,11 +564,11 @@ select,input{font-family:inherit;font-size:12px}
 
     <div class="topbar-sep"></div>
 
-    <!-- Finder controls (ZIP + radius + product) -->
+    <!-- Finder controls (location + radius + product) -->
     <div id="finder-controls">
       <div class="search-group">
-        <label for="zip-input">Project ZIP</label>
-        <input id="zip-input" type="text" placeholder="e.g. 10001" maxlength="5" inputmode="numeric" pattern="[0-9]{5}">
+        <label for="zip-input">Location</label>
+        <input id="zip-input" type="text" placeholder="City, postal code…" maxlength="100">
         <button id="search-btn">Search</button>
       </div>
       <div class="topbar-sep"></div>
@@ -570,6 +576,7 @@ select,input{font-family:inherit;font-size:12px}
         <label for="radius-slider">Radius</label>
         <input id="radius-slider" type="range" min="25" max="500" value="100" step="25">
         <span id="radius-label">100 mi</span>
+        <button id="unit-toggle" title="Switch distance units">mi</button>
       </div>
       <div class="topbar-sep"></div>
       <div class="filter-group">
@@ -585,7 +592,7 @@ select,input{font-family:inherit;font-size:12px}
         <input id="gwp-target-slider" type="range" min="0" max="500" value="250" step="10">
         <span id="gwp-target-label">250 kg CO&#8322;e/m&#179;</span>
       </div>
-      <span class="gwp-hint">Click map or enter ZIP for distance</span>
+      <span class="gwp-hint">Click map or enter location for distance</span>
     </div>
 
     <!-- EC3 API button -->
@@ -629,14 +636,14 @@ select,input{font-family:inherit;font-size:12px}
 
   <!-- Mobile search row (always visible on mobile, hidden on desktop) -->
   <div id="mobile-search-bar" style="display:none;background:linear-gradient(135deg,#1a2035,#1e3a5f);padding:6px 10px;gap:6px;align-items:center;flex-shrink:0;z-index:999">
-    <input id="zip-input-m" type="text" placeholder="Project ZIP (5 digits)" maxlength="5" inputmode="numeric" pattern="[0-9]{5}"
+    <input id="zip-input-m" type="text" placeholder="City, postal code…" maxlength="100"
       style="flex:1;padding:7px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:13px">
     <button id="search-btn-m" style="padding:7px 16px;border-radius:5px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:13px;min-height:36px;flex-shrink:0">Search</button>
   </div>
 
   <!-- ── STATUS BAR ───────────────────────────────────────────── -->
   <div id="status-bar" class="status-bar">
-    Tap the map to set a project location, or enter a ZIP code to search nearby manufacturers.
+    Tap the map to set a project location, or enter a city / postal code to search nearby manufacturers.
   </div>
 
   <!-- ── MAIN (map + sidebar) ────────────────────────────────── -->
@@ -677,7 +684,7 @@ select,input{font-family:inherit;font-size:12px}
 
       <div id="result-list">
         <div class="empty-state">
-          Tap the map or enter a ZIP code to find low-carbon manufacturers in your area.<br><br>
+          Tap the map or enter a city / postal code to find low-carbon manufacturers in your area.<br><br>
           Switch to <strong>GWP Target</strong> mode to find all plants that can meet a specific carbon target.
         </div>
       </div>

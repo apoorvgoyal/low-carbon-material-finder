@@ -7,12 +7,14 @@
     "node": ">=20"
   },
   "scripts": {
+    "start": "node server.js",
     "dev": "vercel dev",
     "seed": "node scripts/seed-db.js",
     "update-db": "node scripts/update-db.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4"
+    "@supabase/supabase-js": "^2.49.4",
+    "express": "^4.19.2"
   },
   "devDependencies": {
     "dotenv": "^16.5.0",

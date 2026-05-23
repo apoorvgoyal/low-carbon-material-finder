@@ -15,9 +15,11 @@ const App = (() => {
     cityLayer: null,
     center: null,
     userState: null,
+    userCountry: null,
     material: 'concrete',
     mode: 'finder',        // 'finder' | 'gwp-target'
     radiusMiles: 100,
+    useKm: false,
     productFilter: 'all',
     sortBy: 'name',
     gwpTarget: 250,
@@ -69,6 +71,7 @@ const App = (() => {
       comparePanel:      document.getElementById('compare-panel'),
       compareClear:      document.getElementById('compare-clear'),
       compareTable:      document.getElementById('compare-table'),
+      unitToggle:        document.getElementById('unit-toggle'),
       ec3Btn:            document.getElementById('ec3-btn'),
       ec3Modal:          document.getElementById('ec3-modal'),
       ec3KeyInput:       document.getElementById('ec3-key-input'),
@@ -83,12 +86,12 @@ const App = (() => {
     bindEvents();
     renderLegend();
     loadManufacturers();
-    setStatus('Tap the map to set a project location, or enter a ZIP code to search nearby manufacturers.');
+    setStatus('Tap the map to set a project location, or enter a city / postal code to search nearby manufacturers.');
   }
 
   /* ── Map setup ─────────────────────────────────────────────── */
   function initMap() {
-    S.map = L.map('map', { zoomControl: false }).setView([38.5, -96.0], 4);
+    S.map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -103,36 +106,43 @@ const App = (() => {
 
   /* ── City Labels ───────────────────────────────────────────── */
   const MAJOR_CITIES = [
-    { name: 'New York',      lat: 40.7128, lng: -74.0060 },
-    { name: 'Los Angeles',   lat: 34.0522, lng: -118.2437 },
-    { name: 'Chicago',       lat: 41.8781, lng: -87.6298 },
-    { name: 'Houston',       lat: 29.7604, lng: -95.3698 },
-    { name: 'Phoenix',       lat: 33.4484, lng: -112.0740 },
-    { name: 'Philadelphia',  lat: 39.9526, lng: -75.1652 },
-    { name: 'San Antonio',   lat: 29.4241, lng: -98.4936 },
-    { name: 'San Diego',     lat: 32.7157, lng: -117.1611 },
-    { name: 'Dallas',        lat: 32.7767, lng: -96.7970 },
-    { name: 'Austin',        lat: 30.2672, lng: -97.7431 },
-    { name: 'Denver',        lat: 39.7392, lng: -104.9903 },
-    { name: 'Seattle',       lat: 47.6062, lng: -122.3321 },
-    { name: 'Nashville',     lat: 36.1627, lng: -86.7816 },
-    { name: 'Washington DC', lat: 38.9072, lng: -77.0369 },
-    { name: 'Boston',        lat: 42.3601, lng: -71.0589 },
-    { name: 'Atlanta',       lat: 33.7490, lng: -84.3880 },
-    { name: 'Miami',         lat: 25.7617, lng: -80.1918 },
-    { name: 'Minneapolis',   lat: 44.9778, lng: -93.2650 },
-    { name: 'Portland',      lat: 45.5051, lng: -122.6750 },
-    { name: 'Las Vegas',     lat: 36.1699, lng: -115.1398 },
-    { name: 'Detroit',       lat: 42.3314, lng: -83.0458 },
-    { name: 'Charlotte',     lat: 35.2271, lng: -80.8431 },
-    { name: 'Indianapolis',  lat: 39.7684, lng: -86.1581 },
-    { name: 'Columbus',      lat: 39.9612, lng: -82.9988 },
-    { name: 'Kansas City',   lat: 39.0997, lng: -94.5786 },
-    { name: 'Salt Lake City',lat: 40.7608, lng: -111.8910 },
-    { name: 'New Orleans',   lat: 29.9511, lng: -90.0715 },
-    { name: 'San Francisco', lat: 37.7749, lng: -122.4194 },
-    { name: 'Memphis',       lat: 35.1495, lng: -90.0490 },
-    { name: 'Albuquerque',   lat: 35.0844, lng: -106.6504 }
+    // North America
+    { name: 'New York',       lat: 40.7128, lng: -74.0060 },
+    { name: 'Los Angeles',    lat: 34.0522, lng: -118.2437 },
+    { name: 'Chicago',        lat: 41.8781, lng: -87.6298 },
+    { name: 'Toronto',        lat: 43.6532, lng: -79.3832 },
+    { name: 'Mexico City',    lat: 19.4326, lng: -99.1332 },
+    { name: 'Vancouver',      lat: 49.2827, lng: -123.1207 },
+    { name: 'Houston',        lat: 29.7604, lng: -95.3698 },
+    // South America
+    { name: 'São Paulo',      lat: -23.5505, lng: -46.6333 },
+    { name: 'Buenos Aires',   lat: -34.6037, lng: -58.3816 },
+    { name: 'Bogotá',         lat:  4.7110,  lng: -74.0721 },
+    { name: 'Santiago',       lat: -33.4489, lng: -70.6693 },
+    // Europe
+    { name: 'London',         lat: 51.5074, lng:  -0.1278 },
+    { name: 'Paris',          lat: 48.8566, lng:   2.3522 },
+    { name: 'Berlin',         lat: 52.5200, lng:  13.4050 },
+    { name: 'Madrid',         lat: 40.4168, lng:  -3.7038 },
+    { name: 'Rome',           lat: 41.9028, lng:  12.4964 },
+    { name: 'Amsterdam',      lat: 52.3676, lng:   4.9041 },
+    { name: 'Stockholm',      lat: 59.3293, lng:  18.0686 },
+    { name: 'Warsaw',         lat: 52.2297, lng:  21.0122 },
+    // Africa & Middle East
+    { name: 'Cairo',          lat: 30.0444, lng:  31.2357 },
+    { name: 'Lagos',          lat:  6.5244, lng:   3.3792 },
+    { name: 'Johannesburg',   lat: -26.2041, lng: 28.0473 },
+    { name: 'Dubai',          lat: 25.2048, lng:  55.2708 },
+    { name: 'Nairobi',        lat: -1.2921, lng:  36.8219 },
+    // Asia & Oceania
+    { name: 'Tokyo',          lat: 35.6762, lng: 139.6503 },
+    { name: 'Beijing',        lat: 39.9042, lng: 116.4074 },
+    { name: 'Shanghai',       lat: 31.2304, lng: 121.4737 },
+    { name: 'Mumbai',         lat: 19.0760, lng:  72.8777 },
+    { name: 'Seoul',          lat: 37.5665, lng: 126.9780 },
+    { name: 'Singapore',      lat:  1.3521, lng: 103.8198 },
+    { name: 'Sydney',         lat: -33.8688, lng: 151.2093 },
+    { name: 'Jakarta',        lat: -6.2088, lng: 106.8456 }
   ];
 
   function initCityLabels() {
@@ -149,7 +159,7 @@ const App = (() => {
     });
 
     const updateCityVis = () => {
-      const show = S.map.getZoom() >= 5;
+      const show = S.map.getZoom() >= 4;
       if (show && !S.map.hasLayer(S.cityLayer)) S.cityLayer.addTo(S.map);
       else if (!show && S.map.hasLayer(S.cityLayer)) S.map.removeLayer(S.cityLayer);
     };
@@ -163,9 +173,9 @@ const App = (() => {
     setStatus('Looking up location…');
     try {
       const result = await reverseGeocode(lat, lng);
-      setProjectLocation(lat, lng, result.state, result.displayName);
+      setProjectLocation(lat, lng, result.state, result.country, result.displayName);
     } catch {
-      setProjectLocation(lat, lng, null, `${lat.toFixed(3)}, ${lng.toFixed(3)}`);
+      setProjectLocation(lat, lng, null, null, `${lat.toFixed(3)}, ${lng.toFixed(3)}`);
     }
   }
 
@@ -177,16 +187,22 @@ const App = (() => {
     const data = await res.json();
     const addr = data.address || {};
     const state = addr.state ? stateNameToAbbr(addr.state) : null;
+    const country = addr.country_code ? addr.country_code.toUpperCase() : null;
     const city = addr.city || addr.town || addr.village || addr.county || '';
+    const region = addr.state || addr.county || '';
+    const displayParts = [city, region];
+    if (country && country !== 'US') displayParts.push(addr.country || country);
     return {
       state,
-      displayName: [city, addr.state].filter(Boolean).join(', ') || `${lat.toFixed(3)}, ${lng.toFixed(3)}`
+      country,
+      displayName: displayParts.filter(Boolean).join(', ') || `${lat.toFixed(3)}, ${lng.toFixed(3)}`
     };
   }
 
-  function setProjectLocation(lat, lng, state, displayName) {
+  function setProjectLocation(lat, lng, state, country, displayName) {
     S.center = { lat, lng };
     S.userState = state;
+    S.userCountry = country;
 
     if (S.projectPin) S.map.removeLayer(S.projectPin);
     S.projectPin = L.marker([lat, lng], { icon: projectIcon(), zIndexOffset: 1000 })
@@ -253,6 +269,17 @@ const App = (() => {
       });
     });
 
+    // Unit toggle
+    if (dom.unitToggle) {
+      dom.unitToggle.addEventListener('click', () => {
+        S.useKm = !S.useKm;
+        dom.unitToggle.textContent = S.useKm ? 'km' : 'mi';
+        updateRadiusLabels();
+        renderSidebar();
+        if (S.center && S.mode === 'finder') { drawRadiusCircle(); runFilter(); }
+      });
+    }
+
     // Radius sliders (desktop + mobile)
     [
       [dom.radiusSlider, dom.radiusLabel],
@@ -264,8 +291,7 @@ const App = (() => {
         // Sync both
         if (dom.radiusSlider) dom.radiusSlider.value = S.radiusMiles;
         if (dom.radiusSliderM) dom.radiusSliderM.value = S.radiusMiles;
-        if (dom.radiusLabel) dom.radiusLabel.textContent = S.radiusMiles + ' mi';
-        if (dom.radiusLabelM) dom.radiusLabelM.textContent = S.radiusMiles + ' mi';
+        updateRadiusLabels();
         if (S.center && S.mode === 'finder') { drawRadiusCircle(); runFilter(); }
       });
     });
@@ -321,6 +347,25 @@ const App = (() => {
     dom.sidebarToggle.addEventListener('click', () => dom.sidebar.classList.toggle('collapsed'));
   }
 
+  function kmFromMiles(mi) { return Math.round(mi * 1.60934); }
+
+  function radiusDisplay() {
+    return S.useKm ? `${kmFromMiles(S.radiusMiles)} km` : `${S.radiusMiles} mi`;
+  }
+
+  function distDisplay(distMi) {
+    if (distMi == null) return null;
+    return S.useKm
+      ? `${Math.round(distMi * 1.60934)} km`
+      : `${Math.round(distMi)} mi`;
+  }
+
+  function updateRadiusLabels() {
+    const label = radiusDisplay();
+    if (dom.radiusLabel) dom.radiusLabel.textContent = label;
+    if (dom.radiusLabelM) dom.radiusLabelM.textContent = label;
+  }
+
   function setMode(mode) {
     S.mode = mode;
     toggleModeControls();
@@ -329,7 +374,7 @@ const App = (() => {
       runGwpTargetFilter();
     } else {
       if (S.center) { drawRadiusCircle(); runFilter(); }
-      else setStatus('Enter a ZIP code or tap the map to set a project location.');
+      else setStatus('Enter a city / postal code or tap the map to set a project location.');
     }
   }
 
@@ -364,46 +409,52 @@ const App = (() => {
      SEARCH & GEOCODING
   ══════════════════════════════════════════════════════════ */
   async function onSearch() {
-    const zip = (dom.zipInput.value || '').trim();
-    await searchZip(zip, dom.searchBtn);
+    const q = (dom.zipInput.value || '').trim();
+    await searchLocation(q, dom.searchBtn);
   }
 
   async function onSearchMobile() {
-    const zip = (dom.zipInputM.value || '').trim();
-    await searchZip(zip, dom.searchBtnM);
+    const q = (dom.zipInputM.value || '').trim();
+    await searchLocation(q, dom.searchBtnM);
   }
 
-  async function searchZip(zip, btn) {
-    if (!/^\d{5}$/.test(zip)) {
-      setStatus('Please enter a valid 5-digit US ZIP code.', 'error');
+  async function searchLocation(query, btn) {
+    if (!query) {
+      setStatus('Please enter a city, address, or postal code.', 'error');
       return;
     }
-    setStatus('Geocoding ZIP code…');
+    setStatus('Searching location…');
     if (btn) btn.disabled = true;
     try {
-      const result = await geocodeZip(zip);
-      setProjectLocation(result.lat, result.lng, result.state, result.displayName);
+      const result = await geocodeLocation(query);
+      setProjectLocation(result.lat, result.lng, result.state, result.country, result.displayName);
     } catch (err) {
-      setStatus(err.message || 'Failed to geocode ZIP code.', 'error');
+      setStatus(err.message || 'Location not found. Try a city name or postal code.', 'error');
     } finally {
       if (btn) btn.disabled = false;
     }
   }
 
-  async function geocodeZip(zip) {
+  async function geocodeLocation(query) {
     const url = 'https://nominatim.openstreetmap.org/search?' +
-      new URLSearchParams({ postalcode: zip, country: 'US', format: 'json', addressdetails: 1, limit: 1 });
+      new URLSearchParams({ q: query, format: 'json', addressdetails: 1, limit: 1 });
     const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
     if (!res.ok) throw new Error('Geocoding failed. Check your connection.');
     const data = await res.json();
-    if (!data.length) throw new Error(`ZIP code ${zip} not found.`);
+    if (!data.length) throw new Error(`Location "${query}" not found.`);
     const item = data[0];
     const addr = item.address || {};
+    const country = addr.country_code ? addr.country_code.toUpperCase() : null;
+    const city = addr.city || addr.town || addr.village || addr.county || '';
+    const region = addr.state || addr.county || '';
+    const displayParts = [city, region];
+    if (country && country !== 'US') displayParts.push(addr.country || country);
     return {
       lat: parseFloat(item.lat),
       lng: parseFloat(item.lon),
       state: addr.state ? stateNameToAbbr(addr.state) : null,
-      displayName: [addr.city || addr.town || addr.village || addr.county, addr.state].filter(Boolean).join(', ')
+      country,
+      displayName: displayParts.filter(Boolean).join(', ') || query
     };
   }
 
@@ -426,11 +477,8 @@ const App = (() => {
      FILTERING
   ══════════════════════════════════════════════════════════ */
   function getAllManufacturers() {
-    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
-    const curated = db[S.material] || [];
-    // communityData only used when API not available (static fallback mode)
-    const community = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
-    return [...curated, ...community];
+    const db = S.manufacturers || {};
+    return db[S.material] || [];
   }
 
   function runFilter() {
@@ -441,15 +489,13 @@ const App = (() => {
       .sort(sorter());
     renderMarkers();
     renderSidebar();
-    setStatus(`${S.results.length} ${S.material} manufacturer${S.results.length !== 1 ? 's' : ''} within ${S.radiusMiles} mi.`);
+    setStatus(`${S.results.length} ${S.material} manufacturer${S.results.length !== 1 ? 's' : ''} within ${radiusDisplay()}.`);
   }
 
   function runGwpTargetFilter() {
     const cfg = GWP_CONFIG[S.material];
-    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
-    const communityFallback = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
+    const db = S.manufacturers || {};
     S.results = (db[S.material] || [])
-      .concat(communityFallback)
       .filter(m => m.products.some(p => {
         const g = p.gwpVerified != null ? p.gwpVerified : p.gwpEstimate;
         return g != null && g <= S.gwpTarget;
@@ -467,9 +513,15 @@ const App = (() => {
 
   function matchesRegion(m) {
     if (m.coverage === 'national') return true;
-    if (!S.userState) return true;
-    if (m.serviceStates && m.serviceStates.includes(S.userState)) return true;
-    return haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng) <= S.radiusMiles * 2;
+    // Distance-based fallback for all regions
+    const dist = haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng);
+    if (dist <= S.radiusMiles) return true;
+    // US-specific: check serviceStates
+    if (S.userState && m.serviceStates && m.serviceStates.includes(S.userState)) return true;
+    // International: check serviceCountries
+    if (S.userCountry && m.serviceCountries && m.serviceCountries.includes(S.userCountry)) return true;
+    // Continental coverage: double-radius heuristic
+    return dist <= S.radiusMiles * 2;
   }
 
   function matchesProduct(m) {
@@ -567,7 +619,7 @@ const App = (() => {
     const techBadge = m.technologyStatus
       ? `<span class="badge tech-${m.technologyStatus}">${techLabel(m.technologyStatus)}</span>` : '';
     const distHtml = m.distanceMi != null
-      ? `<span style="font-size:10px;color:#9ca3af;margin-left:6px">${Math.round(m.distanceMi)} mi</span>` : '';
+      ? `<span style="font-size:10px;color:#9ca3af;margin-left:6px">${distDisplay(m.distanceMi)}</span>` : '';
 
     const hqNote = m.coverage !== 'national'
       ? `<div class="popup-note">&#9733; Map pin: ${m.hq.label}</div>`
@@ -671,7 +723,7 @@ const App = (() => {
       const techBadge = m.technologyStatus
         ? `<span class="sbadge tech-${m.technologyStatus}">${techLabel(m.technologyStatus)}</span>` : '';
       const distBadge = m.distanceMi != null
-        ? `<span class="sbadge dist">${Math.round(m.distanceMi)} mi</span>` : '';
+        ? `<span class="sbadge dist">${distDisplay(m.distanceMi)}</span>` : '';
 
       return `<div class="result-card" data-id="${m.id}">
         <div class="rc-left" style="border-left:3px solid ${color}">
@@ -845,33 +897,50 @@ const App = (() => {
           return;
         }
       }
-    } catch { /* API not available — fall through to static fallback */ }
+    } catch { /* API not available */ }
 
-    // Fallback: static data/manufacturers.js + data/database.json
-    S.manufacturers = null;
-    try {
-      const res = await fetch('data/database.json');
-      if (res.ok) {
-        const db = await res.json();
-        if (db && Array.isArray(db.manufacturers)) {
-          S.communityData = db.manufacturers.filter(m => m.status === 'approved');
-        }
-      }
-    } catch { /* database.json missing — fine */ }
+    // API failed or returned nothing — start with empty data; only EC3 live results will appear
+    S.manufacturers = { concrete: [], steel: [] };
     updateProductDropdown();
   }
 
   /* ══════════════════════════════════════════════════════════
      EC3 INTEGRATION
   ══════════════════════════════════════════════════════════ */
-  function saveEc3Key() {
-    S.ec3ApiKey = dom.ec3KeyInput.value.trim();
-    dom.ec3Modal.classList.remove('show');
-    if (S.ec3ApiKey) {
-      dom.ec3Btn.classList.add('active');
-      setStatus('EC3 API key saved. Live data will be included on next search.');
-    } else {
+  async function saveEc3Key() {
+    const key = dom.ec3KeyInput.value.trim();
+    if (!key) {
+      S.ec3ApiKey = null;
       dom.ec3Btn.classList.remove('active');
+      dom.ec3Modal.classList.remove('show');
+      return;
+    }
+    dom.ec3SaveBtn.disabled = true;
+    dom.ec3SaveBtn.textContent = 'Verifying…';
+    try {
+      const res = await fetch('/api/ec3-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: key, category: 'ReadyMixConcrete', page_size: 1 })
+      });
+      if (res.ok || res.status === 400) {
+        S.ec3ApiKey = key;
+        dom.ec3Btn.classList.add('active');
+        dom.ec3Modal.classList.remove('show');
+        setStatus('EC3 connected. Live data will be included on next search.');
+      } else if (res.status === 401 || res.status === 403) {
+        setStatus('EC3 key rejected (invalid or expired). Check your key and try again.', 'error');
+      } else {
+        setStatus(`EC3 verification returned ${res.status}. Key saved anyway.`, 'warn');
+        S.ec3ApiKey = key;
+        dom.ec3Btn.classList.add('active');
+        dom.ec3Modal.classList.remove('show');
+      }
+    } catch {
+      setStatus('Could not reach EC3 to verify the key. Check your connection.', 'error');
+    } finally {
+      dom.ec3SaveBtn.disabled = false;
+      dom.ec3SaveBtn.textContent = 'Save & Enable';
     }
   }
 
@@ -880,16 +949,45 @@ const App = (() => {
     setStatus('Fetching live data from EC3…');
     try {
       const category = S.material === 'concrete' ? 'ReadyMixConcrete' : 'StructuralSteel';
-      const url = `https://buildingtransparency.org/api/materials/plants/public?` +
-        new URLSearchParams({ category, page_size: 100 });
-      const res = await fetch(url, {
-        headers: { 'Authorization': `Bearer ${S.ec3ApiKey}`, 'Accept': 'application/json' }
-      });
-      if (!res.ok) { setStatus(`EC3 API error ${res.status}. Using curated data only.`, 'warn'); return; }
-      const data = await res.json();
-      if (data && data.results) {
-        mergeEC3Results(data.results);
-        setStatus(`Showing ${S.results.length} results (curated + EC3 live data).`);
+
+      // EC3 supports geocode filtering: US state (e.g. "US-CA"), country code (e.g. "DE"),
+      // or M49 region codes. Use the most specific scope we have.
+      const geocode = S.userCountry
+        ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
+        : null;
+
+      // Paginate up to 3 pages (600 plants) via server-side proxy to avoid CORS
+      let allPlants = [];
+      for (let page = 1; page <= 3; page++) {
+        const res = await fetch('/api/ec3-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiKey: S.ec3ApiKey, category,
+            ...(geocode && { geocode }),
+            page, page_size: 200
+          })
+        });
+        if (!res.ok) {
+          if (page === 1) {
+            setStatus(`EC3 API error ${res.status}. Using curated data only.`, 'warn');
+            return;
+          }
+          break;
+        }
+        const data = await res.json();
+        const batch = Array.isArray(data) ? data : (data.results || []);
+        allPlants = allPlants.concat(batch);
+        if (!data.next || batch.length < 200) break;
+      }
+
+      if (allPlants.length > 0) {
+        const before = S.results.length;
+        mergeEC3Results(allPlants);
+        const added = S.results.filter(r => r.fromEC3).length;
+        setStatus(`${S.results.length} results — ${added} from EC3 live data, ${before} curated.`);
+      } else {
+        setStatus('EC3 returned no plants in this area. Showing curated data only.', 'warn');
       }
     } catch {
       setStatus('EC3 fetch failed. Using curated data only.', 'warn');
@@ -901,19 +999,28 @@ const App = (() => {
     plants.forEach(plant => {
       if (!plant.latitude || !plant.longitude) return;
       const dist = haversine(S.center.lat, S.center.lng, plant.latitude, plant.longitude);
-      if (dist > S.radiusMiles * 1.5) return;
-      const exists = S.results.some(r => r.company.toLowerCase().includes((plant.plant_name || '').toLowerCase().slice(0, 6)));
+      if (dist > S.radiusMiles) return;
+
+      // Deduplicate against curated results by rough name match
+      const plantKey = (plant.plant_name || '').toLowerCase().replace(/\s+/g, '').slice(0, 10);
+      const exists = plantKey && S.results.some(r =>
+        r.company.toLowerCase().replace(/\s+/g, '').startsWith(plantKey)
+      );
       if (exists) return;
+
       const gwpVal = plant.gwp_A1A3 ?? null;
+      const addr = [plant.address, plant.city, plant.country].filter(Boolean).join(', ') || 'See EC3';
       S.results.push({
         id: `ec3-${plant.id || Math.random()}`,
         company: plant.plant_name || 'Unknown Plant (EC3)',
         productLine: plant.category || S.material,
         type: S.material,
         coverage: 'local',
-        serviceRegion: plant.address || 'No data found',
+        serviceRegion: addr,
+        country: plant.country || S.userCountry || null,
+        countryCode: plant.country_code || S.userCountry || null,
         plantCount: '1',
-        hq: { lat: plant.latitude, lng: plant.longitude, label: plant.address || 'See EC3' },
+        hq: { lat: plant.latitude, lng: plant.longitude, label: addr },
         plantLocatorUrl: 'https://www.buildingtransparency.org/',
         about: `Live data from EC3. Declared GWP: ${gwpVal != null ? gwpVal + ' ' + cfg.unit : 'No data found'}.`,
         products: [{
@@ -972,11 +1079,12 @@ const App = (() => {
   }
 
   function getZoomForRadius(miles) {
-    if (miles <= 25) return 10;
-    if (miles <= 50) return 9;
+    if (miles <= 25)  return 10;
+    if (miles <= 50)  return 9;
     if (miles <= 100) return 8;
     if (miles <= 200) return 7;
-    return 6;
+    if (miles <= 350) return 6;
+    return 5;
   }
 
   return { init };
