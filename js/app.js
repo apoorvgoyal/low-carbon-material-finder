@@ -477,11 +477,8 @@ const App = (() => {
      FILTERING
   ══════════════════════════════════════════════════════════ */
   function getAllManufacturers() {
-    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
-    const curated = db[S.material] || [];
-    // communityData only used when API not available (static fallback mode)
-    const community = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
-    return [...curated, ...community];
+    const db = S.manufacturers || {};
+    return db[S.material] || [];
   }
 
   function runFilter() {
@@ -497,10 +494,8 @@ const App = (() => {
 
   function runGwpTargetFilter() {
     const cfg = GWP_CONFIG[S.material];
-    const db = S.manufacturers || (typeof MANUFACTURERS !== 'undefined' ? MANUFACTURERS : {});
-    const communityFallback = S.manufacturers ? [] : S.communityData.filter(m => m.type === S.material);
+    const db = S.manufacturers || {};
     S.results = (db[S.material] || [])
-      .concat(communityFallback)
       .filter(m => m.products.some(p => {
         const g = p.gwpVerified != null ? p.gwpVerified : p.gwpEstimate;
         return g != null && g <= S.gwpTarget;
@@ -902,19 +897,10 @@ const App = (() => {
           return;
         }
       }
-    } catch { /* API not available — fall through to static fallback */ }
+    } catch { /* API not available */ }
 
-    // Fallback: static data/manufacturers.js + data/database.json
-    S.manufacturers = null;
-    try {
-      const res = await fetch('data/database.json');
-      if (res.ok) {
-        const db = await res.json();
-        if (db && Array.isArray(db.manufacturers)) {
-          S.communityData = db.manufacturers.filter(m => m.status === 'approved');
-        }
-      }
-    } catch { /* database.json missing — fine */ }
+    // API failed or returned nothing — start with empty data; only EC3 live results will appear
+    S.manufacturers = { concrete: [], steel: [] };
     updateProductDropdown();
   }
 
