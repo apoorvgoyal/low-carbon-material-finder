@@ -907,14 +907,41 @@ const App = (() => {
   /* ══════════════════════════════════════════════════════════
      EC3 INTEGRATION
   ══════════════════════════════════════════════════════════ */
-  function saveEc3Key() {
-    S.ec3ApiKey = dom.ec3KeyInput.value.trim();
-    dom.ec3Modal.classList.remove('show');
-    if (S.ec3ApiKey) {
-      dom.ec3Btn.classList.add('active');
-      setStatus('EC3 API key saved. Live data will be included on next search.');
-    } else {
+  async function saveEc3Key() {
+    const key = dom.ec3KeyInput.value.trim();
+    if (!key) {
+      S.ec3ApiKey = null;
       dom.ec3Btn.classList.remove('active');
+      dom.ec3Modal.classList.remove('show');
+      return;
+    }
+    dom.ec3SaveBtn.disabled = true;
+    dom.ec3SaveBtn.textContent = 'Verifying…';
+    try {
+      const res = await fetch(
+        'https://buildingtransparency.org/api/materials/plants/public?' +
+          new URLSearchParams({ category: 'ReadyMixConcrete', page_size: 1 }),
+        { headers: { 'Authorization': `Bearer ${key}`, 'Accept': 'application/json' } }
+      );
+      if (res.ok || res.status === 400) {
+        // 400 means the key was accepted but the query was invalid — still a valid key
+        S.ec3ApiKey = key;
+        dom.ec3Btn.classList.add('active');
+        dom.ec3Modal.classList.remove('show');
+        setStatus('EC3 connected. Live data will be included on next search.');
+      } else if (res.status === 401 || res.status === 403) {
+        setStatus('EC3 key rejected (invalid or expired). Check your key and try again.', 'error');
+      } else {
+        setStatus(`EC3 verification returned ${res.status}. Key saved anyway.`, 'warn');
+        S.ec3ApiKey = key;
+        dom.ec3Btn.classList.add('active');
+        dom.ec3Modal.classList.remove('show');
+      }
+    } catch {
+      setStatus('Could not reach EC3 to verify the key. Check your connection.', 'error');
+    } finally {
+      dom.ec3SaveBtn.disabled = false;
+      dom.ec3SaveBtn.textContent = 'Save & Enable';
     }
   }
 
