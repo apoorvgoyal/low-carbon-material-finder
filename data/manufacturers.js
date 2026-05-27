@@ -703,6 +703,336 @@ window.MANUFACTURERS = {
       ],
       contactUrl: 'https://www.sublime.systems/',
       ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    /* ─── Global Concrete ───────────────────────────────────── */
+
+    {
+      id: 'holcim-ecopact-global',
+      company: 'Holcim',
+      productLine: 'ECOPact / ECOPlanet (Global)',
+      type: 'concrete',
+      coverage: 'global',
+      country: 'CH',
+      serviceStates: null,
+      serviceRegion: 'Global — ECOPact in 30+ markets; ECOPlanet in 31 markets across Europe, Latin America, Asia-Pacific',
+      plantCount: 'Global network (~350 ready-mix plants in North America alone)',
+      hq: { lat: 47.166, lng: 8.515, label: 'Zug, Switzerland (Global HQ)' },
+      plantLocatorUrl: 'https://www.holcim.com/what-we-do/our-building-solutions/ready-mix-concrete/ecopact',
+      about: 'Holcim (Zug, Switzerland) is the world\'s largest building materials company. ECOPact is their low-carbon ready-mix concrete available in 30+ markets globally, offering tiered CO₂ reductions from 30% to net-zero. ECOPlanet is the low-carbon cement line with ≥30% CO₂ reduction vs. CEM I, available in 31 countries. Over 120 EPDs published for ECOPact in North America alone.',
+      products: [
+        {
+          id: 'ecopact-global',
+          name: 'ECOPact (Global — ≥30% CO₂ reduction)',
+          description: 'Tiered low-carbon ready-mix: ECOPact ≥30%, ECOPact+ 50–70%, ECOPact Max ≥70% reduction vs. regional baseline',
+          gwpVerified: 286,
+          gwpLabel: '286 kg CO₂e/m³ (published EPD, example 50 MPa mix)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '30–100%+ reduction vs. regional ready-mix baseline (tiered: ECOPact/ECOPact+/ECOPact Max)',
+          epdAvailable: true,
+          epdNote: '120+ EPDs in North America; regional EPDs in Europe, Asia-Pacific via EPD International',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.holcim.com/what-we-do/our-building-solutions/ready-mix-concrete/ecopact',
+          ec3Searchable: true,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact local Holcim plant for pricing'
+        },
+        {
+          id: 'ecoplanet-cement',
+          name: 'ECOPlanet Cement (≥30% CO₂ reduction)',
+          description: 'Low-carbon cement with ≥30% fewer CO₂ emissions than standard CEM I — clinker reduction + SCMs',
+          gwpVerified: null,
+          gwpLabel: 'No data found (varies by plant and grade)',
+          gwpEstimate: null,
+          gwpEstimateNote: 'Company-wide cement net intensity: 502 kg CO₂/t cementitious (2025)',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '≥30% vs. CEM I (OPC); targeting 420 kg CO₂/t by 2030',
+          epdAvailable: true,
+          epdNote: 'Regional EPDs available; Holcim UK has plant-specific EPDs',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.holcim.com/what-we-do/our-building-solutions/cement/ecoplanet',
+          ec3Searchable: true,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact local Holcim operation for pricing'
+        }
+      ],
+      sources: [
+        { label: 'Holcim ECOPact Global', url: 'https://www.holcim.com/what-we-do/our-building-solutions/ready-mix-concrete/ecopact' },
+        { label: 'Holcim ECOPlanet', url: 'https://www.holcim.com/what-we-do/our-building-solutions/cement/ecoplanet' }
+      ],
+      contactUrl: 'https://www.holcim.com/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'heidelberg-evozero',
+      company: 'Heidelberg Materials',
+      productLine: 'evoZero® (Carbon Capture Cement)',
+      type: 'concrete',
+      coverage: 'global',
+      country: 'DE',
+      serviceStates: null,
+      serviceRegion: 'Europe (initial deliveries 2025 from Brevik, Norway); global expansion planned',
+      plantCount: '1 CCS plant operational (Brevik, Norway — 400,000 t CO₂/yr captured)',
+      technologyStatus: 'commercial',
+      hq: { lat: 59.026, lng: 9.706, label: 'Brevik, Norway (CCS Production Plant)' },
+      plantLocatorUrl: 'https://www.evozero.com/en',
+      about: 'Heidelberg Materials launched evoZero® in June 2025 — the world\'s first carbon-captured cement at commercial scale. The Brevik CCS plant in Norway captures 400,000 t CO₂/year from the cement production process. DNV-verified EPD confirms 46 kg CO₂e/t cement cradle-to-gate (A1–A3), a 90% reduction vs. the same plant\'s standard cement (451 kg CO₂e/t). Product available across Europe from mid-2025.',
+      products: [
+        {
+          id: 'evozero-cement',
+          name: 'evoZero® Carbon Captured Cement',
+          description: 'World\'s first commercial CCS cement — 90% CO₂ reduction via carbon capture at Brevik, Norway',
+          gwpVerified: 46,
+          gwpLabel: '46 kg CO₂e/metric ton cement (DNV-verified EPD, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '90% reduction vs. standard Brevik cement (451 kg CO₂e/t reference)',
+          epdAvailable: true,
+          epdNote: 'DNV-verified third-party EPD; launched June 2025',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.evozero.com/en',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'Significant premium (CCS cost embedded)',
+          costNote: 'Contact Heidelberg Materials for pricing'
+        },
+        {
+          id: 'evobuild-eu',
+          name: 'evoBuild™ Low-Carbon Concrete (Europe)',
+          description: 'GGBS-based low-carbon concrete — tiered at 30%, 50%, 60%, 70% CO₂ reduction vs. CEM I baseline',
+          gwpVerified: null,
+          gwpLabel: 'No data found (varies by grade and region)',
+          gwpEstimate: 100,
+          gwpEstimateNote: 'Est. ~90–100 kg CO₂e/m³ at evoBuild 70% grade (vs. GCCA UK reference ~300–330 kg CO₂e/m³ for C32/40)',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '30–85% CO₂ reduction vs. standard CEM I concrete (tiered: 30/50/60/70%)',
+          epdAvailable: true,
+          epdNote: 'EPDs published via Heidelberg Materials UK (heidelbergmaterials.co.uk); One Click LCA integration',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.heidelbergmaterials.co.uk/en/evobuild-low-carbon-concrete',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Heidelberg Materials for regional pricing'
+        }
+      ],
+      sources: [
+        { label: 'evoZero® — World\'s First CCS Cement', url: 'https://www.evozero.com/en' },
+        { label: 'evoBuild UK', url: 'https://www.heidelbergmaterials.co.uk/en/evobuild-low-carbon-concrete' },
+        { label: 'Heidelberg Materials Sustainability', url: 'https://www.heidelbergmaterials.com/en/sustainability' }
+      ],
+      contactUrl: 'https://www.heidelbergmaterials.com/en/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'cemex-vertua-global',
+      company: 'CEMEX',
+      productLine: 'Vertua® (Global)',
+      type: 'concrete',
+      coverage: 'global',
+      country: 'MX',
+      serviceStates: null,
+      serviceRegion: 'Global — 50+ countries including Colombia, France, Germany, Mexico, Spain, UK, UAE, Philippines and more',
+      plantCount: 'Global network across 50+ countries',
+      hq: { lat: 25.650, lng: -100.333, label: 'San Pedro Garza García, Mexico (Global HQ)' },
+      plantLocatorUrl: 'https://www.cemex.com/sustainability/climate-action/vertua',
+      about: 'CEMEX\'s Vertua® low-carbon concrete is available in 50+ countries across Europe, Latin America, Asia, and the Middle East. The CEMEX UAE operation produces ready-mix averaging just 119 kg CO₂/m³ — among the lowest in the world for a large commercial producer. EPDs confirm CO₂ reductions at each tier and support LEED/BREEAM credits globally.',
+      products: [
+        {
+          id: 'vertua-global-classic',
+          name: 'Vertua® Classic (Global)',
+          description: '20–35% CO₂ reduction vs. standard concrete — available across 50+ countries',
+          gwpVerified: null,
+          gwpLabel: 'No data found (region-specific EPDs)',
+          gwpEstimate: 172,
+          gwpEstimateNote: 'Est. ≈172 kg CO₂e/m³ (≥30% below standard baseline ~245 kg CO₂e/m³)',
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '20–35% CO₂ reduction vs. conventional concrete',
+          epdAvailable: true,
+          epdNote: 'Regional EPDs available; support LEED, BREEAM, HQE credits',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.cemex.com/sustainability/climate-action/vertua',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact local CEMEX operation for pricing'
+        },
+        {
+          id: 'vertua-global-ultra',
+          name: 'Vertua® Ultra (Global — UAE benchmark)',
+          description: '≥70% CO₂ reduction; CEMEX UAE avg 119 kg CO₂/m³ — among world\'s lowest for commercial ready-mix',
+          gwpVerified: 119,
+          gwpLabel: '119 kg CO₂/m³ (CEMEX UAE average at 38 MPa — EPD confirmed)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/m³',
+          reductionClaim: '≥70% CO₂ reduction vs. conventional concrete',
+          epdAvailable: true,
+          epdNote: 'EPD confirmed for UAE market; regional EPDs in other markets',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.cemex.com/sustainability/climate-action/vertua',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact local CEMEX operation for pricing'
+        }
+      ],
+      sources: [
+        { label: 'CEMEX Vertua Global', url: 'https://www.cemex.com/sustainability/climate-action/vertua' }
+      ],
+      contactUrl: 'https://www.cemex.com/contact-us',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'buzzi-cgreen',
+      company: 'Buzzi SpA',
+      productLine: 'CGreen® Low-Carbon Cement',
+      type: 'concrete',
+      coverage: 'regional',
+      country: 'IT',
+      serviceStates: null,
+      serviceRegion: 'Europe — Italy, Germany (Dyckerhoff), Netherlands, Luxembourg, Poland, Czech Republic',
+      plantCount: 'Multiple plants across Europe',
+      hq: { lat: 45.133, lng: 8.450, label: 'Casale Monferrato, Italy (Company HQ)' },
+      plantLocatorUrl: 'https://www.buzzi.com/sustainability',
+      about: 'Buzzi SpA (formerly Buzzi Unicem) is a major European cement producer. The CGreen® classification system certifies cements with GWP below 700 kg CO₂e/t (A1–A3) — all carrying independent EPDs. A carbon capture pilot using Nuada technology is underway at the Monselice, Italy plant (2024). German subsidiary Dyckerhoff also offers low-carbon cement products.',
+      products: [
+        {
+          id: 'cgreen-cement',
+          name: 'CGreen® Low-Carbon Cement',
+          description: 'EPD-certified cements with GWP < 700 kg CO₂e/t — top tier cements below 600 kg CO₂e/t',
+          gwpVerified: null,
+          gwpLabel: 'No data found (varies by product; all CGreen < 700 kg CO₂e/t)',
+          gwpEstimate: 650,
+          gwpEstimateNote: 'All CGreen products certified below 700 kg CO₂e/t via EPD; standard cement baseline ~850 kg CO₂e/t',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~20% reduction vs. standard CEM I (EPD-certified; products above 700 kg CO₂e/t excluded from CGreen)',
+          epdAvailable: true,
+          epdNote: 'All CGreen cements carry EPDs via Italian EPD programme / IBU',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.buzzi.com/sustainability',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Buzzi for pricing'
+        }
+      ],
+      sources: [
+        { label: 'Buzzi Sustainability', url: 'https://www.buzzi.com/sustainability' }
+      ],
+      contactUrl: 'https://www.buzzi.com/contacts',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'ultratech-cement',
+      company: 'UltraTech Cement',
+      productLine: 'Blended Cements (PPC / PSC / PCC)',
+      type: 'concrete',
+      coverage: 'regional',
+      country: 'IN',
+      serviceStates: null,
+      serviceRegion: 'India (dominant — No. 1 cement producer), UAE, Bahrain, Sri Lanka, Bangladesh',
+      plantCount: '23+ integrated plants across India',
+      hq: { lat: 19.076, lng: 72.877, label: 'Mumbai, Maharashtra, India (Company HQ)' },
+      plantLocatorUrl: 'https://www.ultratechcement.com/find-dealer',
+      about: 'UltraTech Cement (Aditya Birla Group) is India\'s largest cement producer. Published EPDs on EPD International confirm GWP values for Portland Pozzolana Cement (PPC), Portland Slag Cement (PSC), Portland Composite Cement (PCC) and OPC. PSC (Portland Slag Cement) achieves below 440 kg CO₂/t Scope 1. ~70% of production is blended cement. SBTi-approved carbon targets.',
+      products: [
+        {
+          id: 'ultratech-psc',
+          name: 'Portland Slag Cement (PSC)',
+          description: 'GGBS blended cement — 25–65% slag content; lowest GWP in UltraTech range',
+          gwpVerified: null,
+          gwpLabel: 'No data found (below 440 kg CO₂e/t Scope 1 per company)',
+          gwpEstimate: 420,
+          gwpEstimateNote: 'Company states PSC < 440 kg CO₂/t Scope 1; full cradle-to-gate in EPD-IES-0005019 on environdec.com',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~50% vs. OPC baseline (~850 kg CO₂e/t) via high slag substitution',
+          epdAvailable: true,
+          epdNote: 'EPD published on EPD International (EPD-IES-0005019) — verified per ISO 14025/EN 15804',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.environdec.com/library/epd-4928',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact UltraTech for pricing'
+        },
+        {
+          id: 'ultratech-ppc',
+          name: 'Portland Pozzolana Cement (PPC)',
+          description: 'Fly ash blended cement — 20–35% fly ash content; widely used across India',
+          gwpVerified: null,
+          gwpLabel: 'No data found (see EPD-IES-0005019)',
+          gwpEstimate: 600,
+          gwpEstimateNote: 'Company overall Scope 1 intensity 549 kg CO₂/t; PPC is mid-range. Full value in EPD.',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~25–30% vs. OPC via fly ash substitution',
+          epdAvailable: true,
+          epdNote: 'EPD published on EPD International (EPD-IES-0005019)',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.environdec.com/library/epd-4928',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact UltraTech for pricing'
+        }
+      ],
+      sources: [
+        { label: 'UltraTech EPD Announcement', url: 'https://www.ultratechcement.com/corporate/media/stories/ultratech-announces-grant-of-environmental-product-declaration-for-four-of-its-key-cement-products' },
+        { label: 'UltraTech Sustainability', url: 'https://www.ultratechcement.com/sustainability' }
+      ],
+      contactUrl: 'https://www.ultratechcement.com/contact-us',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'votorantim-blenture',
+      company: 'Votorantim Cimentos',
+      productLine: 'Blenture® / Blended Cements',
+      type: 'concrete',
+      coverage: 'regional',
+      country: 'BR',
+      serviceStates: null,
+      serviceRegion: 'Brazil (dominant), Spain, Portugal (Blenture), Canada, and 11 countries total',
+      plantCount: '30+ plants across Brazil and international operations',
+      hq: { lat: -23.548, lng: -46.634, label: 'São Paulo, Brazil (Company HQ)' },
+      plantLocatorUrl: 'https://www.votorantimcimentos.com',
+      about: 'Votorantim Cimentos is Latin America\'s largest cement producer and a pioneer in publishing Brazil\'s first cement and concrete EPDs. Their Blenture® brand (Spain/Portugal, launched October 2024) targets ≥30% CO₂ reduction vs. standard cement. Company-wide net CO₂ intensity reached 550 kg CO₂/t in 2024 — 27.9% below 1990 levels. SBTi-approved target of 475 kg CO₂/t by 2030.',
+      products: [
+        {
+          id: 'votorantim-blenture-cement',
+          name: 'Blenture® Low-Carbon Cement (Spain/Portugal)',
+          description: '≥30% CO₂ reduction vs. standard cement — launched Iberian Peninsula Oct 2024',
+          gwpVerified: null,
+          gwpLabel: 'No data found',
+          gwpEstimate: 385,
+          gwpEstimateNote: 'Est. ~385 kg CO₂/t (30% below company avg 550 kg CO₂/t)',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '≥30% CO₂ reduction vs. standard cement; 27.9% global reduction vs. 1990',
+          epdAvailable: true,
+          epdNote: 'EPDs published on EPD International (EPD-895 for CP II E-40 cement)',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.votorantimcimentos.com/sustainability',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Votorantim for pricing'
+        }
+      ],
+      sources: [
+        { label: 'Votorantim CO₂ Reduction 2024', url: 'https://www.votorantimcimentos.com/news/votorantim-cimentos-reduced-its-global-co2-emissions-by-27-9-between-1990-and-2024/' },
+        { label: 'Votorantim Sustainability', url: 'https://www.votorantimcimentos.com/sustainability' }
+      ],
+      contactUrl: 'https://www.votorantimcimentos.com/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
     }
 
   ],
@@ -995,6 +1325,361 @@ window.MANUFACTURERS = {
         { label: 'Gerdau Sustainability', url: 'https://www.gerdau.com/en/sustainability' }
       ],
       contactUrl: 'https://www.gerdau.com/en/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    /* ─── Global Steel ──────────────────────────────────────── */
+
+    {
+      id: 'ssab-zero',
+      company: 'SSAB',
+      productLine: 'SSAB Zero™ / SSAB Fossil-Free™',
+      type: 'steel',
+      coverage: 'global',
+      country: 'SE',
+      serviceStates: null,
+      serviceRegion: 'Global — Nordic primary markets + North America; 50,000+ t SSAB Zero shipped 2024',
+      plantCount: 'Multiple EAF mills (Sweden, Finland)',
+      technologyStatus: 'commercial',
+      hq: { lat: 59.334, lng: 18.063, label: 'Stockholm, Sweden (Company HQ)' },
+      plantLocatorUrl: 'https://www.ssab.com/en/fossil-free-steel/ssab-zero',
+      about: 'SSAB (Sweden) produces SSAB Zero™ using 97–100% recycled scrap in electric arc furnaces powered by Nordic renewable electricity. Published EPDs via IBU confirm 470 kg CO₂e/t cradle-to-gate (A1–A3) — a ~77% reduction vs. conventional BF-BOF steel. Available for flat products: hot-rolled, cold-rolled, metal-coated, color-coated sheet. SSAB Fossil-Free™ (HYBRIT — hydrogen-based DRI) completed pilot deliveries; commercial scale expected 2026.',
+      products: [
+        {
+          id: 'ssab-zero-flat',
+          name: 'SSAB Zero™ (Flat Products — EAF Scrap)',
+          description: 'Hot-rolled, cold-rolled, metal-coated, color-coated flat steel — 97–100% recycled scrap + Nordic renewable electricity',
+          gwpVerified: 470,
+          gwpLabel: '470 kg CO₂e/metric ton (EPD confirmed via IBU, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~77% vs. conventional BF-BOF steel (~2,060 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'Multiple EPDs published via IBU for hot-rolled, cold-rolled, metal-coated, color-coated sheet',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.ssab.com/en/fossil-free-steel/ssab-zero/epd',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact SSAB for pricing'
+        },
+        {
+          id: 'ssab-fossil-free',
+          name: 'SSAB Fossil-Free™ (HYBRIT — Hydrogen DRI)',
+          description: 'Near-zero steel via green hydrogen direct reduction of iron (DRI) + EAF — pilot deliveries completed; commercial scale ~2026',
+          gwpVerified: null,
+          gwpLabel: 'No data found (no commercial EPD yet)',
+          gwpEstimate: 50,
+          gwpEstimateNote: 'Scope 1+2 claimed at ~0.05 kg CO₂e/kg steel (50 kg CO₂e/t) — pre-commercial; no verified commercial EPD published',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: 'Near-zero Scope 1+2 via green hydrogen + renewable electricity (HYBRIT process)',
+          epdAvailable: false,
+          epdNote: 'No commercial EPD yet — pilot stage. Commercial EPD expected with full-scale launch.',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.ssab.com/en/fossil-free-steel/hybrit',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact SSAB for pricing'
+        }
+      ],
+      sources: [
+        { label: 'SSAB Zero EPDs (IBU)', url: 'https://www.ssab.com/en/fossil-free-steel/ssab-zero/epd' },
+        { label: 'HYBRIT — Fossil-Free Steel', url: 'https://www.ssab.com/en/fossil-free-steel/hybrit' }
+      ],
+      contactUrl: 'https://www.ssab.com/en/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'thyssenkrupp-bluemint',
+      company: 'thyssenkrupp Steel Europe',
+      productLine: 'bluemint® Steel',
+      type: 'steel',
+      coverage: 'regional',
+      country: 'DE',
+      serviceStates: null,
+      serviceRegion: 'Europe — primarily Germany and EU industrial customers; global delivery available',
+      plantCount: 'Duisburg integrated steel complex (Germany)',
+      technologyStatus: 'commercial',
+      hq: { lat: 51.490, lng: 6.778, label: 'Duisburg, Germany (Company HQ)' },
+      plantLocatorUrl: 'https://www.thyssenkrupp-steel.com/en/products/flat-carbon-steel/bluemint-steel/',
+      about: 'thyssenkrupp Steel Europe (Duisburg, Germany) offers bluemint® Steel — an independently certified low-carbon flat steel product. bluemint® pure (~600 kg CO₂e/t, DNV-certified) uses natural gas-based DRI as a transitional route; bluemint® recycled (~750 kg CO₂e/t, TÜV Süd-certified) uses scrap-based EAF. EPDs published via IBU. Roadmap includes a hydrogen-based DRI plant (tkH2Steel project).',
+      products: [
+        {
+          id: 'bluemint-pure',
+          name: 'bluemint® pure (DRI — Natural Gas Transitional)',
+          description: 'Flat steel via natural gas DRI + EAF — ~70% CO₂ reduction vs. conventional; DNV-certified',
+          gwpVerified: 600,
+          gwpLabel: '~600 kg CO₂e/metric ton (DNV-certified EPD, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~70% reduction vs. conventional BF-BOF (~2,100 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published via IBU; certified by DNV',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.thyssenkrupp-steel.com/en/products/flat-carbon-steel/bluemint-steel/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact thyssenkrupp Steel for pricing'
+        },
+        {
+          id: 'bluemint-recycled',
+          name: 'bluemint® recycled (Scrap EAF)',
+          description: 'Flat steel via 100% scrap EAF — ~64% CO₂ reduction vs. conventional; TÜV Süd-certified',
+          gwpVerified: 750,
+          gwpLabel: '~750 kg CO₂e/metric ton (TÜV Süd-certified EPD, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~64% reduction vs. conventional BF-BOF (~2,100 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published via IBU; certified by TÜV Süd',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.thyssenkrupp-steel.com/en/products/flat-carbon-steel/bluemint-steel/',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact thyssenkrupp Steel for pricing'
+        }
+      ],
+      sources: [
+        { label: 'bluemint® Steel Product Page', url: 'https://www.thyssenkrupp-steel.com/en/products/flat-carbon-steel/bluemint-steel/' },
+        { label: 'thyssenkrupp Steel Sustainability', url: 'https://www.thyssenkrupp-steel.com/en/company/sustainability/' }
+      ],
+      contactUrl: 'https://www.thyssenkrupp-steel.com/en/contact/',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'salzgitter-salcos',
+      company: 'Salzgitter AG',
+      productLine: 'SALCOS® (Salzgitter Low CO₂ Steelmaking)',
+      type: 'steel',
+      coverage: 'regional',
+      country: 'DE',
+      serviceStates: null,
+      serviceRegion: 'Europe — primarily Germany and EU customers',
+      plantCount: 'Salzgitter and Peine plants (Lower Saxony, Germany)',
+      technologyStatus: 'commercial',
+      hq: { lat: 52.162, lng: 10.409, label: 'Salzgitter, Lower Saxony, Germany' },
+      plantLocatorUrl: 'https://salcos.salzgitter-ag.com/en/salcos.html',
+      about: 'Salzgitter AG operates one of Europe\'s most advanced low-carbon steel programmes. The Peine EAF plant produces scrap-based heavy plate at 590.9 kg CO₂e/t (EPD-confirmed, ~75% reduction vs. BF-BOF). The SALCOS® hydrogen steelmaking route has also produced certified steel at 299 kg CO₂e/t — LESS A-grade certified. Roadmap to full hydrogen DRI (target: 95% CO₂ reduction).',
+      products: [
+        {
+          id: 'salcos-eaf-plate',
+          name: 'EAF Heavy Plate (Peine — Scrap Route)',
+          description: 'Scrap-based EAF heavy plate — EPD confirms 75% reduction vs. BF-BOF',
+          gwpVerified: 590.9,
+          gwpLabel: '590.9 kg CO₂e/metric ton (EPD published, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~75% vs. conventional BF-BOF heavy plate (~2,360 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published — scrap-based EAF heavy plate, Salzgitter Flachstahl',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.salzgitter-flachstahl.de/en/sustainability/environmental-product-declaration.html',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Salzgitter for pricing'
+        },
+        {
+          id: 'salcos-green-hydrogen',
+          name: 'SALCOS® Green Hydrogen Steel (LESS A-Grade)',
+          description: 'Hydrogen DRI + EAF structural steel — LESS A-grade certified at 299 kg CO₂e/t',
+          gwpVerified: 299,
+          gwpLabel: '299 kg CO₂e/metric ton (PCF-certified, LESS A-grade)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~87% vs. conventional BF-BOF (~2,360 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'Product Carbon Footprint (PCF) certified; LESS (Low Emission Steel Standard) A-grade',
+          epdUrl: null,
+          epdInfoUrl: 'https://salcos.salzgitter-ag.com/en/salcos.html',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'Green premium applies',
+          costNote: 'Contact Salzgitter for pricing'
+        }
+      ],
+      sources: [
+        { label: 'SALCOS® Programme', url: 'https://salcos.salzgitter-ag.com/en/salcos.html' },
+        { label: 'EPD — 75% CO₂ reduction EAF plate', url: 'https://www.salzgitter-flachstahl.de/en/news/details/epd-21786.html' }
+      ],
+      contactUrl: 'https://www.salzgitter-ag.com/en/contact.html',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'arcelormittal-europe-xcarbr',
+      company: 'ArcelorMittal Europe',
+      productLine: 'XCarb® recycled and renewably produced (Europe)',
+      type: 'steel',
+      coverage: 'regional',
+      country: 'LU',
+      serviceStates: null,
+      serviceRegion: 'Europe — Spain, France, Belgium, Poland, Luxembourg, Czech Republic and others; global customer delivery',
+      plantCount: 'Multiple EAF mills across Europe (primary: Sestao, Spain)',
+      technologyStatus: 'commercial',
+      hq: { lat: 49.601, lng: 6.138, label: 'Luxembourg City, Luxembourg (Group HQ)' },
+      plantLocatorUrl: 'https://europe.arcelormittal.com/sustainability/xcarb',
+      about: 'ArcelorMittal Europe\'s XCarb® recycled and renewably produced steel is made using 100% scrap in electric arc furnaces powered by renewable electricity — primarily at Sestao, Spain. Full suite of EPDs published via IBU covers rebars (300 kg CO₂e/t), sections/merchant bars (333 kg CO₂e/t), hot-rolled coil (600 kg CO₂e/t), heavy plate (~914 kg CO₂e/t), and sheet piling (409 kg CO₂e/t). Rebars represent an 85% reduction vs. BF-BOF.',
+      products: [
+        {
+          id: 'xcarbr-eu-rebars',
+          name: 'XCarb® Rebars & Long Products (Europe)',
+          description: 'Rebar, wire rod, merchant bars — 100% scrap EAF + renewable electricity; EPD confirmed',
+          gwpVerified: 300,
+          gwpLabel: '300 kg CO₂e/metric ton (EPD confirmed via IBU, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~85% vs. BF-BOF baseline (~2,000 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published via IBU (ibu-epd.com); also on EPD International (environdec.com)',
+          epdUrl: null,
+          epdInfoUrl: 'https://europe.arcelormittal.com/sustainability/xcarb/recycled-and-renewably-produced-flat-long-epd',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact ArcelorMittal Europe for pricing'
+        },
+        {
+          id: 'xcarbr-eu-sections',
+          name: 'XCarb® Structural Sections (Europe)',
+          description: 'Wide-flange, beams, channels, angles — 100% scrap EAF + renewable electricity',
+          gwpVerified: 333,
+          gwpLabel: '333 kg CO₂e/metric ton (EPD confirmed via IBU, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~83% vs. BF-BOF baseline (~2,000 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published via IBU; available on EPD International',
+          epdUrl: null,
+          epdInfoUrl: 'https://europe.arcelormittal.com/sustainability/xcarb/recycled-and-renewably-produced-flat-long-epd',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact ArcelorMittal Europe for pricing'
+        },
+        {
+          id: 'xcarbr-eu-hrc',
+          name: 'XCarb® Hot-Rolled Coil / Flat Products (Europe)',
+          description: 'Hot-rolled coil, cold-rolled, galvanized flat steel — 100% scrap EAF + renewable electricity',
+          gwpVerified: 600,
+          gwpLabel: '600 kg CO₂e/metric ton (EPD confirmed via IBU, A1–A3)',
+          gwpEstimate: null,
+          gwpEstimateNote: null,
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '~70% vs. conventional BF-BOF flat steel (~2,000 kg CO₂e/t)',
+          epdAvailable: true,
+          epdNote: 'EPD published via IBU; available on EPD International',
+          epdUrl: null,
+          epdInfoUrl: 'https://europe.arcelormittal.com/sustainability/xcarb/recycled-and-renewably-produced-flat-long-epd',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact ArcelorMittal Europe for pricing'
+        }
+      ],
+      sources: [
+        { label: 'XCarb® EPDs (IBU/EPD International)', url: 'https://europe.arcelormittal.com/sustainability/xcarb/recycled-and-renewably-produced-flat-long-epd' },
+        { label: 'XCarb® Programme', url: 'https://europe.arcelormittal.com/sustainability/xcarb' }
+      ],
+      contactUrl: 'https://europe.arcelormittal.com/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'tata-steel-zeremis',
+      company: 'Tata Steel',
+      productLine: 'Zeremis® Carbon Lite (Europe)',
+      type: 'steel',
+      coverage: 'regional',
+      country: 'NL',
+      serviceStates: null,
+      serviceRegion: 'UK and Europe (Netherlands, UK primary; broader European market)',
+      plantCount: 'IJmuiden, Netherlands + Port Talbot, UK (transitioning to EAF)',
+      technologyStatus: 'commercial',
+      hq: { lat: 52.461, lng: 4.613, label: 'IJmuiden, Netherlands (European HQ & primary plant)' },
+      plantLocatorUrl: 'https://www.tatasteelnederland.com/en/sustainability/zeremis',
+      about: 'Tata Steel offers Zeremis® Carbon Lite (Netherlands) and Optemis® Carbon Lite (UK) — low-carbon flat steel products using mass-balance methodology. Zeremis Carbon Lite provides up to 100% CO₂ reduction allocation. Tata Steel UK is transitioning Port Talbot from BF-BOF to EAF, targeting 80% CO₂ reduction. EPDs available through Tata Steel\'s own programme.',
+      products: [
+        {
+          id: 'zeremis-carbon-lite',
+          name: 'Zeremis® Carbon Lite (Netherlands)',
+          description: 'Low-carbon flat steel — 30% to 100% CO₂ reduction via mass-balance allocation; hot-rolled, cold-rolled, coated',
+          gwpVerified: null,
+          gwpLabel: 'No data found (mass-balance; product-specific calculation)',
+          gwpEstimate: 1320,
+          gwpEstimateNote: 'Est. ~1,320 kg CO₂/t at 30% reduction tier (EU avg ~1,880 kg CO₂/t → ×0.7). Up to 100% reduction available via carbon bank.',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '30–100% CO₂ reduction vs. EU average flat steel (mass-balance methodology)',
+          epdAvailable: true,
+          epdNote: 'EPDs available via Tata Steel\'s own EPD programme; type-III EPD basis',
+          epdUrl: null,
+          epdInfoUrl: 'https://www.tatasteelnederland.com/en/sustainability/zeremis',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Tata Steel for pricing'
+        }
+      ],
+      sources: [
+        { label: 'Zeremis® Carbon Lite', url: 'https://www.tatasteelnederland.com/en/sustainability/zeremis' },
+        { label: 'Tata Steel UK — Optemis Carbon Lite', url: 'https://www.tatasteeluk.com/en-US/green-steel-solutions/optemis/optemis-carbon-lite' }
+      ],
+      contactUrl: 'https://www.tatasteelnederland.com/en/contact',
+      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+    },
+
+    {
+      id: 'stegra-h2-green-steel',
+      company: 'Stegra (formerly H2 Green Steel)',
+      productLine: 'Green Hydrogen Steel',
+      type: 'steel',
+      coverage: 'regional',
+      country: 'SE',
+      serviceStates: null,
+      serviceRegion: 'Europe (Boden, Sweden plant — commercial production targeted 2026; pre-sold to European customers)',
+      plantCount: '1 plant under construction (Boden, Norrbotten, Sweden)',
+      technologyStatus: 'precommercial',
+      hq: { lat: 65.832, lng: 21.690, label: 'Boden, Norrbotten, Sweden (Plant Location)' },
+      plantLocatorUrl: 'https://stegra.com/en/the-boden-plant',
+      about: 'Stegra (rebranded from H2 Green Steel in 2024) is building a green hydrogen-based steel plant in Boden, Sweden targeting commercial production in 2026. Using 100% green hydrogen for direct reduction of iron ore (DRI) + electric arc furnace, powered by Nordic renewable electricity. Target: ≤0.5 t CO₂/t steel cradle-to-gate — over 90% reduction vs. conventional blast furnace. Over half of planned production pre-sold to European automotive and industrial customers.',
+      products: [
+        {
+          id: 'stegra-green-hrc',
+          name: 'Green Hydrogen Steel (Flat Products — Pre-Commercial)',
+          description: 'Hot-rolled coil and flat products from 100% green hydrogen DRI + EAF — commercial production targeted 2026',
+          gwpVerified: null,
+          gwpLabel: 'No data found (pre-commercial; no EPD published)',
+          gwpEstimate: 500,
+          gwpEstimateNote: 'Target ≤500 kg CO₂e/t (≤0.5 t CO₂/t) cradle-to-gate; no commercial EPD published as of 2026',
+          gwpUnit: 'kg CO₂e/metric ton',
+          reductionClaim: '>90% vs. conventional BF-BOF baseline (~2,000 kg CO₂e/t)',
+          epdAvailable: false,
+          epdNote: 'No commercial EPD — plant not yet in production. EPD expected at commercial launch.',
+          epdUrl: null,
+          epdInfoUrl: 'https://stegra.com/en/the-boden-plant',
+          ec3Searchable: false,
+          costBase: 'No data found',
+          costPremium: 'No data found',
+          costNote: 'Contact Stegra for pre-commercial pricing'
+        }
+      ],
+      sources: [
+        { label: 'Stegra — Boden Plant', url: 'https://stegra.com/en/the-boden-plant' },
+        { label: 'Stegra Company', url: 'https://stegra.com' }
+      ],
+      contactUrl: 'https://stegra.com/contact',
       ec3SearchUrl: 'https://www.buildingtransparency.org/'
     }
 
