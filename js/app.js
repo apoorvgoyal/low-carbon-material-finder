@@ -88,7 +88,7 @@ const App = (() => {
 
   /* ── Map setup ─────────────────────────────────────────────── */
   function initMap() {
-    S.map = L.map('map', { zoomControl: false }).setView([38.5, -96.0], 4);
+    S.map = L.map('map', { zoomControl: false }).setView([20, 10], 2);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
