@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manufacturer Profile — Stratum</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%23426b54'/><text y='22' x='5' font-size='20'>🌿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --paper: oklch(98.5% 0.008 120); --paper-2: oklch(97% 0.012 130); --paper-3: oklch(95% 0.015 130);
+  --white: #ffffff; --surface: #ffffff;
+  --ink: oklch(20% 0.02 158); --ink-2: oklch(38% 0.018 156); --ink-3: oklch(58% 0.014 152); --ink-4: oklch(75% 0.01 150);
+  --line: oklch(91% 0.012 135); --line-2: oklch(86% 0.015 135); --line-strong: oklch(70% 0.018 145);
+  --moss: oklch(48% 0.10 152); --moss-deep: oklch(32% 0.08 154); --moss-soft: oklch(93% 0.04 145); --moss-tint: oklch(96.5% 0.025 145); --lichen: oklch(82% 0.16 130);
+  --gwp-1: oklch(70% 0.16 145); --gwp-2: oklch(78% 0.16 115); --gwp-3: oklch(82% 0.15 85); --gwp-4: oklch(72% 0.17 50); --gwp-5: oklch(60% 0.18 28);
+  --gwp-1-soft: oklch(94% 0.06 145); --gwp-2-soft: oklch(95% 0.05 115); --gwp-3-soft: oklch(95% 0.05 85); --gwp-4-soft: oklch(94% 0.06 50); --gwp-5-soft: oklch(93% 0.07 28);
+  --good: oklch(55% 0.12 150); --warn: oklch(65% 0.14 60); --bad: oklch(58% 0.18 28);
+  --f-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-xs:4px; --r-sm:6px; --r-md:10px; --r-lg:16px; --r-xl:22px; --r-full:999px;
+  --sh-1: 0 1px 0 rgba(20,32,28,.04), 0 1px 2px rgba(20,32,28,.05);
+  --sh-2: 0 2px 4px rgba(20,32,28,.05), 0 8px 24px -8px rgba(20,32,28,.10);
+  --sh-3: 0 4px 12px rgba(20,32,28,.08), 0 24px 48px -16px rgba(20,32,28,.14);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f-sans);color:var(--ink);background:var(--paper);min-height:100vh}
+a{color:var(--moss);text-decoration:none}
+a:hover{text-decoration:underline}
+button{cursor:pointer;font-family:var(--f-sans)}
+
+/* ── Page shell ─────────────────────────────────────────────── */
+.page-wrap{max-width:1200px;margin:0 auto;padding:0 40px 80px}
+
+/* ── Top bar ────────────────────────────────────────────────── */
+.top-bar{
+  position:sticky;top:0;z-index:200;background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+  padding:0 40px;margin:0 -40px;
+}
+.top-bar-inner{
+  max-width:1200px;margin:0 auto;height:52px;
+  display:flex;align-items:center;gap:16px;
+}
+.top-bar-brand{font-size:18px;font-weight:700;color:var(--ink);letter-spacing:-.5px;text-decoration:none}
+.top-bar-brand:hover{text-decoration:none}
+.crumb{
+  display:flex;align-items:center;gap:6px;flex:1;
+  font-family:var(--f-mono);font-size:11px;color:var(--ink-3);letter-spacing:.04em;
+}
+.crumb a{color:var(--ink-3)}
+.crumb a:hover{color:var(--ink);text-decoration:none}
+.crumb-sep{color:var(--ink-4)}
+.top-bar-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.btn{
+  padding:7px 14px;border-radius:var(--r-md);border:1px solid var(--line-2);
+  font-size:12px;font-weight:600;cursor:pointer;transition:all .12s;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn-ghost{background:var(--paper-2);color:var(--ink-2)}
+.btn-ghost:hover{border-color:var(--line-strong);color:var(--ink)}
+.btn-primary{background:var(--moss);color:#fff;border-color:var(--moss)}
+.btn-primary:hover{background:var(--moss-deep)}
+.btn-moss{background:var(--lichen);color:var(--ink);border-color:var(--lichen)}
+.btn-moss:hover{background:oklch(78% 0.17 130)}
+
+/* ── Hero ───────────────────────────────────────────────────── */
+.hero{
+  display:grid;grid-template-columns:1fr 360px;gap:40px;
+  padding:40px 0 36px;border-bottom:1px solid var(--line);margin-bottom:32px;
+}
+.hero-left h1{
+  font-size:56px;font-weight:700;letter-spacing:-.025em;
+  color:var(--ink);line-height:1.05;
+}
+.hero-left h1 em{color:var(--moss-deep);font-style:normal}
+.hero-tagline{
+  font-size:16px;color:var(--ink-2);line-height:1.6;
+  margin-top:16px;max-width:540px;
+}
+.hero-meta{
+  display:flex;align-items:center;flex-wrap:wrap;gap:12px;
+  margin-top:20px;font-family:var(--f-mono);font-size:11px;color:var(--ink-3);
+}
+.hero-meta .meta-item{display:inline-flex;align-items:center;gap:5px}
+.hero-meta .meta-dot{width:3px;height:3px;background:var(--ink-4);border-radius:50%}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:3px 10px;border-radius:var(--r-full);
+  background:var(--moss-soft);color:var(--moss-deep);font-weight:500;
+}
+.hero-badge-check{
+  width:14px;height:14px;border-radius:50%;background:var(--moss);color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:8px;font-weight:700;flex-shrink:0;
+}
+.national-badge{background:oklch(93% 0.04 240);color:oklch(40% 0.14 240)}
+
+/* Hero right card */
+.hero-right{
+  background:var(--ink);border-radius:var(--r-xl);
+  padding:28px;color:var(--paper);
+}
+.hero-card-label{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;
+  color:oklch(70% 0.015 150);text-transform:uppercase;
+}
+.hero-card-big{
+  font-family:var(--f-mono);font-size:52px;font-weight:600;line-height:1;
+  letter-spacing:-.025em;color:oklch(85% 0.14 130);margin:8px 0 4px;
+}
+.hero-card-unit{color:oklch(70% 0.015 150);font-size:12px;font-family:var(--f-mono)}
+.hero-card-product{font-size:11px;color:oklch(65% 0.015 150);margin-top:4px}
+.hero-card-delta{
+  margin-top:16px;padding-top:16px;
+  border-top:1px solid oklch(35% 0.025 158);
+  display:flex;align-items:baseline;gap:10px;
+}
+.hero-card-delta-v{
+  font-family:var(--f-mono);font-size:24px;font-weight:500;
+  color:oklch(85% 0.14 130);
+}
+.hero-card-delta-l{color:oklch(65% 0.015 150);font-size:11px;line-height:1.5}
+.hero-card-actions{display:flex;gap:8px;margin-top:20px}
+.hero-card-actions .btn{flex:1;justify-content:center}
+
+/* ── Tab nav ────────────────────────────────────────────────── */
+.tab-nav{
+  display:flex;gap:4px;border-bottom:1px solid var(--line);
+  margin-bottom:36px;overflow-x:auto;
+}
+.tab-nav::-webkit-scrollbar{display:none}
+.tab-link{
+  padding:10px 4px;margin-right:16px;font-size:13px;
+  color:var(--ink-3);border-bottom:2px solid transparent;
+  margin-bottom:-1px;white-space:nowrap;cursor:pointer;
+  background:none;border-left:none;border-right:none;border-top:none;
+  transition:color .12s;
+}
+.tab-link:hover{color:var(--ink)}
+.tab-link.active{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+
+/* Tab content panels */
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Stat grid ──────────────────────────────────────────────── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:36px}
+.stat-tile{
+  padding:20px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);
+}
+.stat-tile .l{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;
+  color:var(--ink-3);text-transform:uppercase;
+}
+.stat-tile .v{
+  font-family:var(--f-mono);font-size:28px;font-weight:500;
+  letter-spacing:-.02em;color:var(--ink);margin-top:8px;
+}
+.stat-tile .s{font-size:11px;color:var(--ink-3);margin-top:4px}
+
+/* ── Section ────────────────────────────────────────────────── */
+.section{margin-bottom:36px}
+.section-h{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-3);margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid var(--line);
+}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:36px}
+
+/* ── Products table ─────────────────────────────────────────── */
+.ptable{
+  width:100%;border:1px solid var(--line);border-radius:var(--r-lg);
+  border-collapse:separate;border-spacing:0;overflow:hidden;background:var(--surface);
+}
+.ptable th{
+  font-family:var(--f-mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);text-align:left;padding:12px 16px;
+  border-bottom:1px solid var(--line);background:var(--paper-2);font-weight:500;
+}
+.ptable th:nth-child(3),.ptable th:nth-child(4){text-align:right}
+.ptable td{padding:16px;border-bottom:1px solid var(--line);vertical-align:top}
+.ptable td:nth-child(3),.ptable td:nth-child(4){text-align:right}
+.ptable tr:last-child td{border-bottom:none}
+.p-name strong{display:block;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px}
+.p-spec{font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.p-gwp-num{
+  font-family:var(--f-mono);font-size:22px;font-weight:500;
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em;
+}
+.p-gwp-unit{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);margin-left:3px}
+.p-bench-bar{
+  position:relative;width:100%;max-width:180px;height:6px;
+  background:var(--paper-2);border-radius:var(--r-full);margin-top:6px;overflow:visible;
+}
+.p-bench-fill{position:absolute;inset:0;border-radius:var(--r-full)}
+.p-bench-line{
+  position:absolute;top:-4px;bottom:-4px;width:0;
+  border-left:1.5px solid var(--ink-3);
+}
+.p-bench-line::after{
+  content:"baseline";position:absolute;top:-14px;left:4px;
+  font-family:var(--f-mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);white-space:nowrap;
+}
+.p-redux{
+  display:inline-flex;align-items:center;
+  font-family:var(--f-mono);font-size:12px;font-weight:500;
+  padding:4px 10px;border-radius:var(--r-full);
+  background:oklch(94% 0.08 145);color:oklch(35% 0.10 145);
+}
+.p-premium{font-family:var(--f-mono);font-size:12px;color:var(--ink-2)}
+.p-epd-btn{
+  padding:5px 10px;border-radius:var(--r-sm);border:1px solid var(--line);
+  font-size:11px;color:var(--ink-2);background:var(--paper-2);cursor:pointer;
+  transition:all .12s;text-decoration:none;display:inline-block;
+}
+.p-epd-btn:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-tint);text-decoration:none}
+
+/* ── Carbon stack ───────────────────────────────────────────── */
+.core-feature{display:flex;gap:28px;align-items:stretch}
+.core-visual{
+  width:64px;display:flex;flex-direction:column;gap:2px;flex-shrink:0;
+}
+.core-seg{
+  border-radius:3px;position:relative;min-height:48px;
+  display:flex;align-items:center;
+}
+.core-seg-lbl{
+  position:absolute;left:100%;margin-left:12px;
+  white-space:nowrap;font-family:var(--f-mono);font-size:10px;color:var(--ink-2);
+  line-height:1.4;
+}
+.core-seg-lbl strong{color:var(--ink)}
+.core-text{flex:1}
+.core-text h2{
+  font-size:28px;font-weight:700;letter-spacing:-.02em;
+  line-height:1.15;margin-bottom:14px;
+}
+.core-text h2 em{color:var(--moss-deep);font-style:normal}
+.core-text p{font-size:13px;color:var(--ink-2);line-height:1.6;max-width:500px}
+.core-stats{display:flex;gap:28px;margin-top:20px;flex-wrap:wrap}
+.core-stat-l{font-family:var(--f-mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.core-stat-v{font-family:var(--f-mono);font-size:20px;color:var(--moss-deep);margin-top:4px;font-weight:500}
+
+/* ── Impact bars ────────────────────────────────────────────── */
+.impact-box{
+  padding:32px;background:var(--moss-tint);
+  border:1px solid var(--moss-soft);border-radius:var(--r-lg);
+}
+.impact-h{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.15;margin-bottom:4px}
+.impact-h em{color:var(--moss-deep);font-style:normal}
+.impact-sub{font-family:var(--f-mono);font-size:10px;letter-spacing:.04em;color:var(--ink-2);margin-bottom:24px}
+.impact-bars{display:flex;gap:20px;align-items:flex-end;height:180px;padding:0 16px}
+.impact-col{flex:1;display:flex;flex-direction:column;align-items:center}
+.impact-bar{
+  width:100%;background:linear-gradient(to bottom,var(--gwp-5),var(--gwp-4));
+  border-radius:4px 4px 0 0;position:relative;
+}
+.impact-bar.highlight{background:linear-gradient(to bottom,var(--moss),var(--moss-deep))}
+.impact-bar-v{
+  position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  font-family:var(--f-mono);font-size:12px;font-weight:500;white-space:nowrap;
+}
+.impact-col-lbl{
+  margin-top:8px;font-family:var(--f-mono);font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:center;line-height:1.4;
+}
+.impact-col-lbl.hl{color:var(--moss-deep);font-weight:600}
+
+/* ── Tech grid ──────────────────────────────────────────────── */
+.tech-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tech-card{
+  padding:16px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);
+}
+.tech-card-head{
+  display:flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:10px;
+  letter-spacing:.12em;color:var(--moss-deep);text-transform:uppercase;margin-bottom:6px;
+}
+.tech-dot{width:8px;height:8px;background:var(--moss);border-radius:50%;flex-shrink:0}
+.tech-card h4{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.tech-card p{font-size:12px;color:var(--ink-2);line-height:1.5}
+.tech-card.roadmap{background:var(--paper-2);border-style:dashed}
+.tech-card.roadmap .tech-card-head{color:var(--ink-3)}
+.tech-card.roadmap .tech-dot{background:var(--ink-4)}
+
+/* ── EPD cards ──────────────────────────────────────────────── */
+.epd-list{display:flex;flex-direction:column;gap:10px}
+.epd-card{
+  display:flex;align-items:center;gap:16px;
+  padding:16px 20px;background:var(--paper-2);
+  border:1px solid var(--line);border-radius:var(--r-lg);
+}
+.epd-thumb{
+  width:48px;height:62px;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--r-sm);
+  flex-shrink:0;position:relative;overflow:hidden;
+}
+.epd-thumb::before{
+  content:'';position:absolute;inset:8px;
+  background:repeating-linear-gradient(to bottom,transparent,transparent 5px,var(--paper-3) 5px,var(--paper-3) 6px);
+}
+.epd-thumb::after{
+  content:'PDF';position:absolute;bottom:3px;right:3px;
+  font-family:var(--f-mono);font-size:7px;
+  background:var(--moss-deep);color:var(--paper);
+  padding:1px 3px;border-radius:2px;letter-spacing:.05em;
+}
+.epd-info{flex:1;min-width:0}
+.epd-info h4{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.epd-meta{font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.epd-actions{display:flex;gap:6px;flex-shrink:0}
+.epd-note{font-size:11px;color:var(--ink-3);margin-top:12px;line-height:1.5}
+
+/* ── Plants list ────────────────────────────────────────────── */
+.plant-list{display:flex;flex-direction:column;gap:8px}
+.plant-card{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 16px;border:1px solid var(--line);
+  border-radius:var(--r-md);background:var(--surface);
+}
+.plant-num{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);width:20px;flex-shrink:0}
+.plant-name{flex:1;font-weight:500;font-size:13px;color:var(--ink)}
+.plant-coords{font-family:var(--f-mono);font-size:10px;color:var(--ink-3)}
+.plant-gwp{font-family:var(--f-mono);font-size:12px;color:var(--ink);font-weight:500}
+
+/* ── Contact ────────────────────────────────────────────────── */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.contact-field .l{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+.contact-field .v{font-size:14px;color:var(--ink)}
+.contact-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+
+/* ── No data state ──────────────────────────────────────────── */
+#mfr-loading,.empty-mfr{
+  padding:80px 40px;text-align:center;font-size:15px;color:var(--ink-3);line-height:1.6;
+}
+.error-mfr{color:var(--bad)}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media(max-width:900px){
+  .page-wrap{padding:0 20px 60px}
+  .top-bar{padding:0 20px;margin:0 -20px}
+  .hero{grid-template-columns:1fr;gap:24px}
+  .hero-left h1{font-size:40px}
+  .stat-grid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .core-feature{flex-direction:column}
+  .core-seg-lbl{position:static;margin-left:8px;font-size:9px}
+  .impact-bars{height:130px;gap:12px}
+  .contact-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <a class="top-bar-brand" href="index.html">Stratum</a>
+    <div class="crumb" id="breadcrumb">
+      <a href="index.html">Find</a>
+      <span class="crumb-sep">›</span>
+      <span id="crumb-type">Concrete</span>
+      <span class="crumb-sep">›</span>
+      <span id="crumb-name" style="color:var(--ink)">Loading…</span>
+    </div>
+    <div class="top-bar-actions">
+      <button class="btn btn-ghost" id="btn-back" onclick="history.back()">← Back to results</button>
+      <button class="btn btn-primary" id="btn-compare">+ Compare</button>
+    </div>
+  </div>
+</div>
+
+<div class="page-wrap">
+
+  <!-- Loading state -->
+  <div id="mfr-loading">Loading manufacturer…</div>
+
+  <!-- Profile (hidden until data loads) -->
+  <div id="mfr-profile" style="display:none">
+
+    <!-- Hero -->
+    <header class="hero" id="mfr-hero">
+      <div class="hero-left">
+        <h1 id="hero-name">Company Name</h1>
+        <p class="hero-tagline" id="hero-tagline"></p>
+        <div class="hero-meta" id="hero-meta"></div>
+      </div>
+      <aside class="hero-right" id="hero-right">
+        <div class="hero-card-label">Best A1–A3 GWP</div>
+        <div class="hero-card-big" id="hero-gwp">—</div>
+        <div class="hero-card-unit" id="hero-gwp-unit"></div>
+        <div class="hero-card-product" id="hero-gwp-product"></div>
+        <div class="hero-card-delta" id="hero-delta"></div>
+        <div class="hero-card-actions">
+          <button class="btn btn-moss" id="hero-compare-btn">+ Compare</button>
+          <button class="btn" style="background:transparent;border-color:oklch(35% 0.025 158);color:var(--paper)">Contact</button>
+        </div>
+      </aside>
+    </header>
+
+    <!-- Tab nav -->
+    <nav class="tab-nav" id="tab-nav">
+      <button class="tab-link active" data-tab="overview">Overview</button>
+      <button class="tab-link" data-tab="products">Products &amp; EPDs</button>
+      <button class="tab-link" data-tab="plants">Plants</button>
+      <button class="tab-link" data-tab="performance">Performance</button>
+      <button class="tab-link" data-tab="contact">Contact</button>
+    </nav>
+
+    <!-- ── TAB: OVERVIEW ────────────────────────────────────── -->
+    <div class="tab-panel active" id="tab-overview">
+
+      <!-- Stat tiles -->
+      <div class="stat-grid" id="stat-tiles"></div>
+
+      <!-- Products table -->
+      <div class="section">
+        <div class="section-h">Mix Designs &amp; GWP</div>
+        <div id="products-table-wrap"></div>
+      </div>
+
+      <!-- Carbon stack (only for concrete) -->
+      <div class="section" id="carbon-stack-section" style="display:none">
+        <div class="section-h">Carbon Stack</div>
+        <div class="core-feature">
+          <div class="core-visual" id="core-visual"></div>
+          <div class="core-text" id="core-text"></div>
+        </div>
+      </div>
+
+      <!-- Impact vs benchmarks -->
+      <div class="section" id="impact-section" style="display:none">
+        <div class="section-h">vs. Regional &amp; National Benchmarks</div>
+        <div class="impact-box" id="impact-box"></div>
+      </div>
+
+      <!-- About -->
+      <div class="section">
+        <div class="section-h">About</div>
+        <p id="about-text" style="font-size:14px;color:var(--ink-2);line-height:1.7;max-width:700px"></p>
+      </div>
+
+    </div>
+
+    <!-- ── TAB: PRODUCTS ─────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-products">
+      <div class="two-col">
+        <div class="section">
+          <div class="section-h">Products</div>
+          <div id="products-detail"></div>
+        </div>
+        <div class="section">
+          <div class="section-h">EPD Documents</div>
+          <div class="epd-list" id="epd-list"></div>
+          <p class="epd-note">Stratum-verified means an independent administrator reviewed the EPD PDF and confirmed the GWP value shown. Stratum does not author EPDs.</p>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-h">Technologies</div>
+        <div class="tech-grid" id="tech-grid"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: PLANTS ───────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-plants">
+      <div class="section">
+        <div class="section-h">Plant Locations</div>
+        <div class="plant-list" id="plant-list"></div>
+      </div>
+      <p style="font-size:12px;color:var(--ink-3);margin-top:8px">
+        Coverage area: <span id="service-region" style="color:var(--ink-2)"></span>
+      </p>
+    </div>
+
+    <!-- ── TAB: PERFORMANCE ──────────────────────────────────── -->
+    <div class="tab-panel" id="tab-performance">
+      <div class="section">
+        <div class="section-h">vs. Regional &amp; National Benchmarks</div>
+        <div class="impact-box" id="perf-impact-box"></div>
+      </div>
+    </div>
+
+    <!-- ── TAB: CONTACT ──────────────────────────────────────── -->
+    <div class="tab-panel" id="tab-contact">
+      <div class="section">
+        <div class="section-h">Contact Information</div>
+        <div class="contact-grid" id="contact-grid"></div>
+        <div class="contact-btns" id="contact-btns"></div>
+      </div>
+    </div>
+
+  </div><!-- /mfr-profile -->
+</div><!-- /page-wrap -->
+
+<script src="data/manufacturers.js"></script>
+<script>
+'use strict';
+
+const GWP_BENCHMARKS = {
+  concrete: { national: 410, regional: 340, leed: 297, ll97: 240, icc: 180, unit: 'kg CO₂e/m³' },
+  steel:    { national: 1800, regional: 1200, leed: 1040, ll97: 880, icc: 700, unit: 'kg CO₂e/t' }
+};
+
+function getParam(key) {
+  return new URLSearchParams(location.search).get(key);
+}
+
+function gwpColor(gwp, type) {
+  if (type === 'concrete') {
+    if (gwp < 200) return 'var(--gwp-1)';
+    if (gwp < 260) return 'var(--gwp-2)';
+    if (gwp < 310) return 'var(--gwp-3)';
+    if (gwp < 350) return 'var(--gwp-4)';
+    return 'var(--gwp-5)';
+  } else {
+    if (gwp < 400)  return 'var(--gwp-1)';
+    if (gwp < 700)  return 'var(--gwp-2)';
+    if (gwp < 950)  return 'var(--gwp-3)';
+    if (gwp < 1200) return 'var(--gwp-4)';
+    return 'var(--gwp-5)';
+  }
+}
+
+function bestProduct(mfr) {
+  const products = mfr.products || [];
+  let best = null;
+  for (const p of products) {
+    const gwp = p.gwpVerified ?? p.gwpEstimate ?? null;
+    if (gwp == null) continue;
+    if (best == null || gwp < best.gwp) best = { gwp, p };
+  }
+  return best;
+}
+
+function pct(v, base) {
+  return Math.round(((base - v) / base) * 100);
+}
+
+function renderHero(mfr) {
+  document.title = `${mfr.company} — Stratum`;
+  document.getElementById('crumb-type').textContent = mfr.type.charAt(0).toUpperCase() + mfr.type.slice(1);
+  document.getElementById('crumb-name').textContent = mfr.company;
+
+  const nameEl = document.getElementById('hero-name');
+  const parts = mfr.company.split(' ');
+  const last = parts.pop();
+  nameEl.innerHTML = parts.join(' ') + (parts.length ? '<br><em>' + last + '</em>' : '<em>' + last + '</em>');
+
+  document.getElementById('hero-tagline').textContent = mfr.about || '';
+
+  const bench = GWP_BENCHMARKS[mfr.type];
+  const best = bestProduct(mfr);
+
+  // Hero card
+  if (best) {
+    const color = gwpColor(best.gwp, mfr.type);
+    document.getElementById('hero-gwp').style.color = color;
+    document.getElementById('hero-gwp').textContent = best.gwp;
+    document.getElementById('hero-gwp-unit').textContent = bench.unit;
+    document.getElementById('hero-gwp-product').textContent = best.p.name || '';
+    const diff = pct(best.gwp, bench.regional);
+    document.getElementById('hero-delta').innerHTML =
+      `<span class="hero-card-delta-v" style="color:${diff > 0 ? 'oklch(85% 0.14 130)' : 'var(--warn)'}">
+        ${diff > 0 ? '−' : '+'}${Math.abs(diff)}%
+      </span>
+      <span class="hero-card-delta-l">vs regional avg<br/>(${bench.regional} ${bench.unit})</span>`;
+  } else {
+    document.getElementById('hero-gwp').textContent = '—';
+    document.getElementById('hero-gwp-unit').textContent = 'No verified GWP data';
+  }
+
+  // Meta row
+  const metaEl = document.getElementById('hero-meta');
+  const parts2 = [];
+  if (mfr.hq) parts2.push(`<span class="meta-item">📍 ${mfr.hq.label}</span>`);
+  if (mfr.plantCount) {
+    parts2.push('<span class="meta-dot"></span>');
+    parts2.push(`<span class="meta-item">${mfr.plantCount} plants</span>`);
+  }
+  parts2.push('<span class="meta-dot"></span>');
+  const covLabel = mfr.coverage === 'national' ? 'National' : mfr.coverage === 'regional' ? 'Regional' : 'Local';
+  const covClass = mfr.coverage === 'national' ? 'national-badge' : '';
+  parts2.push(`<span class="hero-badge ${covClass}">${covLabel}</span>`);
+  if (mfr.products?.some(p => p.epdAvailable)) {
+    parts2.push(`<span class="hero-badge"><span class="hero-badge-check">✓</span> EPD verified</span>`);
+  }
+  metaEl.innerHTML = parts2.join('');
+}
+
+function renderStatTiles(mfr) {
+  const products = mfr.products || [];
+  const withGwp = products.filter(p => (p.gwpVerified ?? p.gwpEstimate) != null);
+  const avg = withGwp.length ? Math.round(withGwp.reduce((s, p) => s + (p.gwpVerified ?? p.gwpEstimate), 0) / withGwp.length) : null;
+  const best = bestProduct(mfr);
+  const bench = GWP_BENCHMARKS[mfr.type];
+  const avgReduction = avg ? pct(avg, bench.regional) : null;
+  const epdCount = products.filter(p => p.epdAvailable).length;
+
+  const tiles = [
+    { l: 'Products', v: products.length, s: 'Mix designs tracked' },
+    { l: 'Active EPDs', v: epdCount || 'N/A', s: 'Publicly available' },
+    { l: 'Avg reduction', v: avgReduction != null ? `−${avgReduction}%` : '—', s: 'vs regional avg', color: avgReduction > 0 ? 'var(--good)' : '' },
+    { l: 'Coverage', v: mfr.coverage === 'national' ? 'National' : mfr.coverage === 'regional' ? 'Regional' : 'Local', s: mfr.serviceRegion?.slice(0, 40) || '' }
+  ];
+
+  document.getElementById('stat-tiles').innerHTML = tiles.map(t =>
+    `<div class="stat-tile">
+      <div class="l">${t.l}</div>
+      <div class="v" style="${t.color ? `color:${t.color}` : ''}">${t.v}</div>
+      <div class="s">${t.s}</div>
+    </div>`
+  ).join('');
+}
+
+function renderProductsTable(mfr) {
+  const products = mfr.products || [];
+  const bench = GWP_BENCHMARKS[mfr.type];
+  const maxGwp = bench.national * 1.1;
+
+  if (!products.length) {
+    document.getElementById('products-table-wrap').innerHTML = '<p style="color:var(--ink-3);font-size:13px">No product data available.</p>';
+    return;
+  }
+
+  const rows = products.map(p => {
+    const gwp = p.gwpVerified ?? p.gwpEstimate ?? null;
+    const isEst = p.gwpVerified == null && p.gwpEstimate != null;
+    const color = gwp ? gwpColor(gwp, mfr.type) : 'var(--ink-4)';
+    const gwpDisplay = gwp ? `<div style="display:flex;align-items:baseline;gap:4px">
+      <span class="p-gwp-num" style="color:${color}">${gwp}${isEst ? '*' : ''}</span>
+      <span class="p-gwp-unit">${bench.unit}</span>
+    </div>
+    <div class="p-bench-bar">
+      <div class="p-bench-fill" style="width:${Math.min(100,(gwp/maxGwp)*100).toFixed(1)}%;background:${color}"></div>
+      <div class="p-bench-line" style="left:${((bench.regional/maxGwp)*100).toFixed(1)}%"></div>
+    </div>` : '<span style="color:var(--ink-4);font-size:12px">No data</span>';
+    const reduction = gwp ? pct(gwp, bench.regional) : null;
+    const redux = reduction != null ? `<span class="p-redux" style="${reduction <= 0 ? 'background:oklch(94% 0.06 28);color:oklch(35% 0.12 28)' : ''}">
+      ${reduction > 0 ? '−' : '+'}${Math.abs(reduction)}%
+    </span>` : '—';
+    const epdBtn = p.epdUrl
+      ? `<a class="p-epd-btn" href="${p.epdUrl}" target="_blank" rel="noopener">View ↗</a>`
+      : p.epdInfoUrl
+      ? `<a class="p-epd-btn" href="${p.epdInfoUrl}" target="_blank" rel="noopener">Info ↗</a>`
+      : `<span style="font-size:11px;color:var(--ink-4)">${p.epdAvailable ? 'On request' : 'None'}</span>`;
+    return `<tr>
+      <td class="p-name"><strong>${p.name}</strong><div class="p-spec">${p.description || ''}</div></td>
+      <td>${gwpDisplay}</td>
+      <td>${redux}</td>
+      <td class="p-premium">${p.costPremium || '—'}</td>
+      <td>${epdBtn}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('products-table-wrap').innerHTML = `
+    <table class="ptable">
+      <thead><tr>
+        <th>Mix / Product</th>
+        <th>A1–A3 GWP</th>
+        <th style="text-align:left">vs. baseline</th>
+        <th>Premium</th>
+        <th>EPD</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    ${products.some(p => p.gwpEstimate) ? '<p style="font-size:11px;color:var(--ink-3);margin-top:8px">* Estimated from manufacturer reduction claims vs NRMCA baseline — not a verified EPD value.</p>' : ''}`;
+}
+
+function renderTechGrid(mfr) {
+  const techLabels = {
+    'co2-min':     { badge: 'CO₂-MIN',    name: 'CO₂ Mineralization', desc: 'Recycled CO₂ injected during mixing, permanently sequestered as calcium carbonate inside the matrix.' },
+    'scm-sub':     { badge: 'SCM',         name: 'SCM Substitution',  desc: 'Clinker replacement with supplementary cementitious materials (slag, fly ash, or calcined clay).' },
+    'plc':         { badge: 'PLC',         name: 'Portland Limestone Cement', desc: 'ASTM C595 interground limestone cement — 10% lower embodied carbon than standard OPC.' },
+    'co2-cure':    { badge: 'CO₂-CURE',    name: 'CO₂ Curing',        desc: 'Pre-cast elements cured in CO₂ atmosphere — carbonation sequestration of ~10 kg CO₂/m³.' },
+    'novel-binder':{ badge: 'NOVEL',       name: 'Novel Binder',      desc: 'Clinker-free binder (geopolymer, alkali-activated, or belite-rich cement) with ≥70% GWP reduction.' },
+    'eaf':         { badge: 'EAF',         name: 'Electric Arc Furnace', desc: 'Steel produced entirely in an EAF using recycled scrap — up to 75% lower GWP than BF-BOF route.' },
+    'h2-dri':      { badge: 'H₂-DRI',     name: 'Hydrogen DRI',      desc: 'Direct reduced iron using green hydrogen as reductant — near-zero Scope 1 emissions from steelmaking.' },
+    'recycled':    { badge: '100% Recycled', name: '100% Recycled Steel', desc: 'Product line uses 100% post-consumer recycled scrap, verified by mill cert.' }
+  };
+
+  const prods = mfr.products || [];
+  const techs = new Set();
+  prods.forEach(p => (p.technologies || []).forEach(t => techs.add(t)));
+
+  if (!techs.size) {
+    document.getElementById('tech-grid').innerHTML = '<p style="color:var(--ink-3);font-size:13px">No technology data recorded.</p>';
+    return;
+  }
+
+  document.getElementById('tech-grid').innerHTML = [...techs].map(t => {
+    const info = techLabels[t] || { badge: t.toUpperCase(), name: t, desc: '' };
+    return `<div class="tech-card">
+      <div class="tech-card-head"><span class="tech-dot"></span>${info.badge}</div>
+      <h4>${info.name}</h4>
+      <p>${info.desc}</p>
+    </div>`;
+  }).join('');
+}
+
+function renderEpdList(mfr) {
+  const products = mfr.products || [];
+  const epdProducts = products.filter(p => p.epdAvailable);
+
+  if (!epdProducts.length) {
+    document.getElementById('epd-list').innerHTML = '<p style="color:var(--ink-3);font-size:13px">No EPD documents recorded for this manufacturer.</p>';
+    return;
+  }
+
+  document.getElementById('epd-list').innerHTML = epdProducts.map(p =>
+    `<div class="epd-card">
+      <div class="epd-thumb"></div>
+      <div class="epd-info">
+        <h4>${p.name}</h4>
+        <div class="epd-meta">${p.epdNote || 'EPD available'}</div>
+      </div>
+      <div class="epd-actions">
+        ${p.epdUrl ? `<a class="p-epd-btn" href="${p.epdUrl}" target="_blank" rel="noopener">View ↗</a>` : ''}
+        ${p.epdInfoUrl ? `<a class="p-epd-btn" href="${p.epdInfoUrl}" target="_blank" rel="noopener">Info ↗</a>` : ''}
+      </div>
+    </div>`
+  ).join('');
+}
+
+function renderPlants(mfr) {
+  document.getElementById('service-region').textContent = mfr.serviceRegion || 'No data';
+  const plants = mfr.plants || [];
+
+  if (!plants.length && mfr.hq) {
+    document.getElementById('plant-list').innerHTML =
+      `<div class="plant-card">
+        <span class="plant-num">HQ</span>
+        <span class="plant-name">${mfr.company} — Headquarters</span>
+        <span class="plant-coords">${mfr.hq.lat?.toFixed(3) ?? '—'}, ${mfr.hq.lng?.toFixed(3) ?? '—'}</span>
+        <span class="plant-gwp">${mfr.hq.label || ''}</span>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('plant-list').innerHTML = plants.map((pl, i) =>
+    `<div class="plant-card">
+      <span class="plant-num">${String(i + 1).padStart(2, '0')}</span>
+      <span class="plant-name">${pl.name || pl.label || 'Plant ' + (i + 1)}</span>
+      <span class="plant-coords">${pl.lat != null ? pl.lat.toFixed(3) + ', ' + pl.lng.toFixed(3) : 'No coords'}</span>
+      <span class="plant-gwp">${pl.note || ''}</span>
+    </div>`
+  ).join('');
+}
+
+function renderImpactChart(mfr, containerId) {
+  const best = bestProduct(mfr);
+  if (!best) { document.getElementById(containerId).innerHTML = '<p style="color:var(--ink-3)">No GWP data to chart.</p>'; return; }
+  const bench = GWP_BENCHMARKS[mfr.type];
+  const bars = [
+    { v: bench.national, lbl: 'National avg', isHL: false },
+    { v: bench.regional, lbl: 'Regional avg', isHL: false },
+    { v: bench.leed,     lbl: 'LEED v4', isHL: false },
+    { v: bench.ll97,     lbl: 'NYC LL97', isHL: false },
+    { v: best.gwp,       lbl: mfr.company.split(' ').slice(-1)[0] + '\n' + (best.p.name || ''), isHL: true },
+    { v: bench.icc,      lbl: 'ICC Tier 2', isHL: false },
+  ].filter(b => b.v > 0);
+  const maxV = Math.max(...bars.map(b => b.v)) * 1.05;
+  const cols = bars.map(b => {
+    const h = Math.round((b.v / maxV) * 100);
+    return `<div class="impact-col">
+      <div class="impact-bar${b.isHL ? ' highlight' : ''}" style="height:${h}%">
+        <span class="impact-bar-v" style="${b.isHL ? 'color:var(--moss-deep)' : ''}">${b.v}</span>
+      </div>
+      <div class="impact-col-lbl${b.isHL ? ' hl' : ''}">${b.lbl.replace('\n', '<br/>')}</div>
+    </div>`;
+  }).join('');
+  document.getElementById(containerId).innerHTML = `
+    <div class="impact-h">Performance vs. <em>benchmarks</em></div>
+    <div class="impact-sub">A1–A3 cradle-to-gate · ${bench.unit}</div>
+    <div class="impact-bars">${cols}</div>`;
+}
+
+function renderContact(mfr) {
+  const fields = [
+    { l: 'Headquarters', v: mfr.hq?.label || 'No data' },
+    { l: 'Coverage', v: mfr.serviceRegion || 'No data' },
+    { l: 'Plant count', v: mfr.plantCount || 'No data' },
+    { l: 'Material type', v: (mfr.type || '').charAt(0).toUpperCase() + (mfr.type || '').slice(1) }
+  ];
+  document.getElementById('contact-grid').innerHTML = fields.map(f =>
+    `<div class="contact-field"><div class="l">${f.l}</div><div class="v">${f.v}</div></div>`
+  ).join('');
+
+  const btns = [];
+  if (mfr.website) btns.push(`<a class="btn btn-ghost" href="${mfr.website}" target="_blank" rel="noopener">Visit website ↗</a>`);
+  if (mfr.plantLocatorUrl) btns.push(`<a class="btn btn-ghost" href="${mfr.plantLocatorUrl}" target="_blank" rel="noopener">Find a plant ↗</a>`);
+  document.getElementById('contact-btns').innerHTML = btns.join('') || '<p style="color:var(--ink-3);font-size:13px">Contact details not available. Search manufacturer name to find official website.</p>';
+}
+
+function render(mfr) {
+  renderHero(mfr);
+  renderStatTiles(mfr);
+  renderProductsTable(mfr);
+  renderTechGrid(mfr);
+  renderEpdList(mfr);
+  renderPlants(mfr);
+  renderImpactChart(mfr, 'impact-box');
+  renderImpactChart(mfr, 'perf-impact-box');
+  renderContact(mfr);
+
+  // Show/hide carbon stack section (only for concrete with enough product detail)
+  const concSec = document.getElementById('carbon-stack-section');
+  if (mfr.type === 'concrete' && mfr.products?.length) {
+    concSec.style.display = '';
+    const best = bestProduct(mfr);
+    if (best) {
+      document.getElementById('core-text').innerHTML = `
+        <h2>How they get to <em>${best.gwp}</em></h2>
+        <p>${mfr.about || 'Carbon reduction details not available.'}</p>
+        <div class="core-stats">
+          <div><div class="core-stat-l">Best GWP</div><div class="core-stat-v">${best.gwp} kg CO₂e/m³</div></div>
+          <div><div class="core-stat-l">Product</div><div class="core-stat-v" style="font-size:14px;margin-top:6px">${best.p.name || '—'}</div></div>
+        </div>`;
+      // Core visual: colored segments
+      const techs = best.p.technologies || [];
+      const segs = [
+        { pct: 40, color: 'oklch(75% 0.06 30)', lbl: 'Cement clinker · ~40%' },
+        { pct: 22, color: 'oklch(80% 0.10 110)', lbl: 'SCM substitution · ~22%' },
+        { pct: 20, color: 'oklch(82% 0.14 145)', lbl: 'Reduction strategies' },
+        { pct: 12, color: 'oklch(85% 0.04 130)', lbl: 'Aggregates · ~12%' },
+        { pct: 6,  color: 'oklch(90% 0.02 130)', lbl: 'Admixtures + transport' },
+      ];
+      document.getElementById('core-visual').innerHTML = segs.map(s =>
+        `<div class="core-seg" style="background:${s.color};flex-basis:${s.pct}%">
+          <span class="core-seg-lbl"><strong>${s.lbl}</strong></span>
+        </div>`
+      ).join('');
+    }
+  } else {
+    concSec.style.display = 'none';
+  }
+
+  // Show impact section for anyone with GWP data
+  const best = bestProduct(mfr);
+  document.getElementById('impact-section').style.display = best ? '' : 'none';
+
+  // Products detail tab
+  document.getElementById('products-detail').innerHTML = document.getElementById('products-table-wrap').innerHTML;
+
+  document.getElementById('mfr-loading').style.display = 'none';
+  document.getElementById('mfr-profile').style.display = '';
+}
+
+function loadMfr() {
+  const id = getParam('id');
+  const allMfrs = [
+    ...(window.MANUFACTURERS?.concrete || []),
+    ...(window.MANUFACTURERS?.steel || [])
+  ];
+
+  if (!id) {
+    // No id — show the first manufacturer or a list
+    if (allMfrs.length) {
+      render(allMfrs[0]);
+    } else {
+      document.getElementById('mfr-loading').innerHTML =
+        '<p class="error-mfr">No manufacturer data found.</p>';
+    }
+    return;
+  }
+
+  const mfr = allMfrs.find(m => m.id === id);
+  if (!mfr) {
+    document.getElementById('mfr-loading').innerHTML =
+      `<p class="error-mfr">Manufacturer "${id}" not found. <a href="manufacturer.html">Browse all</a></p>`;
+    return;
+  }
+
+  render(mfr);
+}
+
+// Tab nav
+document.querySelectorAll('.tab-link').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panelId = 'tab-' + btn.dataset.tab;
+    const panel = document.getElementById(panelId);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+// Compare button
+document.getElementById('btn-compare').addEventListener('click', () => {
+  const id = getParam('id');
+  if (id) window.location = `index.html?compare=${id}`;
+  else window.location = 'index.html';
+});
+document.getElementById('hero-compare-btn').addEventListener('click', () => {
+  const id = getParam('id');
+  if (id) window.location = `index.html?compare=${id}`;
+  else window.location = 'index.html';
+});
+
+loadMfr();
+</script>
+</body>
+</html>
