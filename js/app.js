@@ -489,7 +489,10 @@ const App = (() => {
       .sort(sorter());
     renderMarkers();
     renderSidebar();
-    setStatus(`${S.results.length} ${S.material} manufacturer${S.results.length !== 1 ? 's' : ''} within ${radiusDisplay()}.`);
+    const msg = S.results.length === 0
+      ? `No ${S.material} manufacturers found in your region. Switch to GWP Target mode to browse global options.`
+      : `${S.results.length} ${S.material} manufacturer${S.results.length !== 1 ? 's' : ''} within ${radiusDisplay()}.`;
+    setStatus(msg);
   }
 
   function runGwpTargetFilter() {
@@ -512,15 +515,18 @@ const App = (() => {
   }
 
   function matchesRegion(m) {
-    if (m.coverage === 'national') return true;
-    // Distance-based fallback for all regions
     const dist = haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng);
+    // Within search radius
     if (dist <= S.radiusMiles) return true;
+    // National coverage: only show in the manufacturer's own country
+    const mCountry = m.country || 'US';
+    const uCountry = S.userCountry || 'US';
+    if (m.coverage === 'national' && mCountry === uCountry) return true;
     // US-specific: check serviceStates
     if (S.userState && m.serviceStates && m.serviceStates.includes(S.userState)) return true;
     // International: check serviceCountries
     if (S.userCountry && m.serviceCountries && m.serviceCountries.includes(S.userCountry)) return true;
-    // Continental coverage: double-radius heuristic
+    // Regional fallback: double-radius
     return dist <= S.radiusMiles * 2;
   }
 
