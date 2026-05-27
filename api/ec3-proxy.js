@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' });
   }
 
-  const { apiKey, category, geocode, page = 1, page_size = 200 } = body || {};
+  const { apiKey, category, jurisdiction, page = 1, page_size = 200 } = body || {};
   if (!apiKey)   return res.status(400).json({ error: 'apiKey is required' });
   if (!category) return res.status(400).json({ error: 'category is required' });
 
@@ -34,20 +34,20 @@ module.exports = async function handler(req, res) {
     () => {
       const p = new URLSearchParams({ page_size, page });
       p.set('product_class', ec3Category);
-      if (geocode) p.set('geocode', geocode);
+      if (jurisdiction) p.set('jurisdiction', jurisdiction);
       return `${PLANTS_URL}?${p}`;
     },
     // 2. Plants endpoint without category (return all nearby plants)
     () => {
       const p = new URLSearchParams({ page_size, page });
-      if (geocode) p.set('geocode', geocode);
+      if (jurisdiction) p.set('jurisdiction', jurisdiction);
       return `${PLANTS_URL}?${p}`;
     },
     // 3. EPDs endpoint with category
     () => {
       const p = new URLSearchParams({ page_size, page });
       p.set('category', ec3Category);
-      if (geocode) p.set('geocode', geocode);
+      if (jurisdiction) p.set('jurisdiction', jurisdiction);
       return `${EPDS_URL}?${p}`;
     },
   ];
