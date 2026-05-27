@@ -1067,7 +1067,8 @@ const App = (() => {
     setMeta('Fetching live data from EC3…');
     try {
       const category = S.material; // proxy maps 'concrete'→'Concrete >> ReadyMix', 'steel'→EC3 steel class
-      const geocode = S.userCountry
+      // EC3 uses ISO 3166-2 jurisdiction codes (e.g. US-IL, US, IN)
+      const jurisdiction = S.userCountry
         ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
         : null;
 
@@ -1078,7 +1079,7 @@ const App = (() => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             apiKey: S.ec3ApiKey, category,
-            ...(geocode && { geocode }),
+            ...(jurisdiction && { jurisdiction }),
             page, page_size: 200
           })
         });
@@ -1116,26 +1117,38 @@ const App = (() => {
   function mergeEC3Results(plants) {
     const cfg = GWP_CONFIG[S.material];
     plants.forEach(plant => {
-      if (!plant.latitude || !plant.longitude) return;
-      const dist = haversine(S.center.lat, S.center.lng, plant.latitude, plant.longitude);
+      // EC3 openEPD format: coordinates in location.latlng.lat/lng (new) or top-level latitude/longitude (deprecated)
+      const lat = plant.latitude ?? plant.location?.latlng?.lat ?? plant.lat ?? null;
+      const lng = plant.longitude ?? plant.location?.latlng?.lng ?? plant.lng ?? null;
+      if (lat == null || lng == null) return;
+
+      const dist = haversine(S.center.lat, S.center.lng, lat, lng);
       if (dist > S.radiusMiles) return;
-      const plantKey = (plant.plant_name || '').toLowerCase().replace(/\s+/g, '').slice(0, 10);
+
+      const plantKey = (plant.plant_name || plant.name || '').toLowerCase().replace(/\s+/g, '').slice(0, 10);
       const exists = plantKey && S.results.some(r =>
         r.company.toLowerCase().replace(/\s+/g, '').startsWith(plantKey)
       );
       if (exists) return;
+
       const gwpVal = plant.gwp_A1A3 ?? null;
-      const addr = [plant.address, plant.city, plant.country].filter(Boolean).join(', ') || 'See EC3';
+      const country = plant.country || plant.location?.country || S.userCountry || null;
+      const addr = [
+        plant.address || plant.location?.address,
+        plant.city,
+        country
+      ].filter(Boolean).join(', ') || 'See EC3';
+
       S.results.push({
         id: `ec3-${plant.id || Math.random()}`,
-        company: plant.plant_name || 'Unknown Plant (EC3)',
+        company: plant.plant_name || plant.name || 'Unknown Plant (EC3)',
         productLine: plant.category || S.material,
         type: S.material,
         coverage: 'local',
         serviceRegion: addr,
-        country: plant.country || S.userCountry || null,
+        country,
         plantCount: '1',
-        hq: { lat: plant.latitude, lng: plant.longitude, label: addr },
+        hq: { lat, lng, label: addr },
         plantLocatorUrl: 'https://www.buildingtransparency.org/',
         about: `Live data from EC3. Declared GWP: ${gwpVal != null ? gwpVal + ' ' + cfg.unit : 'No data found'}.`,
         products: [{
