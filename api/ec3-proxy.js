@@ -5,39 +5,96 @@ const EC3_CATEGORY = {
   steel:    'Steel >> StructuralSteel',
 };
 
-// Correct EC3 API endpoints
-const PLANTS_URL = 'https://buildingtransparency.org/api/plants/';
-const EPDS_URL   = 'https://buildingtransparency.org/api/epds/';
+const BASE = 'https://buildingtransparency.org/api';
 
-// EC3 EPDs embed plant_or_group with location — extract unique plants from them.
-// This normalises EPD objects into the same plant shape the frontend expects.
-function extractPlantsFromEpds(epds) {
+// EC3 openEPD format: plant_or_group can be:
+//   Plant:  { latitude, longitude, location:{latlng:{lat,lng}} }
+//   Group:  { plants: [ Plant, ... ] }
+// Both may appear directly OR nested inside an EPD as epd.plant_or_group.
+// This function normalises any of those shapes to a flat array of plant objects.
+function extractLocations(item) {
+  const results = [];
+
+  function tryNode(node, gwp, productName, category) {
+    if (!node) return;
+    // Direct lat/lng fields (openEPD v1 + EC3 legacy)
+    const lat1 = node.latitude  ?? node.lat  ?? null;
+    const lng1 = node.longitude ?? node.lng  ?? null;
+    if (lat1 != null && lng1 != null) {
+      results.push({
+        id:           node.id,
+        plant_name:   node.name || node.plant_name,
+        latitude:     lat1,
+        longitude:    lng1,
+        address:      node.address,
+        city:         node.city,
+        country:      node.country,
+        gwp_A1A3:     gwp,
+        product_name: productName,
+        category,
+        epd_url:      node.epd_url ?? null,
+      });
+      return;
+    }
+    // Nested location.latlng (openEPD v2)
+    const lat2 = node.location?.latlng?.lat ?? null;
+    const lng2 = node.location?.latlng?.lng ?? null;
+    if (lat2 != null && lng2 != null) {
+      results.push({
+        id:           node.id,
+        plant_name:   node.name || node.plant_name,
+        latitude:     lat2,
+        longitude:    lng2,
+        address:      node.address ?? node.location?.address,
+        city:         node.city    ?? node.location?.city,
+        country:      node.country ?? node.location?.country,
+        gwp_A1A3:     gwp,
+        product_name: productName,
+        category,
+        epd_url:      node.epd_url ?? null,
+      });
+      return;
+    }
+    // Group: recurse into plants[]
+    if (Array.isArray(node.plants)) {
+      node.plants.forEach(p => tryNode(p, gwp, productName, category));
+    }
+  }
+
+  const gwp     = item.gwp_a1a3 ?? item.gwp ?? item.gwp_A1A3 ?? null;
+  const name    = item.name  ?? item.plant_name  ?? null;
+  const cat     = item.category ?? item.product_class ?? null;
+  const epd_url = item.external_validation_url ?? item.link ?? null;
+
+  // If item IS a plant (has lat/lng or location) — e.g. from /api/plants/
+  tryNode(item, gwp, name, cat);
+
+  // If item is an EPD with embedded plant_or_group
+  if (item.plant_or_group) {
+    const pg = item.plant_or_group;
+    // Attach gwp and epd_url from the EPD if not on the plant itself
+    const pgGwp = gwp;
+    tryNode(pg, pgGwp, name, cat);
+  }
+
+  // Fix up epd_url from EPD-level field
+  for (const r of results) {
+    if (!r.epd_url && epd_url) r.epd_url = epd_url;
+  }
+
+  return results;
+}
+
+function normalizeToPlants(items) {
   const seen = new Set();
   const plants = [];
-  for (const epd of epds) {
-    const pg = epd.plant_or_group;
-    if (!pg) continue;
-    const lat = pg.location?.latlng?.lat ?? pg.latitude ?? null;
-    const lng = pg.location?.latlng?.lng ?? pg.longitude ?? null;
-    if (lat == null || lng == null) continue;
-
-    const key = pg.id || `${pg.name}|${lat}|${lng}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-
-    plants.push({
-      id:          pg.id || epd.id,
-      plant_name:  pg.name,
-      latitude:    lat,
-      longitude:   lng,
-      address:     pg.location?.address,
-      city:        pg.location?.city,
-      country:     pg.location?.country,
-      gwp_A1A3:    epd.gwp_a1a3 ?? epd.gwp ?? null,
-      product_name: epd.name,
-      category:    epd.category,
-      epd_url:     epd.external_validation_url ?? epd.link ?? null,
-    });
+  for (const item of items) {
+    for (const p of extractLocations(item)) {
+      const key = p.id || `${p.latitude?.toFixed(4)}|${p.longitude?.toFixed(4)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      plants.push(p);
+    }
   }
   return plants;
 }
@@ -60,57 +117,71 @@ module.exports = async function handler(req, res) {
   const ec3Category = EC3_CATEGORY[category] || category;
   const headers = { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' };
 
-  // Strategies tried in order. Stop on 401 (bad token). 403 may mean bad params — keep trying.
-  const strategies = [
-    // 1. Plants endpoint filtered by product_class + jurisdiction
-    { isEpd: false, buildUrl() {
-      const p = new URLSearchParams({ page_size, page });
-      p.set('product_class', ec3Category);
-      if (jurisdiction) p.set('jurisdiction', jurisdiction);
-      return `${PLANTS_URL}?${p}`;
-    }},
-    // 2. EPDs endpoint (normalized into plant objects by extractPlantsFromEpds)
-    { isEpd: true, buildUrl() {
-      const p = new URLSearchParams({ page_size, page });
-      p.set('category', ec3Category);
-      if (jurisdiction) p.set('jurisdiction', jurisdiction);
-      return `${EPDS_URL}?${p}`;
-    }},
-    // 3. Plants endpoint without category (any plants in jurisdiction)
-    { isEpd: false, buildUrl() {
-      const p = new URLSearchParams({ page_size, page });
-      if (jurisdiction) p.set('jurisdiction', jurisdiction);
-      return `${PLANTS_URL}?${p}`;
-    }},
-  ];
+  // Try strategies in priority order.
+  // Key rule: keep trying even on 200 if we extracted 0 plants — the endpoint
+  // may exist but not embed location data, so fall through to the next variant.
+  const strategies = [];
+
+  const addStrategy = (url) => strategies.push(url);
+
+  // Plants endpoint
+  const withCat = new URLSearchParams({ page_size, page, product_class: ec3Category });
+  const noCat   = new URLSearchParams({ page_size, page });
+  if (jurisdiction) {
+    addStrategy(`${BASE}/plants/?${withCat}&jurisdiction=${jurisdiction}`);
+  }
+  addStrategy(`${BASE}/plants/?${withCat}`);
+  if (jurisdiction) {
+    addStrategy(`${BASE}/plants/?${noCat}&jurisdiction=${jurisdiction}`);
+  }
+  addStrategy(`${BASE}/plants/?${noCat}`);
+
+  // EPDs endpoint (location embedded in plant_or_group)
+  const epdWithJ  = new URLSearchParams({ page_size, page, category: ec3Category });
+  const epdNoJ    = new URLSearchParams({ page_size, page, category: ec3Category });
+  if (jurisdiction) {
+    addStrategy(`${BASE}/epds/?${epdWithJ}&jurisdiction=${jurisdiction}`);
+  }
+  addStrategy(`${BASE}/epds/?${epdNoJ}`);
 
   let lastStatus = 502;
-  let lastData = {};
+  let lastData   = {};
+  let gotAny200  = false;
 
-  for (const { isEpd, buildUrl } of strategies) {
-    const url = buildUrl();
+  for (const url of strategies) {
     console.log(`[ec3-proxy] → ${url}`);
     try {
       const r = await fetch(url, { headers });
       const data = await r.json().catch(() => ({}));
       const items = Array.isArray(data) ? data : (data.results || []);
-      console.log(`[ec3-proxy] ← ${r.status}, raw: ${items.length}, type: ${isEpd ? 'epd' : 'plant'}`);
+      console.log(`[ec3-proxy] ← ${r.status}, items: ${items.length}`);
 
       if (r.status === 401) return res.status(401).json(data);
 
       if (r.ok) {
-        const plants = isEpd ? extractPlantsFromEpds(items) : items;
-        console.log(`[ec3-proxy] plants returned: ${plants.length}`);
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-        return res.status(200).json(plants);
+        gotAny200 = true;
+        const plants = normalizeToPlants(items);
+        console.log(`[ec3-proxy] plants with coords: ${plants.length}`);
+        if (plants.length > 0) {
+          res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+          return res.status(200).json(plants);
+        }
+        // Got 200 but 0 plants — try next strategy before giving up
+        continue;
       }
 
       lastStatus = r.status;
-      lastData = data;
+      lastData   = data;
     } catch (err) {
       console.error('[ec3-proxy] fetch failed:', err.message);
     }
   }
 
+  // All strategies exhausted
+  if (gotAny200) {
+    // Connected fine but no location data in any response
+    res.setHeader('Cache-Control', 's-maxage=60');
+    return res.status(200).json([]);
+  }
   return res.status(lastStatus).json(lastData);
 };
