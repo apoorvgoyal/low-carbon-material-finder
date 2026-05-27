@@ -7,6 +7,38 @@ const EC3_CATEGORY = {
 
 const BASE = 'https://buildingtransparency.org/api';
 
+// EC3/openEPD GWP values come in several shapes:
+//   number:  250
+//   string:  "250 kgCO2e"  |  "250 kg CO₂e/m3"  |  "250"
+//   object:  { qty: 250, unit: "kgCO2e" }  |  { mean: 250 }  |  { value: 250 }
+// Returns a plain number (rounded to 1 dp) or null.
+function parseGwp(v) {
+  if (v == null) return null;
+  if (typeof v === 'number') return isFinite(v) ? Math.round(v * 10) / 10 : null;
+  if (typeof v === 'string') {
+    const n = parseFloat(v.replace(/[^0-9.\-]/g, ''));
+    return isFinite(n) && n > 0 ? Math.round(n * 10) / 10 : null;
+  }
+  if (typeof v === 'object') {
+    const raw = v.qty ?? v.mean ?? v.value ?? v.declared ?? null;
+    return parseGwp(raw);
+  }
+  return null;
+}
+
+// Extract GWP from all known EC3/openEPD field names and paths.
+function extractGwp(item) {
+  return parseGwp(item.gwp_a1a3)
+      ?? parseGwp(item.gwp_A1A3)
+      ?? parseGwp(item.declared_gwp)
+      ?? parseGwp(item.gwp)
+      ?? parseGwp(item.impacts?.gwp?.A1A3)
+      ?? parseGwp(item.impacts?.GWP?.A1A3)
+      ?? parseGwp(item.impacts?.gwp?.a1a3)
+      ?? parseGwp(item.kg_co2e_per_m3)
+      ?? null;
+}
+
 // EC3 openEPD format: plant_or_group can be:
 //   Plant:  { latitude, longitude, location:{latlng:{lat,lng}} }
 //   Group:  { plants: [ Plant, ... ] }
@@ -61,7 +93,7 @@ function extractLocations(item) {
     }
   }
 
-  const gwp     = item.gwp_a1a3 ?? item.gwp ?? item.gwp_A1A3 ?? null;
+  const gwp     = extractGwp(item);
   const name    = item.name  ?? item.plant_name  ?? null;
   const cat     = item.category ?? item.product_class ?? null;
   const epd_url = item.external_validation_url ?? item.link ?? null;
@@ -160,8 +192,17 @@ module.exports = async function handler(req, res) {
 
       if (r.ok) {
         gotAny200 = true;
+        // Log GWP fields present on first item to help diagnose missing GWP
+        if (items.length > 0) {
+          const sample = items[0];
+          const gwpFields = ['gwp_a1a3','gwp_A1A3','declared_gwp','gwp','kg_co2e_per_m3'];
+          const found = gwpFields.filter(f => sample[f] != null);
+          const impactKeys = Object.keys(sample.impacts || {});
+          console.log(`[ec3-proxy] sample GWP fields: [${found.join(',')}] impacts: [${impactKeys.join(',')}]`);
+          if (found.length > 0) console.log(`[ec3-proxy] sample gwp raw:`, JSON.stringify(sample[found[0]]));
+        }
         const plants = normalizeToPlants(items);
-        console.log(`[ec3-proxy] plants with coords: ${plants.length}`);
+        console.log(`[ec3-proxy] plants with coords: ${plants.length}, with gwp: ${plants.filter(p=>p.gwp_A1A3!=null).length}`);
         if (plants.length > 0) {
           res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
           return res.status(200).json(plants);
