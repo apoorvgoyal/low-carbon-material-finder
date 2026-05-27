@@ -1211,9 +1211,17 @@ const App = (() => {
   function mergeEC3Results(plants) {
     const cfg = GWP_CONFIG[S.material];
     plants.forEach(plant => {
-      // EC3 openEPD format: coordinates in location.latlng.lat/lng (new) or top-level latitude/longitude (deprecated)
-      const lat = plant.latitude ?? plant.location?.latlng?.lat ?? plant.lat ?? null;
-      const lng = plant.longitude ?? plant.location?.latlng?.lng ?? plant.lng ?? null;
+      // Support: top-level lat/lng (proxy-normalized), location.latlng (openEPD), plant_or_group (raw EPD)
+      const lat = plant.latitude
+               ?? plant.location?.latlng?.lat
+               ?? plant.lat
+               ?? plant.plant_or_group?.location?.latlng?.lat
+               ?? null;
+      const lng = plant.longitude
+               ?? plant.location?.latlng?.lng
+               ?? plant.lng
+               ?? plant.plant_or_group?.location?.latlng?.lng
+               ?? null;
       if (lat == null || lng == null) return;
 
       const dist = haversine(S.center.lat, S.center.lng, lat, lng);
@@ -1225,17 +1233,19 @@ const App = (() => {
       );
       if (exists) return;
 
-      const gwpVal = plant.gwp_A1A3 ?? null;
-      const country = plant.country || plant.location?.country || S.userCountry || null;
+      // Accept gwp_A1A3 (proxy-normalized) or gwp_a1a3 (raw EPD field) or gwp
+      const gwpVal = plant.gwp_A1A3 ?? plant.gwp_a1a3 ?? plant.gwp ?? null;
+      const pg = plant.plant_or_group;
+      const country = plant.country || plant.location?.country || pg?.location?.country || S.userCountry || null;
       const addr = [
-        plant.address || plant.location?.address,
-        plant.city,
+        plant.address || plant.location?.address || pg?.location?.address,
+        plant.city || pg?.location?.city,
         country
       ].filter(Boolean).join(', ') || 'See EC3';
 
       S.results.push({
         id: `ec3-${plant.id || Math.random()}`,
-        company: plant.plant_name || plant.name || 'Unknown Plant (EC3)',
+        company: plant.plant_name || plant.name || pg?.name || 'Unknown Plant (EC3)',
         productLine: plant.category || S.material,
         type: S.material,
         coverage: 'local',
