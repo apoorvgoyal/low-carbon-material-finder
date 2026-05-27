@@ -113,6 +113,7 @@ const App = (() => {
       ec3KeyInput:       document.getElementById('ec3-key-input'),
       ec3SaveBtn:        document.getElementById('ec3-save-btn'),
       ec3CloseBtn:       document.getElementById('ec3-close-btn'),
+      ec3ModalError:     document.getElementById('ec3-modal-error'),
       gwpLegend:         document.getElementById('gwp-legend'),
       concreteChips:     document.getElementById('concrete-chips'),
       steelChips:        document.getElementById('steel-chips')
@@ -340,13 +341,13 @@ const App = (() => {
     dom.compareClear.addEventListener('click', clearComparison);
 
     // EC3 btn (header) — opens modal
-    dom.ec3Btn.addEventListener('click', () => dom.ec3Modal.classList.add('show'));
+    dom.ec3Btn.addEventListener('click', () => { openEc3Modal(); });
 
     // EC3 toggle (rail) — opens modal to enable
     if (dom.ec3Toggle) {
       dom.ec3Toggle.addEventListener('click', () => {
         if (!S.ec3ApiKey) {
-          dom.ec3Modal.classList.add('show');
+          openEc3Modal();
         } else {
           // Disconnect
           S.ec3ApiKey = null;
@@ -363,6 +364,7 @@ const App = (() => {
     dom.ec3Modal.addEventListener('click', e => {
       if (e.target === dom.ec3Modal) dom.ec3Modal.classList.remove('show');
     });
+    dom.ec3KeyInput.addEventListener('input', () => showEc3Error(null)); // clear error on typing
 
     // Detail sheet close
     dom.sheetClose.addEventListener('click', closeSheet);
@@ -1006,6 +1008,22 @@ const App = (() => {
   /* ══════════════════════════════════════════════════════════
      EC3 INTEGRATION
   ══════════════════════════════════════════════════════════ */
+  function openEc3Modal() {
+    showEc3Error(null);
+    dom.ec3Modal.classList.add('show');
+  }
+
+  function showEc3Error(msg) {
+    if (!dom.ec3ModalError) return;
+    if (msg) {
+      dom.ec3ModalError.textContent = msg;
+      dom.ec3ModalError.style.display = 'block';
+    } else {
+      dom.ec3ModalError.style.display = 'none';
+      dom.ec3ModalError.textContent = '';
+    }
+  }
+
   async function saveEc3Key() {
     const key = dom.ec3KeyInput.value.trim();
     if (!key) {
@@ -1023,23 +1041,21 @@ const App = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: key, category: 'ReadyMixConcrete', page_size: 1 })
       });
-      if (res.ok || res.status === 400) {
+      if (res.ok) {
         S.ec3ApiKey = key;
         dom.ec3Btn.classList.add('active');
         if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
         dom.ec3Modal.classList.remove('show');
         setMeta('EC3 connected. Live data will be included on next search.');
       } else if (res.status === 401 || res.status === 403) {
-        setMeta('EC3 key rejected (invalid or expired). Check your key and try again.');
+        showEc3Error('Key rejected by EC3 (invalid or expired). Get a fresh key at buildingtransparency.org → Account → API Tokens.');
+      } else if (res.status === 400) {
+        showEc3Error('Request error — check your key and try again.');
       } else {
-        setMeta(`EC3 verification returned ${res.status}. Key saved.`);
-        S.ec3ApiKey = key;
-        dom.ec3Btn.classList.add('active');
-        if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
-        dom.ec3Modal.classList.remove('show');
+        showEc3Error(`EC3 returned ${res.status}. Try again or proceed without EC3.`);
       }
     } catch {
-      setMeta('Could not reach EC3. Check your connection.');
+      showEc3Error('Could not reach EC3. Check your internet connection.');
     } finally {
       dom.ec3SaveBtn.disabled = false;
       dom.ec3SaveBtn.textContent = 'Save & Enable';
