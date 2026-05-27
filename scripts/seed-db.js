@@ -94,6 +94,7 @@ async function seedManufacturer(m) {
     technology_status: m.technologyStatus || null,
     contact_url:       m.contactUrl   || null,
     ec3_search_url:    m.ec3SearchUrl || null,
+    country:           m.country      || 'US',
     source:            'seed'
   }, { onConflict: 'id' });
 

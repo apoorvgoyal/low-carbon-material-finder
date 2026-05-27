@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS manufacturers (
   logo_color         TEXT,
   about              TEXT,
   technology_status  TEXT CHECK (technology_status IN ('commercial', 'licensed', 'precommercial')),
+  country            TEXT DEFAULT 'US',
   contact_url        TEXT,
   ec3_search_url     TEXT,
   source             TEXT DEFAULT 'manual',
