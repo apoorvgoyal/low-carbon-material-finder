@@ -1,8 +1,10 @@
 'use strict';
 
-// EC3 API endpoints to try in order (Building Transparency migrated URLs over time)
+// EC3 API endpoints to try in order.
+// /materials/plants/public is the correct plant-map endpoint (geographic plant locations).
+// /api/epds/ is the EPD search fallback.
 const EC3_ENDPOINTS = [
-  'https://buildingtransparency.org/api/materials/plants/',
+  'https://buildingtransparency.org/api/materials/plants/public',
   'https://buildingtransparency.org/api/epds/',
 ];
 
