@@ -3,721 +3,827 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Low-Carbon Material Finder — Global</title>
+<title>Stratum — Low-Carbon Material Finder</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
-/* ═══════════════════════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════════════════════ */
+/* ── Design tokens ─────────────────────────────────────── */
+:root {
+  --paper: oklch(98.5% 0.008 120); --paper-2: oklch(97% 0.012 130); --paper-3: oklch(95% 0.015 130);
+  --white: #ffffff; --surface: #ffffff;
+  --ink: oklch(20% 0.02 158); --ink-2: oklch(38% 0.018 156); --ink-3: oklch(58% 0.014 152); --ink-4: oklch(75% 0.01 150);
+  --line: oklch(91% 0.012 135); --line-2: oklch(86% 0.015 135); --line-strong: oklch(70% 0.018 145);
+  --moss: oklch(48% 0.10 152); --moss-deep: oklch(32% 0.08 154); --moss-soft: oklch(93% 0.04 145); --moss-tint: oklch(96.5% 0.025 145); --lichen: oklch(82% 0.16 130);
+  --gwp-1: oklch(70% 0.16 145); --gwp-2: oklch(78% 0.16 115); --gwp-3: oklch(82% 0.15 85); --gwp-4: oklch(72% 0.17 50); --gwp-5: oklch(60% 0.18 28);
+  --gwp-1-soft: oklch(94% 0.06 145); --gwp-2-soft: oklch(95% 0.05 115); --gwp-3-soft: oklch(95% 0.05 85); --gwp-4-soft: oklch(94% 0.06 50); --gwp-5-soft: oklch(93% 0.07 28);
+  --good: oklch(55% 0.12 150); --warn: oklch(65% 0.14 60); --bad: oklch(58% 0.18 28);
+  --f-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-xs:4px; --r-sm:6px; --r-md:10px; --r-lg:16px; --r-xl:22px; --r-full:999px;
+  --sh-1: 0 1px 0 rgba(20,32,28,.04), 0 1px 2px rgba(20,32,28,.05);
+  --sh-2: 0 2px 4px rgba(20,32,28,.05), 0 8px 24px -8px rgba(20,32,28,.10);
+  --sh-3: 0 4px 12px rgba(20,32,28,.08), 0 24px 48px -16px rgba(20,32,28,.14);
+  --card-pad:16px; --section-pad:24px;
+}
+
+/* ── Reset & base ──────────────────────────────────────── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  font-size:13px;color:#1a2035;background:#f0f2f7}
-a{color:#3b6fd4;text-decoration:none}
+html,body{height:100%;overflow:hidden;font-family:var(--f-sans);color:var(--ink);background:var(--paper)}
+a{color:var(--moss);text-decoration:none}
 a:hover{text-decoration:underline}
-button{cursor:pointer;font-family:inherit;font-size:12px}
-select,input{font-family:inherit;font-size:12px}
+button{cursor:pointer;font-family:var(--f-sans)}
+input,select{font-family:var(--f-sans)}
 
-/* ═══════════════════════════════════════════════════════
-   TOP BAR
-═══════════════════════════════════════════════════════ */
-#topbar{
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  background:linear-gradient(135deg,#1a2035 0%,#1e3a5f 100%);
-  color:#fff;padding:0 12px;min-height:52px;flex-shrink:0;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:1000;position:relative;
+/* ── App shell ─────────────────────────────────────────── */
+#app{height:100vh;display:grid;grid-template-rows:56px 1fr}
+
+/* ── Header ────────────────────────────────────────────── */
+.hdr{
+  display:flex;align-items:center;padding:0 20px;background:var(--surface);
+  border-bottom:1px solid var(--line);gap:20px;z-index:200;
 }
 
-.brand{display:flex;align-items:baseline;gap:6px;flex-shrink:0}
-.brand-title{font-size:14px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
-.brand-sub{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#93b4d9;white-space:nowrap}
+.hdr-brand{display:flex;flex-direction:column;gap:1px;flex-shrink:0}
+.hdr-brand-name{font-size:22px;font-weight:700;color:var(--ink);letter-spacing:-.5px;line-height:1}
+.hdr-brand-sub{font-family:var(--f-mono);font-size:10px;font-weight:500;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em}
 
-.topbar-sep{width:1px;height:24px;background:rgba(255,255,255,.15);flex-shrink:0}
-
-/* Mode toggle */
-.mode-toggle{display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:2px;flex-shrink:0}
-.mode-btn{
-  padding:4px 10px;border:none;border-radius:4px;background:transparent;
-  color:rgba(255,255,255,.65);font-weight:500;font-size:11px;transition:all .15s;white-space:nowrap;
+.hdr-nav{display:flex;align-items:center;gap:2px;margin-left:8px}
+.hdr-nav-link{
+  padding:5px 12px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--ink-2);
+  border:none;background:transparent;cursor:pointer;transition:background .12s,color .12s;
 }
-.mode-btn.active{background:rgba(59,130,246,.85);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.hdr-nav-link:hover{background:var(--paper-2);color:var(--ink)}
+.hdr-nav-link.active{background:var(--moss-soft);color:var(--moss-deep);font-weight:600}
 
-/* Material toggle */
-.mat-toggle{display:flex;gap:2px;background:rgba(255,255,255,.1);border-radius:6px;padding:2px;flex-shrink:0}
-.mat-btn{
-  padding:4px 12px;border:none;border-radius:4px;background:transparent;
-  color:rgba(255,255,255,.7);font-weight:500;font-size:12px;transition:all .15s;
+.hdr-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+/* EC3 fab button */
+.map-fab{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 12px;
+  border-radius:var(--r-full);border:1px solid var(--line-2);background:var(--surface);
+  color:var(--ink-2);font-size:12px;font-weight:500;cursor:pointer;
+  box-shadow:var(--sh-1);transition:all .15s;
 }
-.mat-btn.active{background:#fff;color:#1a2035;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.map-fab:hover{border-color:var(--moss);color:var(--moss);box-shadow:var(--sh-2)}
+.map-fab.active{background:var(--moss-tint);border-color:var(--moss);color:var(--moss-deep)}
+.map-fab svg{width:14px;height:14px;flex-shrink:0}
 
-/* Finder controls group */
-#finder-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-
-/* Search */
-.search-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.search-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
-#zip-input{
-  width:88px;padding:5px 8px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.12);color:#fff;
+/* User avatar pill */
+.user-pill{
+  display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;
+  border-radius:var(--r-full);border:1px solid var(--line);background:var(--paper-2);
+  font-size:12px;font-weight:500;color:var(--ink-2);cursor:pointer;
 }
-#zip-input::placeholder{color:rgba(255,255,255,.4)}
-#zip-input:focus{outline:none;border-color:rgba(255,255,255,.5);background:rgba(255,255,255,.18)}
-#search-btn{
-  padding:5px 12px;border-radius:5px;border:none;
-  background:#3b82f6;color:#fff;font-weight:600;font-size:12px;
-  transition:background .15s;white-space:nowrap;min-height:30px;
-}
-#search-btn:hover{background:#2563eb}
-#search-btn:disabled{background:#4b5563;cursor:not-allowed}
-
-/* Radius */
-.radius-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.radius-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
-#radius-slider{width:80px;accent-color:#3b82f6}
-#radius-label{font-size:11px;font-weight:600;min-width:40px;color:#cbd5e1}
-#unit-toggle{
-  padding:3px 7px;border-radius:4px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);
-  font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;
-}
-#unit-toggle:hover{background:rgba(255,255,255,.2);color:#fff}
-
-/* Product filter */
-.filter-group{display:flex;align-items:center;gap:5px;flex-shrink:0}
-.filter-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
-#product-sel{
-  padding:4px 5px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
-  background:rgba(255,255,255,.12);color:#fff;max-width:160px;
-}
-#product-sel option{background:#1a2035;color:#fff}
-
-/* GWP Target controls */
-#gwp-controls{display:none;align-items:center;gap:8px;flex-wrap:wrap}
-.gwp-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.gwp-group label{font-size:10px;color:#93b4d9;white-space:nowrap}
-#gwp-target-slider{width:120px;accent-color:#22d3ee}
-#gwp-target-label{font-size:12px;font-weight:700;color:#22d3ee;min-width:130px;white-space:nowrap}
-.gwp-hint{font-size:10px;color:rgba(255,255,255,.45);white-space:nowrap}
-
-/* EC3 button */
-#ec3-btn{
-  margin-left:auto;padding:4px 9px;border-radius:5px;border:1px solid rgba(255,255,255,.25);
-  background:transparent;color:rgba(255,255,255,.7);font-size:11px;white-space:nowrap;
-  transition:all .15s;flex-shrink:0;
-}
-#ec3-btn:hover,#ec3-btn.active{background:rgba(59,130,246,.3);border-color:#3b82f6;color:#fff}
-#ec3-btn.active::before{content:'● ';color:#22c55e}
-
-/* Mobile options toggle */
-#mobile-opts-btn{
-  display:none;padding:5px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.2);
-  background:rgba(255,255,255,.1);color:#fff;font-size:12px;flex-shrink:0;
+.user-avatar{
+  width:26px;height:26px;border-radius:50%;background:var(--moss-soft);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:var(--moss-deep);
 }
 
-/* ═══════════════════════════════════════════════════════
-   MAP CLICK HINT
-═══════════════════════════════════════════════════════ */
-#map-click-hint{
-  position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:800;
-  background:rgba(26,32,53,.82);color:#fff;font-size:11px;
-  padding:5px 14px;border-radius:20px;pointer-events:none;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);white-space:nowrap;
-  transition:opacity .4s;
+/* ── Body grid ─────────────────────────────────────────── */
+.body{
+  display:grid;grid-template-columns:296px 1fr 360px;
+  height:100%;min-height:0;position:relative;
 }
-#map-click-hint.hidden{opacity:0}
 
-/* ═══════════════════════════════════════════════════════
-   STATUS BAR
-═══════════════════════════════════════════════════════ */
-.status-bar{
-  height:22px;flex-shrink:0;padding:0 12px;font-size:11px;
-  display:flex;align-items:center;background:#e8edf5;color:#4b5563;
-  border-bottom:1px solid #d1d9e8;
+/* ── Filter rail ───────────────────────────────────────── */
+.filter-rail{
+  background:var(--surface);border-right:1px solid var(--line);
+  overflow-y:auto;padding:var(--section-pad);
+  display:flex;flex-direction:column;gap:var(--section-pad);
 }
-.status-bar.error{background:#fef2f2;color:#dc2626}
-.status-bar.warn{background:#fffbeb;color:#92400e}
-.status-bar.info{background:#eff6ff;color:#1e40af}
+.filter-rail::-webkit-scrollbar{width:4px}
+.filter-rail::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
 
-/* ═══════════════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════════════ */
-#shell{display:flex;flex-direction:column;height:100vh;overflow:hidden}
-#main{flex:1;min-height:0;display:flex;position:relative;overflow:hidden}
+/* Section headings in rail */
+.rail-section{}
+.rail-section-title{
+  font-size:10px;font-weight:600;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;
+}
 
-/* ═══════════════════════════════════════════════════════
-   MAP
-═══════════════════════════════════════════════════════ */
-#map{flex:1;min-height:0;z-index:1}
+/* Mode tabs */
+.mode-tabs{display:flex;gap:4px;background:var(--paper-2);border-radius:var(--r-md);padding:3px}
+.mode-tab{
+  flex:1;padding:7px 10px;border-radius:var(--r-sm);border:none;background:transparent;
+  font-size:12px;font-weight:500;color:var(--ink-3);cursor:pointer;transition:all .15s;text-align:center;
+}
+.mode-tab.active{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:var(--sh-1)}
+
+/* Material tabs */
+.mat-tabs{display:flex;gap:4px;background:var(--paper-2);border-radius:var(--r-md);padding:3px}
+.mat-tab{
+  flex:1;padding:7px 10px;border-radius:var(--r-sm);border:none;background:transparent;
+  font-size:12px;font-weight:600;color:var(--ink-3);cursor:pointer;transition:all .15s;text-align:center;
+}
+.mat-tab.active{background:var(--moss);color:#fff;box-shadow:var(--sh-1)}
+
+/* Search input */
+.search-row{display:flex;gap:6px}
+.search-input{
+  flex:1;padding:8px 11px;border-radius:var(--r-md);border:1px solid var(--line-2);
+  background:var(--paper);font-size:13px;color:var(--ink);
+  transition:border-color .15s,box-shadow .15s;
+}
+.search-input::placeholder{color:var(--ink-4)}
+.search-input:focus{outline:none;border-color:var(--moss);box-shadow:0 0 0 3px oklch(93% 0.04 145 / .5)}
+.search-btn{
+  padding:8px 14px;border-radius:var(--r-md);border:none;background:var(--moss);
+  color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;
+  transition:background .15s;
+}
+.search-btn:hover{background:var(--moss-deep)}
+.search-btn:disabled{background:var(--ink-4);cursor:not-allowed}
+
+/* Radius slider */
+.slider-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+.slider-label{font-size:11px;color:var(--ink-3);flex-shrink:0}
+.radius-slider{flex:1;accent-color:var(--moss);cursor:pointer}
+.radius-value{font-family:var(--f-mono);font-size:12px;font-weight:500;color:var(--ink);min-width:48px;text-align:right}
+
+/* Mode sections (finder vs gwp) */
+#finder-section{}
+#gwp-section{display:none}
+
+/* GWP target display */
+.gwp-target-display{
+  font-family:var(--f-mono);font-size:32px;font-weight:600;color:var(--ink);
+  line-height:1;text-align:center;padding:8px 0;
+}
+.gwp-target-unit{font-size:13px;color:var(--ink-3);text-align:center;margin-top:2px;margin-bottom:10px}
+.gwp-target-slider{width:100%;accent-color:var(--moss);cursor:pointer;margin-top:4px}
+
+/* Benchmark presets */
+.presets-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.preset{
+  padding:7px 8px;border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:10px;font-weight:600;color:var(--ink-2);
+  cursor:pointer;text-align:left;line-height:1.3;transition:all .12s;
+}
+.preset span{display:block;font-size:9px;font-family:var(--f-mono);color:var(--ink-3);font-weight:400;margin-top:1px}
+.preset:hover{border-color:var(--moss);background:var(--moss-tint);color:var(--moss-deep)}
+
+/* Tech chips */
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chip{
+  padding:4px 9px;border-radius:var(--r-full);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:11px;font-weight:500;color:var(--ink-3);
+  cursor:pointer;transition:all .12s;
+}
+.chip:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-tint)}
+.chip.on{border-color:var(--moss);background:var(--moss-soft);color:var(--moss-deep);font-weight:600}
+
+/* Data source toggles */
+.source-row{
+  display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--line);
+}
+.source-row:last-child{border-bottom:none}
+.source-label{flex:1;font-size:12px;font-weight:500;color:var(--ink)}
+.source-meta{font-size:10px;color:var(--ink-3);margin-top:1px}
+.toggle-switch{
+  width:32px;height:18px;border-radius:var(--r-full);
+  background:var(--line-2);border:none;cursor:pointer;
+  position:relative;transition:background .2s;flex-shrink:0;
+}
+.toggle-switch.on{background:var(--moss)}
+.toggle-switch::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.15);
+}
+.toggle-switch.on::after{left:16px}
+.toggle-always{font-family:var(--f-mono);font-size:10px;color:var(--moss);font-weight:600}
+
+/* ── Map wrap ───────────────────────────────────────────── */
+.map-wrap{position:relative;overflow:hidden}
+#map{width:100%;height:100%}
+
+/* Leaflet tile filter */
+.leaflet-tile{filter:saturate(0.55) brightness(1.04) contrast(0.96)}
 
 /* City labels */
 .city-label{
-  display:block;white-space:nowrap;
-  font-size:10px;font-weight:600;color:#374151;
-  background:rgba(255,255,255,.82);
-  padding:1px 5px;border-radius:3px;
-  box-shadow:0 1px 3px rgba(0,0,0,.12);
-  border:1px solid rgba(0,0,0,.07);
-  transform:translate(-50%,-50%);
-  pointer-events:none;user-select:none;
+  display:block;white-space:nowrap;font-size:10px;font-weight:600;color:var(--ink-2);
+  background:rgba(255,255,255,.88);padding:1px 5px;border-radius:3px;
+  box-shadow:var(--sh-1);border:1px solid var(--line);
+  transform:translate(-50%,-50%);pointer-events:none;user-select:none;
 }
 
-/* ═══════════════════════════════════════════════════════
-   GWP LEGEND OVERLAY
-═══════════════════════════════════════════════════════ */
+/* Map hint */
+#map-hint{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:800;
+  display:flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,.96);border:1px solid var(--line-2);
+  color:var(--ink-2);font-size:12px;padding:6px 16px;border-radius:var(--r-full);
+  pointer-events:none;box-shadow:var(--sh-2);white-space:nowrap;
+  transition:opacity .4s;
+}
+#map-hint.hidden{opacity:0;pointer-events:none}
+.hint-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--moss);flex-shrink:0;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 oklch(48% 0.10 152 / .4)}
+  50%{box-shadow:0 0 0 6px oklch(48% 0.10 152 / 0)}
+}
+
+/* Map fab row */
+.map-fab-row{
+  position:absolute;top:12px;left:12px;z-index:800;
+  display:flex;gap:6px;
+}
+.map-fab-sm{
+  padding:5px 10px;border-radius:var(--r-md);border:1px solid var(--line-2);
+  background:rgba(255,255,255,.96);color:var(--ink-2);font-size:11px;font-weight:500;
+  cursor:pointer;box-shadow:var(--sh-1);transition:all .12s;
+}
+.map-fab-sm:hover{border-color:var(--moss);color:var(--moss)}
+
+/* GWP legend overlay */
 #gwp-legend{
   position:absolute;bottom:32px;left:12px;z-index:800;
-  background:rgba(255,255,255,.96);border-radius:8px;
-  padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.15);
-  min-width:145px;font-size:11px;
+  background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:var(--r-md);
+  padding:12px 14px;box-shadow:var(--sh-2);min-width:160px;
 }
-#gwp-legend.hidden{display:none}
-.leg-title{font-weight:700;font-size:10px;color:#4b5563;text-transform:uppercase;
-  letter-spacing:.5px;margin-bottom:6px}
-.leg-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
-.leg-swatch{width:12px;height:12px;border-radius:3px;flex-shrink:0}
-.leg-est{margin-top:4px;font-size:9px;color:#9ca3af}
-.leg-bench{margin-top:4px;font-size:9px;color:#9ca3af;border-top:1px solid #e5e7eb;padding-top:4px}
-.leg-target{margin-top:4px;font-size:9px;color:#0e7490;border-top:1px solid #e5e7eb;padding-top:4px;font-weight:600}
-
-/* Legend toggle on mobile */
-#legend-toggle{
-  position:absolute;bottom:32px;left:12px;z-index:801;
-  display:none;
-  background:#fff;border:1px solid #d1d9e8;border-radius:6px;
-  padding:5px 9px;font-size:11px;color:#4b5563;box-shadow:0 2px 6px rgba(0,0,0,.1);
+.legend-title{
+  font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:8px;
 }
-
-/* ═══════════════════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════════════════ */
-#sidebar{
-  width:320px;flex-shrink:0;display:flex;flex-direction:column;
-  background:#fff;border-left:1px solid #d1d9e8;
-  box-shadow:-2px 0 8px rgba(0,0,0,.06);
-  transition:width .2s ease,opacity .2s ease;z-index:500;
+.hist-bars{display:flex;align-items:flex-end;gap:2px;height:40px;margin-bottom:4px}
+.hist-bar{
+  flex:1;border-radius:2px 2px 0 0;transition:height .3s;position:relative;
+  min-height:2px;
 }
-#sidebar.collapsed{width:0;overflow:hidden;opacity:0}
-
-#sidebar-header{
-  padding:8px 12px;border-bottom:1px solid #e8ecf3;
-  display:flex;align-items:center;gap:8px;flex-shrink:0;
+.hist-bar-count{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  font-size:9px;font-family:var(--f-mono);color:var(--ink-3);white-space:nowrap;
 }
-#result-count{font-weight:700;font-size:13px;color:#1a2035;flex:1}
-#sort-sel{padding:3px 5px;border:1px solid #d1d5db;border-radius:4px;font-size:11px}
-
-.sidebar-data-note{
-  padding:5px 12px;font-size:10px;color:#6b7280;
-  background:#f8f9fc;border-bottom:1px solid #e8ecf3;flex-shrink:0;line-height:1.5;
+.hist-axis{display:flex;justify-content:space-between;margin-bottom:8px}
+.hist-axis-label{font-size:9px;font-family:var(--f-mono);color:var(--ink-4)}
+.hist-target-line{
+  position:absolute;bottom:0;width:2px;background:var(--ink);border-radius:1px;
+  transform:translateX(-50%);pointer-events:none;
 }
-.sidebar-data-note a{color:#4a6fa5;font-size:10px}
+.hist-container{position:relative;margin-bottom:4px}
 
-#result-list{flex:1;overflow-y:auto;padding:6px;-webkit-overflow-scrolling:touch}
-
-/* Result card */
-.result-card{
-  display:flex;border-radius:7px;border:1px solid #e5e8f0;
-  margin-bottom:6px;overflow:hidden;transition:box-shadow .15s;
+/* Map pins */
+.pin{
+  display:flex;align-items:center;justify-content:center;
+  min-width:36px;padding:0 6px;height:26px;border-radius:var(--r-sm);
+  font-family:var(--f-mono);font-size:11px;font-weight:600;color:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.22),0 0 0 2px rgba(255,255,255,.5);
+  cursor:pointer;white-space:nowrap;position:relative;
+  transition:transform .12s,box-shadow .12s;
+  border:none;
 }
-.result-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.10)}
-.rc-left{flex:1;padding:8px 10px;border-right:1px solid #e5e8f0;min-width:0}
-.rc-company{font-weight:600;font-size:12px;color:#1a2035;line-height:1.3}
-.rc-line{font-size:11px;color:#4b5563;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sbadge{display:inline-block;margin-top:3px;margin-right:2px;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600}
-.sbadge.nat{background:#dbeafe;color:#1d4ed8}
-.sbadge.reg{background:#dcfce7;color:#15803d}
-.sbadge.dist{background:#f3f4f6;color:#6b7280}
-.sbadge.tech-licensed{background:#ede9fe;color:#7c3aed}
-.sbadge.tech-precommercial{background:#fef3c7;color:#92400e}
-.sbadge.tech-commercial{background:#dcfce7;color:#15803d}
-.sbadge.tech-emerging{background:#e0f2fe;color:#0369a1}
-
-.rc-right{
-  width:96px;flex-shrink:0;padding:7px 8px;
-  display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+.pin::after{
+  content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
 }
-.rc-gwp{text-align:right;line-height:1.2}
-.rc-gwp strong{font-size:14px}
-.rc-gwp small{font-size:9px;color:#6b7280}
-.rc-gwp .nd{font-size:11px;color:#9ca3af}
-.rc-epd{font-size:10px;color:#6b7280}
-.rc-actions{display:flex;gap:3px;margin-top:auto}
-.rc-view{padding:4px 8px;border-radius:4px;border:1px solid #d1d5db;background:#fff;
-  font-size:10px;color:#374151;transition:all .12s;min-height:28px;}
-.rc-view:hover{background:#f0f4ff;border-color:#3b6fd4;color:#3b6fd4}
-.rc-cmp{padding:4px 7px;border-radius:4px;border:1px solid #d1d5db;
-  background:#fff;font-size:11px;font-weight:700;color:#6b7280;transition:all .12s;min-height:28px;}
-.rc-cmp:hover{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
-.rc-cmp.active{background:#dcfce7;border-color:#16a34a;color:#16a34a}
+.pin:hover,.pin.selected{transform:scale(1.12);box-shadow:0 4px 12px rgba(0,0,0,.28),0 0 0 2px rgba(255,255,255,.8)}
+.pin.dimmed{opacity:.35}
+.pin.gwp-1{background:var(--gwp-1)}
+.pin.gwp-1::after{border-top:5px solid var(--gwp-1)}
+.pin.gwp-2{background:var(--gwp-2)}
+.pin.gwp-2::after{border-top:5px solid var(--gwp-2)}
+.pin.gwp-3{background:var(--gwp-3)}
+.pin.gwp-3::after{border-top:5px solid var(--gwp-3)}
+.pin.gwp-4{background:var(--gwp-4)}
+.pin.gwp-4::after{border-top:5px solid var(--gwp-4)}
+.pin.gwp-5{background:var(--gwp-5)}
+.pin.gwp-5::after{border-top:5px solid var(--gwp-5)}
+.pin.nodata{background:var(--ink-4)}
+.pin.nodata::after{border-top:5px solid var(--ink-4)}
+.pin.project-pin{background:var(--moss-deep);min-width:28px;height:28px}
+.pin.project-pin::after{border-top:5px solid var(--moss-deep)}
 
-.empty-state{padding:24px 16px;text-align:center;color:#9ca3af;font-size:12px;line-height:1.6}
-
-/* Sidebar toggle button */
-#sidebar-toggle{
-  position:absolute;right:320px;top:50%;transform:translateY(-50%);
-  z-index:600;background:#fff;border:1px solid #d1d9e8;border-right:none;
-  border-radius:6px 0 0 6px;padding:8px 5px;box-shadow:-2px 0 6px rgba(0,0,0,.08);
-  font-size:14px;color:#6b7280;cursor:pointer;transition:right .2s;
+/* ── Results rail ───────────────────────────────────────── */
+.results-rail{
+  background:var(--surface);border-left:1px solid var(--line);
+  display:flex;flex-direction:column;min-height:0;position:relative;
 }
 
-/* ═══════════════════════════════════════════════════════
-   POPUP STYLES
-═══════════════════════════════════════════════════════ */
-.lcmf-popup .leaflet-popup-content-wrapper{
-  border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.18);padding:0;overflow:hidden;
+/* Results header */
+.rr-header{
+  padding:12px 16px 10px;border-bottom:1px solid var(--line);flex-shrink:0;
 }
-.lcmf-popup .leaflet-popup-content{margin:0;width:400px!important}
-.lcmf-popup .leaflet-popup-tip-container{margin-top:-1px}
-
-.popup-inner{display:flex;flex-direction:column;max-height:70vh;overflow:hidden}
-.popup-header{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
-  padding:12px 14px;background:#f8faff;border-bottom:1px solid #e5e8f0;
+.rr-heading-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+#result-count{font-size:14px;font-weight:700;color:var(--ink);flex:1}
+#sort-sel{
+  padding:5px 8px;border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:11px;color:var(--ink-2);cursor:pointer;
 }
-.popup-company{font-weight:700;font-size:14px;color:#1a2035}
-.popup-line{font-size:11px;color:#4b5563;margin-top:1px}
+#rr-meta{font-size:11px;color:var(--ink-3);margin-bottom:6px}
+.rr-stats{display:flex;gap:12px}
+.rr-stat{display:flex;flex-direction:column;gap:2px}
+.rr-stat-val{font-family:var(--f-mono);font-size:13px;font-weight:600;color:var(--ink)}
+.rr-stat-label{font-size:10px;color:var(--ink-3)}
 
-.badge{display:inline-block;margin-top:4px;margin-right:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
-.badge.national{background:#dbeafe;color:#1d4ed8}
-.badge.regional{background:#dcfce7;color:#15803d}
-.badge.tech-licensed{background:#ede9fe;color:#7c3aed}
-.badge.tech-precommercial{background:#fef3c7;color:#92400e}
-.badge.tech-commercial{background:#dcfce7;color:#15803d}
+/* Result cards */
+#result-list{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+#result-list::-webkit-scrollbar{width:4px}
+#result-list::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
 
-.cmp-btn{
-  flex-shrink:0;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:600;
-  border:1px solid #d1d5db;background:#fff;color:#374151;white-space:nowrap;
-  transition:all .12s;min-height:32px;
+.rcard{
+  border-radius:var(--r-md);border:1px solid var(--line);
+  background:var(--surface);overflow:hidden;cursor:pointer;
+  transition:box-shadow .15s,border-color .15s;position:relative;
 }
-.cmp-btn:hover{background:#f0fdf4;border-color:#16a34a;color:#16a34a}
-.cmp-btn.active{background:#dcfce7;border-color:#16a34a;color:#15803d}
+.rcard:hover{box-shadow:var(--sh-2);border-color:var(--line-2)}
+.rcard.selected{border-color:var(--moss);box-shadow:0 0 0 2px var(--moss-soft)}
 
-.popup-about{padding:9px 14px;font-size:11px;color:#4b5563;line-height:1.5;border-bottom:1px solid #e5e8f0;overflow-y:auto}
-.popup-note{padding:3px 14px 6px;font-size:10px;color:#9ca3af;background:#fffbf0;border-bottom:1px solid #fef3c7}
+/* Core sample bar */
+.rcard-core{height:4px;display:flex;overflow:hidden}
+.core-sample{display:flex;width:100%;height:100%}
+.core-sample .seg{flex:1}
 
-.popup-scroll{overflow-y:auto;flex:1}
-.popup-products{width:100%;border-collapse:collapse;font-size:11px}
-.popup-products thead th{
-  padding:6px 10px;background:#f0f3fb;color:#6b7280;font-weight:600;
-  font-size:10px;text-transform:uppercase;letter-spacing:.4px;text-align:left;
-  border-bottom:1px solid #e5e8f0;white-space:nowrap;
+/* Card body */
+.rcard-body{display:flex;gap:0;padding:12px 14px 10px}
+.rcard-main{flex:1;min-width:0}
+.rcard-company{
+  font-size:13px;font-weight:600;color:var(--ink);line-height:1.3;
+  display:flex;align-items:center;gap:5px;
 }
-.popup-products tbody tr{border-bottom:1px solid #f0f2f7}
-.popup-products tbody tr:last-child{border-bottom:none}
-.popup-products td{padding:7px 10px;vertical-align:top}
-.p-name strong{font-size:12px;color:#1a2035}
-.p-name small{color:#6b7280;font-size:10px;margin-top:1px;display:block}
-
-.gwp-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-weight:600;font-size:11px;white-space:nowrap}
-.gwp-tag.estimate{font-style:italic}
-.gwp-tag.nodata{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb;font-weight:400}
-
-.reduction-badge{display:inline-block;padding:2px 6px;border-radius:4px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;font-size:10px}
-.cost-tag{font-size:10px;color:#6b7280}
-
-.epd-btn{display:inline-block;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;margin:1px 0;text-decoration:none;white-space:nowrap}
-.epd-btn.view{background:#dbeafe;color:#1d4ed8;border:1px solid #bfdbfe}
-.epd-btn.view:hover{background:#bfdbfe}
-.epd-btn.info{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
-.epd-btn.info:hover{background:#dcfce7}
-.epd-btn.ec3{background:#f5f3ff;color:#7c3aed;border:1px solid #ddd6fe;font-size:9px}
-.epd-btn.ec3:hover{background:#ede9fe}
-.p-actions{white-space:nowrap}
-
-.popup-footer{
-  padding:8px 14px;background:#f8faff;border-top:1px solid #e5e8f0;
-  font-size:10px;color:#6b7280;flex-shrink:0;
+.rcard-verified{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:14px;height:14px;border-radius:50%;background:var(--moss);
+  color:#fff;font-size:9px;flex-shrink:0;
 }
-.popup-sources{margin-bottom:3px}
-.popup-sources a,.popup-links a{color:#3b6fd4;font-size:10px}
+.rcard-meta{font-size:11px;color:var(--ink-3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rcard-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:6px}
+.rcard-chip{
+  padding:2px 7px;border-radius:var(--r-full);background:var(--moss-soft);
+  color:var(--moss-deep);font-size:10px;font-weight:500;
+}
+.rcard-chip.ec3{background:oklch(95% 0.03 270);color:oklch(40% 0.12 270)}
 
-/* ═══════════════════════════════════════════════════════
-   COMPARISON PANEL
-═══════════════════════════════════════════════════════ */
-#compare-panel{
-  position:fixed;bottom:0;left:0;right:0;z-index:2000;
-  background:#fff;border-top:2px solid #3b6fd4;
-  box-shadow:0 -4px 20px rgba(0,0,0,.15);
-  transform:translateY(100%);transition:transform .25s ease;
-  max-height:55vh;display:flex;flex-direction:column;
+/* GWP column */
+.rcard-gwp{
+  display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+  flex-shrink:0;min-width:72px;
 }
-#compare-panel.open{transform:translateY(0)}
-#compare-header{
-  display:flex;align-items:center;padding:8px 14px;
-  border-bottom:1px solid #e5e8f0;flex-shrink:0;gap:12px;background:#f0f4ff;
+.rcard-gwp-val{
+  font-family:var(--f-mono);font-size:20px;font-weight:600;color:var(--ink);line-height:1;
 }
-#compare-header strong{font-size:13px;color:#1a2035;flex:1}
-#compare-clear{
-  padding:4px 12px;border-radius:5px;border:1px solid #d1d5db;
-  background:#fff;color:#6b7280;font-size:11px;transition:all .12s;
-}
-#compare-clear:hover{border-color:#ef4444;color:#ef4444}
-.compare-scroll{overflow:auto;flex:1}
-#compare-table{width:100%;border-collapse:collapse;font-size:11px;min-width:500px}
-#compare-table th{
-  position:sticky;top:0;padding:8px 12px;background:#f8faff;
-  border-bottom:2px solid #e5e8f0;text-align:left;font-weight:600;white-space:nowrap;
-}
-.cth-co{font-size:12px;color:#1a2035;font-weight:700}
-.cth-pl{font-size:10px;color:#6b7280}
-#compare-table td{padding:7px 12px;border-bottom:1px solid #f0f2f7;vertical-align:middle}
-.ctr-label{font-weight:600;color:#4b5563;background:#f8f9fc;white-space:nowrap;position:sticky;left:0}
-.section-head td{background:#e8ecf7;font-size:10px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.5px;padding:5px 12px}
-.nd{color:#9ca3af}
+.rcard-gwp-unit{font-size:9px;color:var(--ink-3);text-align:right;line-height:1.2}
+.rcard-gwp-bar-wrap{width:100%;height:4px;background:var(--line);border-radius:2px;position:relative;margin-top:4px}
+.rcard-gwp-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+.rcard-gwp-bench{position:absolute;top:-2px;width:2px;height:8px;background:var(--ink-3);border-radius:1px}
+.rcard-gwp-pct{font-size:10px;font-family:var(--f-mono);color:var(--good);margin-top:2px}
+.rcard-gwp-pct.over{color:var(--bad)}
+.rcard-gwp-nodata{font-size:12px;color:var(--ink-4)}
 
-/* ═══════════════════════════════════════════════════════
-   EC3 MODAL
-═══════════════════════════════════════════════════════ */
+/* Compare button */
+.rcard-compare{
+  position:absolute;top:10px;right:10px;
+  width:24px;height:24px;border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:var(--surface);color:var(--ink-3);font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .12s;
+}
+.rcard-compare:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-tint)}
+.rcard-compare.on{border-color:var(--moss);background:var(--moss-soft);color:var(--moss-deep)}
+
+.empty-state{padding:32px 20px;text-align:center;color:var(--ink-3);font-size:13px;line-height:1.6}
+
+/* Compare tray */
+.compare-tray{
+  flex-shrink:0;border-top:2px solid var(--moss);background:var(--surface);
+  max-height:0;overflow:hidden;transition:max-height .25s ease;
+}
+.compare-tray.open{max-height:160px}
+.compare-tray-inner{padding:10px 14px}
+.compare-tray-title{
+  font-size:10px;font-weight:700;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.compare-tray-clear{
+  margin-left:auto;padding:3px 8px;border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:transparent;font-size:10px;color:var(--ink-3);cursor:pointer;
+}
+.compare-tray-clear:hover{border-color:var(--bad);color:var(--bad)}
+.compare-slots{display:flex;gap:6px}
+.compare-slot{
+  flex:1;padding:6px 8px;border-radius:var(--r-sm);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:11px;color:var(--ink-3);
+  display:flex;align-items:center;justify-content:center;min-height:40px;
+}
+.compare-slot.filled{background:var(--moss-tint);border-color:var(--moss);color:var(--moss-deep);font-weight:500;justify-content:space-between}
+.compare-slot-remove{
+  width:16px;height:16px;border-radius:50%;border:none;background:var(--moss-soft);
+  color:var(--moss-deep);font-size:12px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;line-height:1;
+}
+
+/* ── Detail sheet ───────────────────────────────────────── */
+.sheet-backdrop{
+  position:fixed;inset:0;z-index:900;background:rgba(20,32,28,.3);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.sheet-backdrop.show{opacity:1;pointer-events:all}
+
+.sheet{
+  position:fixed;right:0;top:56px;bottom:0;z-index:1000;width:480px;
+  background:var(--surface);border-left:1px solid var(--line);
+  box-shadow:var(--sh-3);display:flex;flex-direction:column;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.25,.46,.45,.94);
+}
+.sheet.open{transform:translateX(0)}
+
+.sheet-head{
+  padding:16px 20px;border-bottom:1px solid var(--line);flex-shrink:0;
+  display:flex;align-items:flex-start;gap:12px;
+}
+.sheet-head-info{flex:1;min-width:0}
+.sheet-company{font-size:18px;font-weight:700;color:var(--ink);margin-bottom:3px}
+.sheet-meta{font-size:12px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px}
+.sheet-meta-item{display:flex;align-items:center;gap:3px}
+.sheet-close{
+  width:30px;height:30px;border-radius:var(--r-md);border:1px solid var(--line);
+  background:var(--paper-2);color:var(--ink-3);font-size:16px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.sheet-close:hover{border-color:var(--line-strong);color:var(--ink)}
+
+.sheet-body{flex:1;overflow-y:auto;padding:20px}
+.sheet-body::-webkit-scrollbar{width:4px}
+.sheet-body::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:2px}
+
+/* Hero stats grid */
+.sheet-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.sheet-stat{
+  padding:12px;border-radius:var(--r-md);background:var(--paper-2);border:1px solid var(--line);
+}
+.sheet-stat-val{font-family:var(--f-mono);font-size:22px;font-weight:600;color:var(--ink);line-height:1}
+.sheet-stat-label{font-size:10px;color:var(--ink-3);margin-top:3px}
+
+/* Sheet sections */
+.sheet-section{margin-bottom:20px}
+.sheet-section-title{
+  font-size:11px;font-weight:700;color:var(--ink-3);text-transform:uppercase;
+  letter-spacing:.08em;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);
+}
+.sheet-about{font-size:13px;color:var(--ink-2);line-height:1.6}
+
+/* Sheet tech chips */
+.sheet-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sheet-chip{
+  padding:4px 10px;border-radius:var(--r-full);background:var(--moss-soft);
+  color:var(--moss-deep);font-size:11px;font-weight:500;border:1px solid var(--line-2);
+}
+
+/* Products table */
+.products-table{width:100%;border-collapse:collapse;font-size:12px}
+.products-table th{
+  text-align:left;padding:7px 10px;background:var(--paper-2);
+  color:var(--ink-3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;
+  border-bottom:1px solid var(--line);
+}
+.products-table td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.products-table tr:last-child td{border-bottom:none}
+.pt-gwp{
+  display:inline-block;padding:2px 7px;border-radius:var(--r-sm);
+  font-family:var(--f-mono);font-size:11px;font-weight:600;
+}
+.pt-epd{display:inline-block;padding:2px 7px;border-radius:var(--r-sm);font-size:10px;text-decoration:none}
+.pt-epd.view{background:oklch(94% 0.05 240);color:oklch(38% 0.14 240);border:1px solid oklch(86% 0.08 240)}
+.pt-epd.info{background:var(--moss-soft);color:var(--moss-deep);border:1px solid var(--line-2)}
+
+/* Plants list */
+.plants-list{display:flex;flex-direction:column;gap:6px}
+.plant-item{padding:8px 10px;border-radius:var(--r-sm);background:var(--paper-2);border:1px solid var(--line);font-size:12px;color:var(--ink-2)}
+
+/* Contact row */
+.sheet-contact{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.contact-btn{
+  padding:7px 14px;border-radius:var(--r-md);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:12px;color:var(--ink-2);font-weight:500;
+  text-decoration:none;transition:all .12s;
+}
+.contact-btn:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-tint)}
+.contact-btn.primary{background:var(--moss);color:#fff;border-color:var(--moss)}
+.contact-btn.primary:hover{background:var(--moss-deep)}
+
+/* Sheet actions */
+.sheet-actions{
+  padding:14px 20px;border-top:1px solid var(--line);flex-shrink:0;
+  display:flex;gap:8px;
+}
+.sheet-action{
+  flex:1;padding:9px 16px;border-radius:var(--r-md);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:13px;font-weight:600;color:var(--ink-2);
+  cursor:pointer;transition:all .12s;text-align:center;
+}
+.sheet-action:hover{border-color:var(--moss);color:var(--moss);background:var(--moss-tint)}
+.sheet-action.primary{background:var(--moss);color:#fff;border-color:var(--moss)}
+.sheet-action.primary:hover{background:var(--moss-deep)}
+
+/* ── EC3 Modal ──────────────────────────────────────────── */
 #ec3-modal{
   display:none;position:fixed;inset:0;z-index:3000;
-  background:rgba(0,0,0,.4);align-items:center;justify-content:center;
+  background:rgba(20,32,28,.4);align-items:center;justify-content:center;
 }
 #ec3-modal.show{display:flex}
 .modal-box{
-  background:#fff;border-radius:10px;padding:24px;width:440px;max-width:92vw;
-  box-shadow:0 20px 60px rgba(0,0,0,.3);
+  background:var(--surface);border-radius:var(--r-xl);padding:28px;width:460px;max-width:92vw;
+  box-shadow:var(--sh-3);border:1px solid var(--line);
 }
-.modal-box h2{font-size:16px;color:#1a2035;margin-bottom:6px}
-.modal-box p{font-size:12px;color:#4b5563;line-height:1.6;margin-bottom:14px}
-.modal-box label{display:block;font-size:11px;font-weight:600;color:#374151;margin-bottom:5px}
-.modal-box input{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-bottom:14px}
-.modal-box input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+.modal-box h2{font-size:17px;font-weight:700;color:var(--ink);margin-bottom:6px}
+.modal-box p{font-size:13px;color:var(--ink-2);line-height:1.6;margin-bottom:14px}
+.modal-box label{display:block;font-size:11px;font-weight:600;color:var(--ink-2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.modal-box input{
+  width:100%;padding:9px 12px;border:1px solid var(--line-2);border-radius:var(--r-md);
+  font-size:13px;color:var(--ink);background:var(--paper);margin-bottom:14px;
+}
+.modal-box input:focus{outline:none;border-color:var(--moss);box-shadow:0 0 0 3px var(--moss-soft)}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end}
-.modal-actions button{padding:7px 16px;border-radius:6px;border:none;font-size:12px;font-weight:600;min-height:36px}
-#ec3-close-btn{background:#f3f4f6;color:#374151}
-#ec3-save-btn{background:#3b82f6;color:#fff}
-.modal-note{font-size:10px;color:#9ca3af;margin-top:10px;line-height:1.5}
+.modal-actions button{padding:8px 18px;border-radius:var(--r-md);border:none;font-size:13px;font-weight:600;cursor:pointer;min-height:36px}
+#ec3-close-btn{background:var(--paper-2);color:var(--ink-2);border:1px solid var(--line-2)}
+#ec3-close-btn:hover{border-color:var(--line-strong)}
+#ec3-save-btn{background:var(--moss);color:#fff}
+#ec3-save-btn:hover{background:var(--moss-deep)}
+.modal-note{font-size:11px;color:var(--ink-4);margin-top:12px;line-height:1.5;border-top:1px solid var(--line);padding-top:12px}
 
-/* ═══════════════════════════════════════════════════════
-   MOBILE STYLES
-═══════════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-  /* Topbar: explicit 3-row layout using flex-basis:100% trick */
-  #topbar{
-    min-height:auto;padding:0;gap:0;
-    flex-direction:row;flex-wrap:wrap;align-items:center;
-  }
-  .topbar-sep{display:none}
+/* ── Misc ───────────────────────────────────────────────── */
+.nd{color:var(--ink-4)}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:var(--r-full);font-size:10px;font-weight:600}
+.badge.national{background:oklch(93% 0.04 240);color:oklch(40% 0.14 240)}
+.badge.regional{background:var(--moss-soft);color:var(--moss-deep)}
+.badge.tech-precommercial{background:oklch(95% 0.05 85);color:oklch(42% 0.14 75)}
+.badge.tech-licensed{background:oklch(93% 0.05 300);color:oklch(40% 0.15 300)}
+.badge.tech-emerging{background:oklch(94% 0.05 200);color:oklch(40% 0.12 200)}
 
-  /* Row 1: brand (left) + Options button (right) */
-  .brand{
-    flex:1;order:1;
-    padding:10px 12px;
-    min-width:0;
-  }
-  .brand-title{font-size:13px}
-  .brand-sub{display:none}
-  #mobile-opts-btn{
-    display:flex!important;
-    order:2;
-    padding:10px 12px;
-    border:none;
-    border-radius:0;
-    background:rgba(255,255,255,.08);
-    font-size:13px;font-weight:600;
-  }
-
-  /* Row 2: material toggle — full width, forced onto its own row */
-  .mat-toggle{
-    order:3;
-    flex-basis:100%;
-    width:100%;
-    padding:6px 10px 8px;
-    gap:6px;
-    background:rgba(0,0,0,.15);
-    border-radius:0;
-  }
-  .mat-btn{
-    flex:1;
-    padding:11px 8px;
-    font-size:14px;font-weight:700;
-    border-radius:8px;
-    min-height:44px;
-    text-align:center;
-  }
-  .mat-btn:not(.active){
-    background:rgba(255,255,255,.1);
-    color:rgba(255,255,255,.75);
-  }
-  .mat-btn.active{
-    background:#3b82f6;
-    color:#fff;
-    box-shadow:0 2px 8px rgba(59,130,246,.5);
-  }
-
-  /* Hide desktop-only controls */
-  .mode-toggle,
-  #finder-controls,
-  #gwp-controls,
-  #ec3-btn,
-  #mobile-search-row{
-    display:none!important;
-  }
-
-  /* Row 3 (when options open): options panel full width */
-  #mobile-opts-panel{
-    display:none;
-    order:4;
-    flex-basis:100%;
-    width:100%;
-    padding:10px 12px;
-    border-top:1px solid rgba(255,255,255,.12);
-    flex-direction:column;gap:10px;
-    background:rgba(0,0,0,.2);
-  }
-  #mobile-opts-panel.open{display:flex}
-
-  /* Controls inside options panel */
-  #mobile-opts-panel .mode-toggle{
-    display:flex!important;width:100%;
-  }
-  #mobile-opts-panel .mode-btn{
-    flex:1;padding:9px 8px;font-size:13px;font-weight:600;min-height:40px;
-  }
-  #finder-controls-m,
-  #gwp-controls-m{padding:0}
-  #mobile-opts-panel .radius-group,
-  #mobile-opts-panel .filter-group,
-  #mobile-opts-panel .gwp-group{
-    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  }
-  #mobile-opts-panel label{color:rgba(255,255,255,.7);font-size:11px}
-  #radius-slider-m{width:150px;accent-color:#3b82f6}
-  #radius-label-m{color:#cbd5e1;font-size:12px;font-weight:600}
-  #product-sel-m{
-    padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.2);
-    background:rgba(255,255,255,.1);color:#fff;font-size:12px;max-width:100%;
-  }
-  #product-sel-m option{background:#1a2035}
-  #gwp-target-slider-m{width:150px;accent-color:#22d3ee}
-  #gwp-target-label-m{color:#22d3ee;font-size:12px;font-weight:700}
-  #ec3-btn-m{
-    align-self:flex-start;padding:8px 14px;border-radius:6px;
-    border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);
-    color:rgba(255,255,255,.8);font-size:12px;
-  }
-
-  /* Sidebar: bottom sheet on mobile */
-  #sidebar{
-    width:100%!important;border-left:none;
-    border-top:2px solid #3b6fd4;
+/* ── Mobile breakpoint ──────────────────────────────────── */
+@media (max-width: 920px) {
+  .body{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  .filter-rail{display:none}
+  .results-rail{
     position:absolute;bottom:0;left:0;right:0;z-index:600;
-    transition:height .25s ease;
-    height:46%;
-    box-shadow:0 -4px 20px rgba(0,0,0,.12);
+    height:45%;border-left:none;border-top:2px solid var(--moss);
   }
-  #sidebar.collapsed{height:44px;overflow:hidden}
-  #sidebar-header{
-    cursor:pointer;
-    border-bottom:1px solid #e8ecf3;
-  }
-  #sidebar-toggle{display:none}
-
-  /* Map click hint: smaller on mobile */
-  #map-click-hint{font-size:10px;padding:4px 10px}
-
-  /* Legend: hide by default, show via toggle button */
-  #gwp-legend{display:none}
-  #legend-toggle{display:flex;align-items:center;gap:4px}
-
-  /* Popup: full width on mobile */
-  .lcmf-popup .leaflet-popup-content{width:min(92vw, 400px)!important}
-
-  /* Comparison panel: smaller */
-  #compare-panel{max-height:60vh}
-  #compare-header strong{font-size:12px}
-
-  /* Status bar: compact */
-  .status-bar{height:auto;min-height:20px;padding:3px 10px;font-size:10px}
-}
-
-/* Tiny screens */
-@media (max-width: 380px) {
-  .brand-title{font-size:12px}
-  #sidebar{height:40%}
-  #sidebar.collapsed{height:40px}
+  .map-wrap{grid-row:1;grid-column:1}
+  .sheet{width:100%;top:56px}
 }
 </style>
 </head>
 <body>
-<div id="shell">
+<div id="app">
 
-  <!-- ── TOP BAR ─────────────────────────────────────────────── -->
-  <header id="topbar">
-    <div class="brand">
-      <span class="brand-title">Low-Carbon Material Finder</span>
-      <span class="brand-sub">Global · Concrete &amp; Steel</span>
+  <!-- ── HEADER ────────────────────────────────────────────────── -->
+  <header class="hdr">
+    <div class="hdr-brand">
+      <span class="hdr-brand-name">Stratum</span>
+      <span class="hdr-brand-sub">Low-Carbon Material Finder</span>
     </div>
 
-    <!-- Material toggle (always visible) -->
-    <div class="mat-toggle">
-      <button class="mat-btn active" data-mat="concrete">Concrete</button>
-      <button class="mat-btn" data-mat="steel">Steel</button>
-    </div>
+    <nav class="hdr-nav">
+      <button class="hdr-nav-link active">Find</button>
+      <button class="hdr-nav-link">Projects</button>
+      <button class="hdr-nav-link">Reports</button>
+      <button class="hdr-nav-link">Manufacturers</button>
+    </nav>
 
-    <div class="topbar-sep"></div>
-
-    <!-- Mode toggle -->
-    <div class="mode-toggle">
-      <button class="mode-btn active" data-mode="finder">&#128269; Finder</button>
-      <button class="mode-btn" data-mode="gwp-target">&#127919; GWP Target</button>
-    </div>
-
-    <div class="topbar-sep"></div>
-
-    <!-- Finder controls (location + radius + product) -->
-    <div id="finder-controls">
-      <div class="search-group">
-        <label for="zip-input">Location</label>
-        <input id="zip-input" type="text" placeholder="City, postal code…" maxlength="100">
-        <button id="search-btn">Search</button>
+    <div class="hdr-right">
+      <button class="map-fab" id="ec3-btn" title="Connect to EC3 live data">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 2C5.5 2 3.5 3.8 3.5 6c0 1.2.5 2.2 1.3 3L8 14l3.2-5c.8-.8 1.3-1.8 1.3-3C12.5 3.8 10.5 2 8 2z"/>
+          <circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+        EC3 Live Data
+      </button>
+      <div class="user-pill">
+        <div class="user-avatar">AG</div>
+        Account
       </div>
-      <div class="topbar-sep"></div>
-      <div class="radius-group">
-        <label for="radius-slider">Radius</label>
-        <input id="radius-slider" type="range" min="25" max="500" value="100" step="25">
-        <span id="radius-label">100 mi</span>
-        <button id="unit-toggle" title="Switch distance units">mi</button>
-      </div>
-      <div class="topbar-sep"></div>
-      <div class="filter-group">
-        <label for="product-sel">Product</label>
-        <select id="product-sel"><option value="all">All Products</option></select>
-      </div>
-    </div>
-
-    <!-- GWP Target controls (shown in GWP mode) -->
-    <div id="gwp-controls">
-      <div class="gwp-group">
-        <label for="gwp-target-slider">GWP Target</label>
-        <input id="gwp-target-slider" type="range" min="0" max="500" value="250" step="10">
-        <span id="gwp-target-label">250 kg CO&#8322;e/m&#179;</span>
-      </div>
-      <span class="gwp-hint">Click map or enter location for distance</span>
-    </div>
-
-    <!-- EC3 API button -->
-    <button id="ec3-btn" title="Connect to EC3 (Building Transparency) for live plant data">&#x2B21; EC3 Live Data</button>
-
-    <!-- Mobile: always-visible search row (via CSS injection) -->
-    <div id="mobile-search-row" style="display:none">
-      <!-- populated by mobile CSS layout — uses same #zip-input via clone or flexbox order -->
-    </div>
-
-    <!-- Mobile options toggle -->
-    <button id="mobile-opts-btn">&#9776; Options</button>
-
-    <!-- Mobile options panel (toggle) -->
-    <div id="mobile-opts-panel">
-      <div class="mode-toggle">
-        <button class="mode-btn active" data-mode="finder" data-mobile="1">&#128269; Finder</button>
-        <button class="mode-btn" data-mode="gwp-target" data-mobile="1">&#127919; GWP Target</button>
-      </div>
-      <div id="finder-controls-m">
-        <div class="radius-group">
-          <label for="radius-slider-m">Radius</label>
-          <input id="radius-slider-m" type="range" min="25" max="500" value="100" step="25">
-          <span id="radius-label-m">100 mi</span>
-        </div>
-        <div class="filter-group" style="margin-top:4px">
-          <label for="product-sel-m">Product</label>
-          <select id="product-sel-m"><option value="all">All Products</option></select>
-        </div>
-      </div>
-      <div id="gwp-controls-m" style="display:none">
-        <div class="gwp-group">
-          <label for="gwp-target-slider-m">GWP Target</label>
-          <input id="gwp-target-slider-m" type="range" min="0" max="500" value="250" step="10">
-          <span id="gwp-target-label-m">250 kg CO&#8322;e/m&#179;</span>
-        </div>
-      </div>
-      <button id="ec3-btn-m" style="margin-top:4px;padding:5px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:transparent;color:rgba(255,255,255,.7);font-size:11px">&#x2B21; EC3 Live Data</button>
     </div>
   </header>
 
-  <!-- Mobile search row (always visible on mobile, hidden on desktop) -->
-  <div id="mobile-search-bar" style="display:none;background:linear-gradient(135deg,#1a2035,#1e3a5f);padding:6px 10px;gap:6px;align-items:center;flex-shrink:0;z-index:999">
-    <input id="zip-input-m" type="text" placeholder="City, postal code…" maxlength="100"
-      style="flex:1;padding:7px 10px;border-radius:5px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;font-size:13px">
-    <button id="search-btn-m" style="padding:7px 16px;border-radius:5px;border:none;background:#3b82f6;color:#fff;font-weight:600;font-size:13px;min-height:36px;flex-shrink:0">Search</button>
-  </div>
+  <!-- ── BODY GRID ──────────────────────────────────────────────── -->
+  <div id="body-grid" class="body">
 
-  <!-- ── STATUS BAR ───────────────────────────────────────────── -->
-  <div id="status-bar" class="status-bar">
-    Tap the map to set a project location, or enter a city / postal code to search nearby manufacturers.
-  </div>
+    <!-- ── FILTER RAIL ──────────────────────────────────────────── -->
+    <aside id="filter-rail" class="filter-rail">
 
-  <!-- ── MAIN (map + sidebar) ────────────────────────────────── -->
-  <div id="main">
-
-    <!-- MAP -->
-    <div id="map"></div>
-
-    <!-- Map click hint -->
-    <div id="map-click-hint">Tap map to set project location</div>
-
-    <!-- GWP LEGEND (overlay on map) -->
-    <div id="gwp-legend">
-      <div class="leg-title">GWP (A1-A3)</div>
-    </div>
-
-    <!-- Legend toggle button (mobile only) -->
-    <button id="legend-toggle">Legend</button>
-
-    <!-- SIDEBAR -->
-    <aside id="sidebar">
-      <div id="sidebar-header">
-        <span id="result-count">0 found</span>
-        <select id="sort-sel" title="Sort results">
-          <option value="name">Name</option>
-          <option value="gwp">GWP ↑</option>
-          <option value="distance">Distance</option>
-        </select>
-      </div>
-
-      <div class="sidebar-data-note">
-        Curated from manufacturer websites &amp; published EPDs.
-        No data is fabricated &mdash; gaps are marked "No data found."
-        <a href="#" id="ec3-link">Connect EC3</a> for live data &middot;
-        <a href="https://climateearth.com/plant-locator" target="_blank" rel="noopener">Climate Earth</a> &middot;
-        <a href="submit.html" target="_blank">Submit Data</a>
-      </div>
-
-      <div id="result-list">
-        <div class="empty-state">
-          Tap the map or enter a city / postal code to find low-carbon manufacturers in your area.<br><br>
-          Switch to <strong>GWP Target</strong> mode to find all plants that can meet a specific carbon target.
+      <!-- Mode tabs -->
+      <div class="rail-section">
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="mode-finder">Near a site</button>
+          <button class="mode-tab" id="mode-gwp">GWP target</button>
         </div>
       </div>
-    </aside>
 
-    <!-- Sidebar toggle (desktop) -->
-    <button id="sidebar-toggle" title="Toggle sidebar">&#9664;</button>
-  </div>
+      <!-- Material tabs -->
+      <div class="rail-section">
+        <div class="rail-section-title">Material</div>
+        <div class="mat-tabs">
+          <button class="mat-tab active" id="mat-concrete">Concrete</button>
+          <button class="mat-tab" id="mat-steel">Steel</button>
+        </div>
+      </div>
 
-  <!-- ── COMPARISON PANEL ─────────────────────────────────────── -->
-  <div id="compare-panel">
-    <div id="compare-header">
-      <strong>Manufacturer Comparison</strong>
-      <span style="font-size:11px;color:#6b7280">Select up to 4 using + Compare</span>
-      <button id="compare-clear">Clear All</button>
+      <!-- Finder section -->
+      <div id="finder-section" class="rail-section">
+        <div class="rail-section-title">Location</div>
+        <div class="search-row">
+          <input class="search-input" id="zip-input" type="text" placeholder="City, postal code…" maxlength="100">
+          <button class="search-btn" id="search-btn">Find</button>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Radius</span>
+          <input class="radius-slider" id="radius-slider" type="range" min="25" max="500" value="100" step="25">
+          <span class="radius-value" id="radius-label">100 mi</span>
+        </div>
+      </div>
+
+      <!-- GWP target section -->
+      <div id="gwp-section" class="rail-section">
+        <div class="rail-section-title">GWP Target</div>
+        <div class="gwp-target-display" id="gwp-target-label">250</div>
+        <div class="gwp-target-unit">kg CO₂e/m³</div>
+        <input class="gwp-target-slider" id="gwp-target-slider" type="range" min="100" max="500" value="250" step="5">
+        <div class="rail-section-title" style="margin-top:16px">Benchmark Presets</div>
+        <div class="presets-grid">
+          <button class="preset" data-gwp="290" data-gwp-steel="1040">Buy Clean CA<span>290 / 1040</span></button>
+          <button class="preset" data-gwp="297" data-gwp-steel="297">LEED v4<span>297</span></button>
+          <button class="preset" data-gwp="240" data-gwp-steel="240">NYC LL97<span>240</span></button>
+          <button class="preset" data-gwp="220" data-gwp-steel="700">ICC Tier 2<span>220 / 700</span></button>
+        </div>
+      </div>
+
+      <!-- Technology chips -->
+      <div class="rail-section" id="tech-chips-section">
+        <div class="rail-section-title">Technologies</div>
+        <div class="chips" id="concrete-chips">
+          <button class="chip" id="chip-co2-min">CO₂ Min</button>
+          <button class="chip" id="chip-co2-cure">CO₂ Cure</button>
+          <button class="chip" id="chip-scm-sub">SCM Sub</button>
+          <button class="chip" id="chip-plc">PLC</button>
+          <button class="chip" id="chip-novel-binder">Novel Binder</button>
+        </div>
+        <div class="chips" id="steel-chips" style="display:none">
+          <button class="chip" id="chip-eaf">EAF</button>
+          <button class="chip" id="chip-h2-dri">H₂-DRI</button>
+          <button class="chip" id="chip-recycled">100% Recycled</button>
+        </div>
+      </div>
+
+      <!-- Data sources -->
+      <div class="rail-section">
+        <div class="rail-section-title">Data Sources</div>
+        <div class="source-row">
+          <div>
+            <div class="source-label">Stratum curated</div>
+            <div class="source-meta">Verified EPDs &amp; manufacturer data</div>
+          </div>
+          <span class="toggle-always">Always on</span>
+        </div>
+        <div class="source-row">
+          <div>
+            <div class="source-label">EC3 live</div>
+            <div class="source-meta">Building Transparency EPD database</div>
+          </div>
+          <button class="toggle-switch" id="ec3-toggle" title="Enable EC3 live data"></button>
+        </div>
+      </div>
+
+    </aside><!-- /filter-rail -->
+
+    <!-- ── MAP WRAP ─────────────────────────────────────────────── -->
+    <div class="map-wrap">
+      <div id="map"></div>
+
+      <!-- Map hint -->
+      <div id="map-hint">
+        <span class="hint-dot"></span>
+        Click map or search a city to set project location
+      </div>
+
+      <!-- Map fab row -->
+      <div class="map-fab-row">
+        <button class="map-fab-sm">Layers</button>
+        <button class="map-fab-sm">About data</button>
+      </div>
+
+      <!-- GWP legend -->
+      <div id="gwp-legend">
+        <div class="legend-title">GWP Distribution</div>
+        <div class="hist-container">
+          <div class="hist-bars" id="hist-bars">
+            <div class="hist-bar" id="hist-bar-1" style="background:var(--gwp-1);height:20%">
+              <span class="hist-bar-count">0</span>
+            </div>
+            <div class="hist-bar" id="hist-bar-2" style="background:var(--gwp-2);height:20%">
+              <span class="hist-bar-count">0</span>
+            </div>
+            <div class="hist-bar" id="hist-bar-3" style="background:var(--gwp-3);height:20%">
+              <span class="hist-bar-count">0</span>
+            </div>
+            <div class="hist-bar" id="hist-bar-4" style="background:var(--gwp-4);height:20%">
+              <span class="hist-bar-count">0</span>
+            </div>
+            <div class="hist-bar" id="hist-bar-5" style="background:var(--gwp-5);height:20%">
+              <span class="hist-bar-count">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="hist-axis">
+          <span class="hist-axis-label">Low</span>
+          <span class="hist-axis-label">High</span>
+        </div>
+      </div>
+    </div><!-- /map-wrap -->
+
+    <!-- ── RESULTS RAIL ──────────────────────────────────────────── -->
+    <aside id="results-rail" class="results-rail">
+
+      <!-- Results header -->
+      <div class="rr-header">
+        <div class="rr-heading-row">
+          <span id="result-count">0 found</span>
+          <select id="sort-sel">
+            <option value="name">A–Z</option>
+            <option value="gwp">GWP ↑</option>
+            <option value="distance">Distance</option>
+          </select>
+        </div>
+        <div id="rr-meta">Search a location or enable GWP target mode</div>
+        <div class="rr-stats" id="rr-stats">
+          <div class="rr-stat">
+            <span class="rr-stat-val" id="avg-gwp">—</span>
+            <span class="rr-stat-label">Avg GWP</span>
+          </div>
+          <div class="rr-stat">
+            <span class="rr-stat-val" id="meet-target">—</span>
+            <span class="rr-stat-label">Meet target</span>
+          </div>
+          <div class="rr-stat">
+            <span class="rr-stat-val" id="best-gwp">—</span>
+            <span class="rr-stat-label">Best GWP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result list -->
+      <div id="result-list">
+        <div class="empty-state">
+          Search a location or switch to GWP Target mode to discover low-carbon manufacturers.
+        </div>
+      </div>
+
+      <!-- Compare tray -->
+      <div id="compare-tray" class="compare-tray">
+        <div class="compare-tray-inner">
+          <div class="compare-tray-title">
+            Comparing
+            <button class="compare-tray-clear" id="compare-clear">Clear all</button>
+          </div>
+          <div class="compare-slots" id="compare-slots">
+            <div class="compare-slot">+ Add</div>
+            <div class="compare-slot">+ Add</div>
+            <div class="compare-slot">+ Add</div>
+            <div class="compare-slot">+ Add</div>
+          </div>
+        </div>
+      </div>
+
+    </aside><!-- /results-rail -->
+
+  </div><!-- /body-grid -->
+
+  <!-- ── DETAIL SHEET ──────────────────────────────────────────── -->
+  <div id="sheet-backdrop" class="sheet-backdrop"></div>
+  <aside id="detail-sheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-info">
+        <div class="sheet-company" id="sheet-company">Company Name</div>
+        <div class="sheet-meta" id="sheet-meta"></div>
+      </div>
+      <button class="sheet-close" id="sheet-close">&#10005;</button>
     </div>
-    <div class="compare-scroll">
-      <table id="compare-table"></table>
+    <div class="sheet-body" id="sheet-body"></div>
+    <div class="sheet-actions">
+      <button class="sheet-action" id="sheet-compare-btn">+ Add to Compare</button>
+      <button class="sheet-action primary">View Full Profile</button>
     </div>
-  </div>
+  </aside>
 
-  <!-- ── EC3 MODAL ──────────────────────────────────────────── -->
+  <!-- ── EC3 MODAL ─────────────────────────────────────────────── -->
   <div id="ec3-modal" role="dialog" aria-modal="true" aria-label="EC3 API Key">
     <div class="modal-box">
-      <h2>&#x2B21; EC3 (Building Transparency) Live Data</h2>
+      <h2>EC3 Live Data</h2>
       <p>Connect to the <a href="https://www.buildingtransparency.org/" target="_blank" rel="noopener">EC3 database</a>
         to overlay real plant locations and verified EPD data on the map.
         EC3 contains 90,000+ active EPDs for concrete, steel, and other materials.</p>
       <label for="ec3-key-input">EC3 API Key (Bearer token)</label>
       <input id="ec3-key-input" type="password" placeholder="Paste your EC3 API key here">
-      <p style="font-size:11px;color:#6b7280">
-        Get your free API key at
-        <a href="https://www.buildingtransparency.org/ec3/settings" target="_blank" rel="noopener">buildingtransparency.org &rarr; Settings &rarr; API &amp; Integrations</a>.
+      <p style="font-size:12px;color:var(--ink-3)">
+        Get your free key at
+        <a href="https://www.buildingtransparency.org/ec3/settings" target="_blank" rel="noopener">buildingtransparency.org → Settings → API &amp; Integrations</a>.
         Your key is stored only in this browser session.
       </p>
       <div class="modal-actions">
@@ -728,72 +834,10 @@ select,input{font-family:inherit;font-size:12px}
     </div>
   </div>
 
-</div><!-- #shell -->
+</div><!-- #app -->
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="data/manufacturers.js"></script>
 <script src="js/app.js"></script>
-
-<script>
-(function(){
-  // Show mobile search bar on small screens
-  function checkMobile(){
-    const isMobile = window.innerWidth <= 768;
-    document.getElementById('mobile-search-bar').style.display = isMobile ? 'flex' : 'none';
-  }
-  checkMobile();
-  window.addEventListener('resize', checkMobile);
-
-  // Mobile opts toggle
-  document.getElementById('mobile-opts-btn').addEventListener('click', function(){
-    const panel = document.getElementById('mobile-opts-panel');
-    panel.classList.toggle('open');
-    this.textContent = panel.classList.contains('open') ? '✕ Close' : '☰ Options';
-  });
-
-  // EC3 link in sidebar
-  document.getElementById('ec3-link').addEventListener('click', function(e){
-    e.preventDefault();
-    document.getElementById('ec3-modal').classList.add('show');
-  });
-
-  // EC3 mobile button
-  document.getElementById('ec3-btn-m').addEventListener('click', function(){
-    document.getElementById('ec3-modal').classList.add('show');
-  });
-
-  // Sidebar toggle (desktop)
-  var sbToggle = document.getElementById('sidebar-toggle');
-  var sidebar = document.getElementById('sidebar');
-  var observer = new MutationObserver(function(){
-    sbToggle.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◄';
-    sbToggle.style.right = sidebar.classList.contains('collapsed') ? '0px' : '320px';
-  });
-  observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-
-  // Sidebar tap to collapse/expand on mobile (tap header)
-  document.getElementById('sidebar-header').addEventListener('click', function(){
-    if(window.innerWidth <= 768){
-      sidebar.classList.toggle('collapsed');
-    }
-  });
-
-  // Legend toggle (mobile)
-  var legendToggle = document.getElementById('legend-toggle');
-  var legend = document.getElementById('gwp-legend');
-  legendToggle.addEventListener('click', function(){
-    var vis = legend.style.display !== 'none' && !legend.classList.contains('hidden');
-    if(vis){ legend.style.display = 'none'; legendToggle.textContent = 'Legend'; }
-    else { legend.style.display = ''; legendToggle.textContent = 'Hide'; }
-  });
-
-  // Map click hint: hide after first interaction or after 8s
-  var hint = document.getElementById('map-click-hint');
-  setTimeout(function(){ hint.classList.add('hidden'); }, 8000);
-  document.getElementById('map').addEventListener('click', function(){
-    hint.classList.add('hidden');
-  }, { once: true });
-})();
-</script>
 </body>
 </html>
