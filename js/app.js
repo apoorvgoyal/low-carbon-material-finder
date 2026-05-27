@@ -1083,6 +1083,14 @@ const App = (() => {
           })
         });
         if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            // Key is invalid — disconnect to stop future auto-calls
+            S.ec3ApiKey = null;
+            if (dom.ec3Toggle) dom.ec3Toggle.classList.remove('on');
+            dom.ec3Btn.classList.remove('active');
+            setMeta('EC3 key expired or invalid — disconnected. Re-enter your key in EC3 Live Data.');
+            return;
+          }
           if (page === 1) { setMeta(`EC3 API error ${res.status}. Using curated data only.`); return; }
           break;
         }
