@@ -1,5 +1,11 @@
 'use strict';
 
+// EC3 API endpoints to try in order (Building Transparency migrated URLs over time)
+const EC3_ENDPOINTS = [
+  'https://buildingtransparency.org/api/materials/plants/',
+  'https://buildingtransparency.org/api/epds/',
+];
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -18,19 +24,36 @@ module.exports = async function handler(req, res) {
   const params = new URLSearchParams({ category, page_size, page });
   if (geocode) params.set('geocode', geocode);
 
-  try {
-    const ec3Res = await fetch(
-      `https://buildingtransparency.org/api/materials/plants/public?${params}`,
-      { headers: { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' } }
-    );
+  const headers = {
+    'Authorization': `Bearer ${apiKey}`,
+    'Accept': 'application/json'
+  };
 
-    let data;
-    try { data = await ec3Res.json(); } catch { data = {}; }
+  // Try the plants endpoint first, fall back to epds endpoint
+  for (const base of EC3_ENDPOINTS) {
+    try {
+      const url = `${base}?${params}`;
+      console.log(`[ec3-proxy] Trying ${url}`);
 
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-    return res.status(ec3Res.status).json(data);
-  } catch (err) {
-    console.error('[api/ec3-proxy]', err.message);
-    return res.status(502).json({ error: 'Failed to reach EC3' });
+      const ec3Res = await fetch(url, { headers });
+      let data;
+      try { data = await ec3Res.json(); } catch { data = {}; }
+
+      console.log(`[ec3-proxy] ${base} → ${ec3Res.status}, items: ${Array.isArray(data) ? data.length : (data.results?.length ?? 'n/a')}`);
+
+      // 401/403 means bad key — return immediately, no point retrying other endpoints
+      if (ec3Res.status === 401 || ec3Res.status === 403) {
+        return res.status(ec3Res.status).json(data);
+      }
+
+      if (ec3Res.ok) {
+        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+        return res.status(200).json(data);
+      }
+    } catch (err) {
+      console.error(`[ec3-proxy] ${base} failed:`, err.message);
+    }
   }
+
+  return res.status(502).json({ error: 'EC3 API unavailable on all endpoints' });
 };
