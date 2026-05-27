@@ -1,7 +1,6 @@
 -- EC3 Plants — PostGIS-backed table for monthly synced plant data
 -- Run in: Supabase Dashboard → SQL Editor
 
--- PostGIS is enabled by default on Supabase; this is a no-op if already present
 CREATE EXTENSION IF NOT EXISTS postgis;
 
 -- ── ec3_plants ────────────────────────────────────────────────────────────────
@@ -10,28 +9,28 @@ CREATE TABLE IF NOT EXISTS ec3_plants (
   plant_name   TEXT,
   latitude     DOUBLE PRECISION NOT NULL,
   longitude    DOUBLE PRECISION NOT NULL,
-  location     GEOGRAPHY(POINT, 4326),          -- auto-computed by trigger below
+  location     GEOGRAPHY(POINT, 4326),
   address      TEXT,
   city         TEXT,
   country      TEXT,
   gwp_a1a3     DOUBLE PRECISION,
   product_name TEXT,
-  category     TEXT NOT NULL,                    -- 'concrete' | 'steel'
+  category     TEXT NOT NULL,
   epd_url      TEXT,
   synced_at    TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS ec3_plants_location_idx  ON ec3_plants USING GIST(location);
-CREATE INDEX IF NOT EXISTS ec3_plants_category_idx  ON ec3_plants (category);
+CREATE INDEX IF NOT EXISTS ec3_plants_location_idx ON ec3_plants USING GIST(location);
+CREATE INDEX IF NOT EXISTS ec3_plants_category_idx ON ec3_plants (category);
 
--- Trigger: keep location in sync with latitude/longitude on every write
+-- Trigger: auto-compute location geography from lat/lng on every write
 CREATE OR REPLACE FUNCTION ec3_plants_set_location()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER AS $$
 BEGIN
   NEW.location := ST_SetSRID(ST_MakePoint(NEW.longitude, NEW.latitude), 4326)::geography;
   RETURN NEW;
 END;
-$$;
+$$ LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS ec3_plants_location_trig ON ec3_plants;
 CREATE TRIGGER ec3_plants_location_trig
@@ -62,28 +61,52 @@ RETURNS TABLE(
   synced_at     TIMESTAMPTZ,
   distance_m    DOUBLE PRECISION
 )
-LANGUAGE sql STABLE AS $$
+AS $$
   SELECT
-    p.id, p.plant_name, p.latitude, p.longitude,
-    p.address, p.city, p.country,
-    p.gwp_a1a3, p.product_name, p.category, p.epd_url, p.synced_at,
-    ST_Distance(
-      p.location,
-      ST_SetSRID(ST_MakePoint(p_lng, p_lat), 4326)::geography
-    ) AS distance_m
-  FROM ec3_plants p
-  WHERE p.category = p_category
-    AND ST_DWithin(
-      p.location,
-      ST_SetSRID(ST_MakePoint(p_lng, p_lat), 4326)::geography,
-      p_radius_meters
-    )
-  ORDER BY distance_m
+    sub.id,
+    sub.plant_name,
+    sub.latitude,
+    sub.longitude,
+    sub.address,
+    sub.city,
+    sub.country,
+    sub.gwp_a1a3,
+    sub.product_name,
+    sub.category,
+    sub.epd_url,
+    sub.synced_at,
+    sub.distance_m
+  FROM (
+    SELECT
+      p.id,
+      p.plant_name,
+      p.latitude,
+      p.longitude,
+      p.address,
+      p.city,
+      p.country,
+      p.gwp_a1a3,
+      p.product_name,
+      p.category,
+      p.epd_url,
+      p.synced_at,
+      ST_Distance(
+        p.location,
+        ST_SetSRID(ST_MakePoint(p_lng, p_lat), 4326)::geography
+      ) AS distance_m
+    FROM ec3_plants p
+    WHERE p.category = p_category
+      AND ST_DWithin(
+        p.location,
+        ST_SetSRID(ST_MakePoint(p_lng, p_lat), 4326)::geography,
+        p_radius_meters
+      )
+  ) sub
+  ORDER BY sub.distance_m
   LIMIT p_limit;
-$$;
+$$ LANGUAGE sql STABLE;
 
 -- ── sync_log ──────────────────────────────────────────────────────────────────
--- Tracks when each data source was last synced; shown in the UI as "last updated"
 CREATE TABLE IF NOT EXISTS sync_log (
   id           TEXT PRIMARY KEY,
   last_synced  TIMESTAMPTZ NOT NULL,
