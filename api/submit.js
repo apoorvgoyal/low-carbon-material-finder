@@ -25,8 +25,8 @@ function validateSubmission(body) {
   }
   const lat = parseFloat(body.hq_lat);
   const lng = parseFloat(body.hq_lng);
-  if (lat < 14 || lat > 72 || lng < -180 || lng > -50) {
-    errors.push('hq coordinates appear to be outside North America');
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    errors.push('hq coordinates are not valid latitude/longitude values');
   }
   if (!Array.isArray(body.products) || body.products.length === 0) {
     errors.push('at least one product is required');
@@ -78,7 +78,11 @@ module.exports = async function handler(req, res) {
       type: body.type,
       coverage: ['national', 'regional', 'local'].includes(body.coverage) ? body.coverage : 'local',
       service_states: Array.isArray(body.serviceStates) ? body.serviceStates.slice(0, 56) : null,
+      service_countries: Array.isArray(body.serviceCountries) ? body.serviceCountries.slice(0, 50) : null,
       service_region: (body.serviceRegion || '').trim().substring(0, 500) || null,
+      country: (body.country || '').trim().substring(0, 100) || null,
+      country_code: body.countryCode && /^[A-Z]{2}$/i.test(body.countryCode)
+        ? body.countryCode.toUpperCase() : null,
       plant_count: (body.plantCount || '').trim().substring(0, 100) || null,
       hq_lat: parseFloat(body.hq_lat),
       hq_lng: parseFloat(body.hq_lng),
