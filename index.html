@@ -559,16 +559,73 @@ input,select{font-family:var(--f-sans)}
 .badge.tech-licensed{background:oklch(93% 0.05 300);color:oklch(40% 0.15 300)}
 .badge.tech-emerging{background:oklch(94% 0.05 200);color:oklch(40% 0.12 200)}
 
+/* ── Mobile filter pills ────────────────────────────────────── */
+.mobile-pills-row{
+  display:none;overflow-x:auto;padding:8px 16px 10px;gap:6px;
+  background:var(--surface);border-bottom:1px solid var(--line);flex-shrink:0;
+}
+.mobile-pills-row::-webkit-scrollbar{display:none}
+.mobile-pill{
+  padding:7px 13px;border-radius:var(--r-full);border:1px solid var(--line-2);
+  background:var(--paper-2);font-size:12px;font-weight:500;color:var(--ink-3);
+  white-space:nowrap;flex-shrink:0;cursor:pointer;transition:all .12s;
+  font-family:var(--f-mono);letter-spacing:.02em;
+}
+.mobile-pill.mat-on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.mobile-pill.chip-on{background:var(--moss-soft);color:var(--moss-deep);border-color:var(--moss)}
+
+/* ── Results sheet grab handle ──────────────────────────────── */
+.results-grab{
+  display:none;height:20px;align-items:center;justify-content:center;
+  flex-shrink:0;cursor:grab;user-select:none;
+}
+.results-grab::after{
+  content:'';width:40px;height:4px;background:var(--line-2);border-radius:2px;
+}
+
+/* ── Tab bar ────────────────────────────────────────────────── */
+.tab-bar{
+  display:none;background:var(--surface);border-top:1px solid var(--line);
+  justify-content:space-around;align-items:center;
+  padding:8px 0 env(safe-area-inset-bottom,8px);flex-shrink:0;
+}
+.tab-item-mob{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:4px 12px;color:var(--ink-3);text-decoration:none;cursor:pointer;
+  border:none;background:none;font-family:var(--f-mono);font-size:9px;
+  letter-spacing:.08em;text-transform:uppercase;flex:1;transition:color .12s;
+}
+.tab-item-mob.active{color:var(--ink)}
+.tab-item-mob svg{width:22px;height:22px;flex-shrink:0}
+
 /* ── Mobile breakpoint ──────────────────────────────────── */
 @media (max-width: 920px) {
-  .body{grid-template-columns:1fr;grid-template-rows:1fr auto}
+  #app{grid-template-rows:48px auto 1fr 72px}
+  .hdr{padding:0 16px;height:48px}
+  .hdr-brand-name{font-size:18px}
+  .hdr-brand-sub{display:none}
+  .hdr-nav{display:none}
+  .hdr-right .map-fab{display:none}
+  .user-pill>span:not(.user-avatar){display:none}
+  .user-pill{padding:4px}
+  .mobile-pills-row{display:flex}
+  .body{grid-template-columns:1fr;grid-template-rows:1fr;position:relative}
   .filter-rail{display:none}
-  .results-rail{
-    position:absolute;bottom:0;left:0;right:0;z-index:600;
-    height:45%;border-left:none;border-top:2px solid var(--moss);
-  }
   .map-wrap{grid-row:1;grid-column:1}
-  .sheet{width:100%;top:56px}
+  .results-rail{
+    position:absolute;left:0;right:0;bottom:0;height:340px;
+    border-left:none;border-top:none;
+    border-radius:24px 24px 0 0;
+    box-shadow:0 -8px 32px rgba(20,32,28,.14);z-index:600;
+    transition:height .3s cubic-bezier(.25,.46,.45,.94);
+  }
+  .results-rail.expanded{height:78%}
+  .results-grab{display:flex}
+  .tab-bar{display:flex}
+  #gwp-legend{display:none}
+  .compare-tray{display:none}
+  .map-fab-row{top:8px;left:8px}
+  .sheet{width:100%;top:0;border-radius:0}
 }
 </style>
 </head>
@@ -583,10 +640,10 @@ input,select{font-family:var(--f-sans)}
     </div>
 
     <nav class="hdr-nav">
-      <button class="hdr-nav-link active">Find</button>
-      <button class="hdr-nav-link">Projects</button>
-      <button class="hdr-nav-link">Reports</button>
-      <button class="hdr-nav-link">Manufacturers</button>
+      <button class="hdr-nav-link active" id="nav-find">Find</button>
+      <a class="hdr-nav-link" href="projects.html">Projects</a>
+      <button class="hdr-nav-link" disabled style="opacity:.45;cursor:default">Reports</button>
+      <a class="hdr-nav-link" href="manufacturer.html">Manufacturers</a>
     </nav>
 
     <div class="hdr-right">
@@ -603,6 +660,16 @@ input,select{font-family:var(--f-sans)}
       </div>
     </div>
   </header>
+
+  <!-- ── MOBILE FILTER PILLS ──────────────────────────────────── -->
+  <div class="mobile-pills-row" id="mobile-pills-row">
+    <button class="mobile-pill mat-on" id="mpill-concrete">Concrete</button>
+    <button class="mobile-pill" id="mpill-steel">Steel</button>
+    <button class="mobile-pill" id="mpill-gwp">≤ 250 kg/m³</button>
+    <button class="mobile-pill" id="mpill-co2min">CO₂-MIN</button>
+    <button class="mobile-pill" id="mpill-scm">SCM</button>
+    <button class="mobile-pill" id="mpill-epd">EPD verified</button>
+  </div>
 
   <!-- ── BODY GRID ──────────────────────────────────────────────── -->
   <div id="body-grid" class="body">
@@ -741,6 +808,7 @@ input,select{font-family:var(--f-sans)}
 
     <!-- ── RESULTS RAIL ──────────────────────────────────────────── -->
     <aside id="results-rail" class="results-rail">
+      <div class="results-grab" id="results-grab"></div>
 
       <!-- Results header -->
       <div class="rr-header">
@@ -809,9 +877,29 @@ input,select{font-family:var(--f-sans)}
     <div class="sheet-body" id="sheet-body"></div>
     <div class="sheet-actions">
       <button class="sheet-action" id="sheet-compare-btn">+ Add to Compare</button>
-      <button class="sheet-action primary">View Full Profile</button>
+      <button class="sheet-action primary" id="sheet-profile-btn">View Full Profile</button>
     </div>
   </aside>
+
+  <!-- ── TAB BAR (mobile) ─────────────────────────────────────── -->
+  <nav class="tab-bar" id="tab-bar">
+    <button class="tab-item-mob active" id="tab-find">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg>
+      Find
+    </button>
+    <a class="tab-item-mob" href="projects.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Projects
+    </a>
+    <button class="tab-item-mob" id="tab-ec3-mob">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3C9 3 6.5 5.5 6.5 9c0 2 .7 3.5 2 5L12 21l3.5-7c1.3-1.5 2-3 2-5 0-3.5-2.5-6-5.5-6z"/><circle cx="12" cy="9" r="2" fill="currentColor" stroke="none"/></svg>
+      EC3
+    </button>
+    <button class="tab-item-mob" id="tab-account-mob">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="3"/><path d="M5 21c0-3.5 3-6 7-6s7 2.5 7 6"/></svg>
+      Account
+    </button>
+  </nav>
 
   <!-- ── EC3 MODAL ─────────────────────────────────────────────── -->
   <div id="ec3-modal" role="dialog" aria-modal="true" aria-label="EC3 API Key">

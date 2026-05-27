@@ -116,7 +116,9 @@ const App = (() => {
       ec3ModalError:     document.getElementById('ec3-modal-error'),
       gwpLegend:         document.getElementById('gwp-legend'),
       concreteChips:     document.getElementById('concrete-chips'),
-      steelChips:        document.getElementById('steel-chips')
+      steelChips:        document.getElementById('steel-chips'),
+      mobilePillsRow:    document.getElementById('mobile-pills-row'),
+      resultsRail:       document.getElementById('results-rail')
     };
 
     initMap();
@@ -375,11 +377,103 @@ const App = (() => {
       if (S.activeSheet) toggleComparison(S.activeSheet);
     });
 
+    // Sheet "View Full Profile" button
+    const sheetProfileBtn = document.getElementById('sheet-profile-btn');
+    if (sheetProfileBtn) {
+      sheetProfileBtn.addEventListener('click', () => {
+        if (S.activeSheet?.id) {
+          window.location.href = `manufacturer.html?id=${encodeURIComponent(S.activeSheet.id)}`;
+        }
+      });
+    }
+
     // Map hint hide
     if (dom.mapHint) {
       setTimeout(() => dom.mapHint.classList.add('hidden'), 10000);
       dom.map.addEventListener('click', () => dom.mapHint.classList.add('hidden'), { once: true });
     }
+
+    // Mobile pills
+    bindMobilePills();
+
+    // Mobile tab bar EC3 button
+    const tabEc3 = document.getElementById('tab-ec3-mob');
+    if (tabEc3) tabEc3.addEventListener('click', () => openEc3Modal());
+
+    // Grab handle: touch/click to toggle sheet height
+    const grab = document.getElementById('results-grab');
+    const rail = document.getElementById('results-rail');
+    if (grab && rail) {
+      grab.addEventListener('click', () => rail.classList.toggle('expanded'));
+      let startY = 0, startH = 0;
+      grab.addEventListener('touchstart', e => {
+        startY = e.touches[0].clientY;
+        startH = rail.offsetHeight;
+      }, { passive: true });
+      grab.addEventListener('touchmove', e => {
+        const dy = startY - e.touches[0].clientY;
+        const newH = Math.min(Math.max(startH + dy, 120), window.innerHeight * 0.85);
+        rail.style.height = newH + 'px';
+      }, { passive: true });
+      grab.addEventListener('touchend', () => {
+        // Snap to expanded or collapsed based on current height
+        const threshold = window.innerHeight * 0.45;
+        if (rail.offsetHeight > threshold) {
+          rail.classList.add('expanded');
+        } else {
+          rail.classList.remove('expanded');
+        }
+        rail.style.height = '';
+      });
+    }
+  }
+
+  function bindMobilePills() {
+    const mpConcrete = document.getElementById('mpill-concrete');
+    const mpSteel    = document.getElementById('mpill-steel');
+    const mpGwp      = document.getElementById('mpill-gwp');
+    const mpCo2min   = document.getElementById('mpill-co2min');
+    const mpScm      = document.getElementById('mpill-scm');
+    const mpEpd      = document.getElementById('mpill-epd');
+    if (!mpConcrete) return;
+
+    mpConcrete.addEventListener('click', () => {
+      if (S.material === 'concrete') return;
+      dom.matConcrete.click();
+      mpConcrete.classList.add('mat-on');
+      mpSteel.classList.remove('mat-on');
+    });
+    mpSteel.addEventListener('click', () => {
+      if (S.material === 'steel') return;
+      dom.matSteel.click();
+      mpSteel.classList.add('mat-on');
+      mpConcrete.classList.remove('mat-on');
+    });
+    mpGwp.addEventListener('click', () => {
+      const isGwpMode = S.mode === 'gwp-target';
+      if (!isGwpMode) {
+        dom.modeGwp.click();
+        mpGwp.classList.add('chip-on');
+      } else {
+        dom.modeFinder.click();
+        mpGwp.classList.remove('chip-on');
+      }
+    });
+    // Wire tech chip pills to the rail chips
+    const chipMap = {
+      'mpill-co2min': 'chip-co2-min',
+      'mpill-scm':    'chip-scm-sub',
+      'mpill-epd':    null
+    };
+    [[mpCo2min, 'chip-co2-min'], [mpScm, 'chip-scm-sub']].forEach(([pill, chipId]) => {
+      if (!pill) return;
+      const railChip = document.getElementById(chipId);
+      pill.addEventListener('click', () => {
+        if (railChip) railChip.click();
+        pill.classList.toggle('chip-on');
+      });
+    });
+    if (mpEpd) mpEpd.addEventListener('click', () => mpEpd.classList.toggle('chip-on'));
   }
 
   /* ── Utilities ─────────────────────────────────────────────── */
