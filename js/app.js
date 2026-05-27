@@ -1039,7 +1039,7 @@ const App = (() => {
       const res = await fetch('/api/ec3-proxy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: key, category: 'ReadyMixConcrete', page_size: 1 })
+        body: JSON.stringify({ apiKey: key, category: 'concrete', page_size: 1 })
       });
       if (res.ok) {
         S.ec3ApiKey = key;
@@ -1066,7 +1066,7 @@ const App = (() => {
     if (!S.ec3ApiKey || !S.center) return;
     setMeta('Fetching live data from EC3…');
     try {
-      const category = S.material === 'concrete' ? 'ReadyMixConcrete' : 'StructuralSteel';
+      const category = S.material; // proxy maps 'concrete'→'Concrete >> ReadyMix', 'steel'→EC3 steel class
       const geocode = S.userCountry
         ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
         : null;
