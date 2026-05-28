@@ -168,12 +168,9 @@ async function fetchAllPages(baseUrl, label) {
     process.stdout.write(`  ${label} ${all.length} items… `);
     const r = await fetch(url, { headers: HEADERS });
 
-    if (r.status === 401) {
-      console.log('401 — EC3_API_KEY invalid or expired');
-      break;
-    }
     if (!r.ok) {
-      console.log(`HTTP ${r.status} — stopping`);
+      const body = await r.text().catch(() => '');
+      console.log(`HTTP ${r.status} — ${body.slice(0, 300) || 'no body'}`);
       break;
     }
 
@@ -218,6 +215,7 @@ async function upsertBatch(supabase, rows) {
 
 async function main() {
   if (DRY_RUN) console.log('DRY RUN — Supabase will not be written.\n');
+  console.log(`EC3 key: ${EC3_API_KEY.slice(0, 4)}…${EC3_API_KEY.slice(-4)} (${EC3_API_KEY.length} chars)`);
 
   const supabase   = DRY_RUN ? null : createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
   const syncStart  = Date.now();
