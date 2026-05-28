@@ -1,22 +1,14 @@
 name: Sync EC3 Plant Data
 
 on:
-  # First day of each month at 02:00 UTC
   schedule:
-    - cron: '0 2 1 * *'
-  # Manual trigger with optional dry-run
-  workflow_dispatch:
-    inputs:
-      dry_run:
-        description: 'Dry run (no DB writes, just log output)'
-        required: false
-        default: 'false'
-        type: boolean
+    - cron: '0 2 1 * *'   # 1st of each month, 02:00 UTC
+  workflow_dispatch:       # manual trigger from Actions UI
 
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 90        # full global sync can take a while
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
@@ -25,16 +17,10 @@ jobs:
         with:
           node-version: '22'
 
-      - run: npm install
-
-      - name: Sync EC3 → Supabase
+      - name: Trigger EC3 sync via Vercel
+        # EC3 requests come from Vercel's IP (not blocked by EC3 WAF).
+        # GitHub Actions only orchestrates the pagination loop.
         env:
-          EC3_API_KEY:          ${{ secrets.EC3_API_KEY }}
-          SUPABASE_URL:         ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-        run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            node scripts/sync-ec3.js --dry-run
-          else
-            node scripts/sync-ec3.js
-          fi
+          VERCEL_URL:  ${{ secrets.VERCEL_URL }}
+          SYNC_SECRET: ${{ secrets.SYNC_SECRET }}
+        run: node scripts/trigger-sync.js
