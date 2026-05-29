@@ -118,8 +118,13 @@ module.exports = async function handler(req, res) {
   const ec3Key     = process.env.EC3_API_KEY;
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-  if (!ec3Key || !supabaseUrl || !supabaseKey) {
-    return res.status(503).json({ error: 'Missing server env vars' });
+  const missing = [
+    !ec3Key      && 'EC3_API_KEY',
+    !supabaseUrl && 'SUPABASE_URL',
+    !supabaseKey && 'SUPABASE_SERVICE_KEY',
+  ].filter(Boolean);
+  if (missing.length) {
+    return res.status(503).json({ error: 'Missing env vars', missing });
   }
 
   const enc     = encodeURIComponent(EC3_CATEGORIES[category]);
