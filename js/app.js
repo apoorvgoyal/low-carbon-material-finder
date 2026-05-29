@@ -1122,36 +1122,16 @@ const App = (() => {
     }
   }
 
-  async function saveEc3Key() {
+  function saveEc3Key() {
     const key = dom.ec3KeyInput?.value?.trim();
     if (!key) { showEc3Error('Please enter your EC3 API key.'); return; }
-    dom.ec3SaveBtn.disabled = true;
-    dom.ec3SaveBtn.textContent = 'Verifying…';
-    try {
-      const res = await fetch('/api/ec3-proxy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey: key, category: 'concrete', page_size: 1 })
-      });
-      // Accept the key unless EC3 explicitly says it's invalid (401).
-      // 403 = WAF block (IP restriction, not a bad key), 404/200 = success.
-      if (res.status !== 401) {
-        S.ec3ApiKey  = key;
-        S.ec3Enabled = true;
-        dom.ec3Btn.classList.add('active');
-        if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
-        dom.ec3Modal.classList.remove('show');
-        if (S.center) fetchEC3Data();
-        else setMeta('EC3 connected. Search a location to load plant data.');
-      } else {
-        showEc3Error('Key rejected by EC3 (401). Get a fresh key at buildingtransparency.org → Settings → API & Integrations.');
-      }
-    } catch {
-      showEc3Error('Could not reach EC3. Check your internet connection.');
-    } finally {
-      dom.ec3SaveBtn.disabled = false;
-      dom.ec3SaveBtn.textContent = 'Save & Enable';
-    }
+    S.ec3ApiKey  = key;
+    S.ec3Enabled = true;
+    dom.ec3Btn.classList.add('active');
+    if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
+    dom.ec3Modal.classList.remove('show');
+    if (S.center) fetchEC3Data();
+    else setMeta('EC3 connected. Search a location to load plant data.');
   }
 
   async function fetchEC3Data() {
