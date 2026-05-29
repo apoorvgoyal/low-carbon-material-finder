@@ -1164,12 +1164,16 @@ const App = (() => {
           })
         });
         if (!res.ok) {
-          if (res.status === 401 || res.status === 403) {
+          if (res.status === 401) {
             S.ec3ApiKey = null;
             if (dom.ec3Toggle) dom.ec3Toggle.classList.remove('on');
             dom.ec3Btn.classList.remove('active');
-            setMeta('EC3 key expired — reconnect via the EC3 button.');
+            setMeta('EC3 key rejected — reconnect via the EC3 button.');
             return;
+          }
+          if (res.status === 403) {
+            if (page === 1) setMeta('EC3 temporarily unavailable. Showing curated data only.');
+            break;
           }
           if (page === 1) { setMeta(`EC3 error ${res.status}. Showing curated data only.`); return; }
           break;
