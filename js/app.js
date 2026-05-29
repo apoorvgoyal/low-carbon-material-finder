@@ -1133,7 +1133,9 @@ const App = (() => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ apiKey: key, category: 'concrete', page_size: 1 })
       });
-      if (res.ok || res.status === 404) {
+      // Accept the key unless EC3 explicitly says it's invalid (401).
+      // 403 = WAF block (IP restriction, not a bad key), 404/200 = success.
+      if (res.status !== 401) {
         S.ec3ApiKey  = key;
         S.ec3Enabled = true;
         dom.ec3Btn.classList.add('active');
@@ -1141,10 +1143,8 @@ const App = (() => {
         dom.ec3Modal.classList.remove('show');
         if (S.center) fetchEC3Data();
         else setMeta('EC3 connected. Search a location to load plant data.');
-      } else if (res.status === 401 || res.status === 403) {
-        showEc3Error('Key rejected by EC3. Get a fresh key at buildingtransparency.org → Settings → API & Integrations.');
       } else {
-        showEc3Error(`EC3 returned ${res.status}. Try again or check your key.`);
+        showEc3Error('Key rejected by EC3 (401). Get a fresh key at buildingtransparency.org → Settings → API & Integrations.');
       }
     } catch {
       showEc3Error('Could not reach EC3. Check your internet connection.');
