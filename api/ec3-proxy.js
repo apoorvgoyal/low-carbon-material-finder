@@ -208,7 +208,9 @@ module.exports = async function handler(req, res) {
       const items = Array.isArray(data) ? data : (data.results || []);
       console.log(`[ec3-proxy] ← ${r.status}, items: ${items.length}`);
 
-      if (r.status === 401) return res.status(401).json(data);
+      // 401 on one endpoint doesn't mean the key is bad — try remaining strategies
+      // before giving up (EPDs and plants may have different auth requirements).
+      if (r.status === 401) { lastStatus = 401; lastData = data; continue; }
 
       if (r.ok) {
         gotAny200 = true;
