@@ -179,32 +179,22 @@ module.exports = async function handler(req, res) {
   const ec3Category = EC3_CATEGORY[category] || category;
   const headers = { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' };
 
-  // Try strategies in priority order.
-  // Key rule: keep trying even on 200 if we extracted 0 plants — the endpoint
-  // may exist but not embed location data, so fall through to the next variant.
   const strategies = [];
-
   const addStrategy = (url) => strategies.push(url);
 
-  // Plants endpoint
-  const withCat = new URLSearchParams({ page_size, page, product_class: ec3Category });
-  const noCat   = new URLSearchParams({ page_size, page });
-  if (jurisdiction) {
-    addStrategy(`${BASE}/plants/?${withCat}&jurisdiction=${jurisdiction}`);
-  }
-  addStrategy(`${BASE}/plants/?${withCat}`);
-  if (jurisdiction) {
-    addStrategy(`${BASE}/plants/?${noCat}&jurisdiction=${jurisdiction}`);
-  }
-  addStrategy(`${BASE}/plants/?${noCat}`);
+  const epdParams   = new URLSearchParams({ page_size, page, category: ec3Category });
+  const plantParams = new URLSearchParams({ page_size, page, product_class: ec3Category });
 
-  // EPDs endpoint (location embedded in plant_or_group)
-  const epdWithJ  = new URLSearchParams({ page_size, page, category: ec3Category });
-  const epdNoJ    = new URLSearchParams({ page_size, page, category: ec3Category });
+  // EPDs first — they carry both location (plant_or_group) AND declared GWP.
+  // Plants endpoint has location only, no GWP, so it comes last as a fallback.
   if (jurisdiction) {
-    addStrategy(`${BASE}/epds/?${epdWithJ}&jurisdiction=${jurisdiction}`);
+    addStrategy(`${BASE}/epds/?${epdParams}&jurisdiction=${jurisdiction}`);
   }
-  addStrategy(`${BASE}/epds/?${epdNoJ}`);
+  addStrategy(`${BASE}/epds/?${epdParams}`);
+  if (jurisdiction) {
+    addStrategy(`${BASE}/plants/?${plantParams}&jurisdiction=${jurisdiction}`);
+  }
+  addStrategy(`${BASE}/plants/?${plantParams}`);
 
   let lastStatus = 502;
   let lastData   = {};
