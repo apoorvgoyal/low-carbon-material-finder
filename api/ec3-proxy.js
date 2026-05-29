@@ -1,5 +1,7 @@
 'use strict';
 
+const { createClient } = require('@supabase/supabase-js');
+
 const EC3_CATEGORY = {
   concrete: 'Concrete >> ReadyMix',
   steel:    'Steel >> StructuralSteel',
@@ -131,6 +133,34 @@ function normalizeToPlants(items) {
   return plants;
 }
 
+async function cacheToSupabase(plants, category) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return;
+  const supabase = createClient(url, key);
+  const now  = new Date().toISOString();
+  const rows = plants.map(p => ({
+    id:           p.id || `${(+p.latitude).toFixed(4)}|${(+p.longitude).toFixed(4)}`,
+    plant_name:   p.plant_name || null,
+    latitude:     +p.latitude,
+    longitude:    +p.longitude,
+    address:      p.address    || null,
+    city:         p.city       || null,
+    country:      p.country    || null,
+    gwp_a1a3:     p.gwp_A1A3  ?? null,
+    product_name: p.product_name || null,
+    category:     category,
+    epd_url:      p.epd_url   || null,
+    synced_at:    now,
+  })).filter(r => r.latitude && r.longitude);
+
+  const CHUNK = 100;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await supabase.from('ec3_plants')
+      .upsert(rows.slice(i, i + CHUNK), { onConflict: 'id' });
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -205,6 +235,8 @@ module.exports = async function handler(req, res) {
         console.log(`[ec3-proxy] plants with coords: ${plants.length}, with gwp: ${plants.filter(p=>p.gwp_A1A3!=null).length}`);
         if (plants.length > 0) {
           res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+          // Cache to Supabase in background so search-plants can serve future users
+          cacheToSupabase(plants, category).catch(() => {});
           return res.status(200).json(plants);
         }
         // Got 200 but 0 plants — try next strategy before giving up

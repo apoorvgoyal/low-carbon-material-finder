@@ -58,6 +58,7 @@ const App = (() => {
     results: [],
     comparison: [],
     ec3Enabled: false,
+    ec3ApiKey:  null,
     activeSheet: null,     // manufacturer shown in detail sheet
     manufacturers: null,
     projectPin: null,
@@ -1122,43 +1123,117 @@ const App = (() => {
   }
 
   async function saveEc3Key() {
-    S.ec3Enabled = true;
-    dom.ec3Btn.classList.add('active');
-    if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
-    dom.ec3Modal.classList.remove('show');
-    if (S.center) fetchEC3Data();
-    else setMeta('EC3 enabled. Search a location to load plant data.');
+    const key = dom.ec3KeyInput?.value?.trim();
+    if (!key) { showEc3Error('Please enter your EC3 API key.'); return; }
+    dom.ec3SaveBtn.disabled = true;
+    dom.ec3SaveBtn.textContent = 'Verifying…';
+    try {
+      const res = await fetch('/api/ec3-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: key, category: 'concrete', page_size: 1 })
+      });
+      if (res.ok || res.status === 404) {
+        S.ec3ApiKey  = key;
+        S.ec3Enabled = true;
+        dom.ec3Btn.classList.add('active');
+        if (dom.ec3Toggle) dom.ec3Toggle.classList.add('on');
+        dom.ec3Modal.classList.remove('show');
+        if (S.center) fetchEC3Data();
+        else setMeta('EC3 connected. Search a location to load plant data.');
+      } else if (res.status === 401 || res.status === 403) {
+        showEc3Error('Key rejected by EC3. Get a fresh key at buildingtransparency.org → Settings → API & Integrations.');
+      } else {
+        showEc3Error(`EC3 returned ${res.status}. Try again or check your key.`);
+      }
+    } catch {
+      showEc3Error('Could not reach EC3. Check your internet connection.');
+    } finally {
+      dom.ec3SaveBtn.disabled = false;
+      dom.ec3SaveBtn.textContent = 'Save & Enable';
+    }
   }
 
   async function fetchEC3Data() {
     if (!S.ec3Enabled || !S.center) return;
-    setMeta('Loading EC3 plant data…');
+
+    // If user has an EC3 key, use the live proxy (which also caches results).
+    // Otherwise fall back to the Supabase cache built from previous searches.
+    if (S.ec3ApiKey) {
+      await fetchEC3Live();
+    } else {
+      await fetchEC3Cache();
+    }
+  }
+
+  async function fetchEC3Live() {
+    setMeta('Fetching live EC3 data…');
+    const jurisdiction = S.userCountry
+      ? (S.userCountry === 'US' && S.userState ? `US-${S.userState}` : S.userCountry)
+      : null;
+    try {
+      let allPlants = [];
+      for (let page = 1; page <= 3; page++) {
+        const res = await fetch('/api/ec3-proxy', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            apiKey: S.ec3ApiKey, category: S.material,
+            ...(jurisdiction && { jurisdiction }),
+            page, page_size: 200
+          })
+        });
+        if (!res.ok) {
+          if (res.status === 401 || res.status === 403) {
+            S.ec3ApiKey = null;
+            if (dom.ec3Toggle) dom.ec3Toggle.classList.remove('on');
+            dom.ec3Btn.classList.remove('active');
+            setMeta('EC3 key expired — reconnect via the EC3 button.');
+            return;
+          }
+          if (page === 1) { setMeta(`EC3 error ${res.status}. Showing curated data only.`); return; }
+          break;
+        }
+        const batch = await res.json();
+        allPlants = allPlants.concat(Array.isArray(batch) ? batch : (batch.results || []));
+        if (allPlants.length < 200 * page) break;
+      }
+      if (allPlants.length > 0) {
+        const before = S.results.length;
+        mergeEC3Results(allPlants);
+        const added = S.results.filter(r => r.fromEC3).length;
+        setMeta(`${S.results.length} results — ${added} from EC3, ${before} curated.`);
+      } else {
+        setMeta('No EC3 plants found here. Showing curated data only.');
+      }
+    } catch {
+      setMeta('EC3 fetch failed. Showing curated data only.');
+    }
+  }
+
+  async function fetchEC3Cache() {
+    setMeta('Loading EC3 plant data from cache…');
     try {
       const res = await fetch('/api/search-plants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category:    S.material,
-          lat:         S.center.lat,
-          lng:         S.center.lng,
-          radiusMiles: S.radiusMiles,
+          category: S.material, lat: S.center.lat,
+          lng: S.center.lng, radiusMiles: S.radiusMiles,
         })
       });
-      if (!res.ok) {
-        setMeta(`EC3 data unavailable (${res.status}). Showing curated results only.`);
-        return;
-      }
+      if (!res.ok) { setMeta('EC3 cache unavailable. Showing curated data only.'); return; }
       const plants = await res.json();
       if (plants.length > 0) {
         const before = S.results.length;
         mergeEC3Results(plants);
         const added = S.results.filter(r => r.fromEC3).length;
-        setMeta(`${S.results.length} results — ${added} from EC3, ${before} curated.`);
+        setMeta(`${S.results.length} results — ${added} from EC3 cache, ${before} curated.`);
       } else {
-        setMeta('No EC3 plants found in this area. Showing curated data only.');
+        setMeta('No cached EC3 data here. Add your EC3 API key to load live data.');
       }
     } catch {
-      setMeta('EC3 data unavailable. Showing curated results only.');
+      setMeta('EC3 cache unavailable. Showing curated data only.');
     }
   }
 
