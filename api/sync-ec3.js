@@ -128,7 +128,11 @@ module.exports = async function handler(req, res) {
   }
 
   const enc     = encodeURIComponent(EC3_CATEGORIES[category]);
-  const headers = { Authorization: `Bearer ${ec3Key}`, Accept: 'application/json' };
+  const headers = {
+    Authorization: `Bearer ${ec3Key}`,
+    Accept: 'application/json',
+    'User-Agent': 'Mozilla/5.0 (compatible; LowCarbonMaterialFinder/1.0; +https://buildingtransparency.org)',
+  };
 
   const [plantsRes, epdsRes] = await Promise.all([
     fetch(`${BASE}/plants/?page_size=200&page=${page}&product_class=${enc}`, { headers }),
