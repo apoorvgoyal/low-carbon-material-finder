@@ -29,16 +29,33 @@ function parseGwp(v) {
 }
 
 // Extract GWP from all known EC3/openEPD field names and paths.
+//
+// openEPD v2 structure (confirmed from openepd Python library + sample EPDs):
+//   item.impacts is keyed by methodology name ("TRACI 2.1", "EF 3.0", etc.)
+//   → impacts["TRACI 2.1"].gwp.A1A2A3  (A1A2A3 = "Sum of A1..A3", NOT "A1A3")
+//
+// Legacy EC3 API: flat field gwp_a1a3 as a plain number.
+// openEPD top-level gwp: ScopeSetGwp object → gwp.A1A2A3
 function extractGwp(item) {
-  return parseGwp(item.gwp_a1a3)
-      ?? parseGwp(item.gwp_A1A3)
-      ?? parseGwp(item.declared_gwp)
-      ?? parseGwp(item.gwp)
-      ?? parseGwp(item.impacts?.gwp?.A1A3)
-      ?? parseGwp(item.impacts?.GWP?.A1A3)
-      ?? parseGwp(item.impacts?.gwp?.a1a3)
-      ?? parseGwp(item.kg_co2e_per_m3)
-      ?? null;
+  // 1. Flat legacy fields
+  let v = parseGwp(item.gwp_a1a3) ?? parseGwp(item.gwp_A1A3) ?? parseGwp(item.declared_gwp);
+  if (v != null) return v;
+
+  // 2. Top-level gwp object (ScopeSetGwp): gwp.A1A2A3
+  v = parseGwp(item.gwp?.A1A2A3) ?? parseGwp(item.gwp?.A1A3);
+  if (v != null) return v;
+
+  // 3. impacts keyed by methodology name → methodology.gwp.A1A2A3
+  if (item.impacts && typeof item.impacts === 'object') {
+    for (const method of Object.values(item.impacts)) {
+      if (!method || typeof method !== 'object') continue;
+      v = parseGwp(method.gwp?.A1A2A3) ?? parseGwp(method.gwp?.A1A3);
+      if (v != null) return v;
+    }
+  }
+
+  // 4. Legacy numeric kg/m³ field
+  return parseGwp(item.kg_co2e_per_m3) ?? null;
 }
 
 // EC3 openEPD format: plant_or_group can be:
@@ -214,14 +231,20 @@ module.exports = async function handler(req, res) {
 
       if (r.ok) {
         gotAny200 = true;
-        // Log GWP fields present on first item to help diagnose missing GWP
+        // Log GWP fields to help diagnose missing GWP
         if (items.length > 0) {
-          const sample = items[0];
-          const gwpFields = ['gwp_a1a3','gwp_A1A3','declared_gwp','gwp','kg_co2e_per_m3'];
-          const found = gwpFields.filter(f => sample[f] != null);
-          const impactKeys = Object.keys(sample.impacts || {});
-          console.log(`[ec3-proxy] sample GWP fields: [${found.join(',')}] impacts: [${impactKeys.join(',')}]`);
-          if (found.length > 0) console.log(`[ec3-proxy] sample gwp raw:`, JSON.stringify(sample[found[0]]));
+          const s = items[0];
+          const flatFields = ['gwp_a1a3','gwp_A1A3','declared_gwp','kg_co2e_per_m3'];
+          const found = flatFields.filter(f => s[f] != null);
+          const impactKeys = Object.keys(s.impacts || {});
+          const gwpScopeKeys = s.gwp ? Object.keys(s.gwp) : [];
+          console.log(`[ec3-proxy] flat GWP fields: [${found.join(',')}]`);
+          console.log(`[ec3-proxy] gwp scope keys: [${gwpScopeKeys.join(',')}]`);
+          console.log(`[ec3-proxy] impacts methodologies: [${impactKeys.join(',')}]`);
+          if (impactKeys.length > 0) {
+            const meth = s.impacts[impactKeys[0]];
+            console.log(`[ec3-proxy] impacts.${impactKeys[0]}.gwp.A1A2A3:`, JSON.stringify(meth?.gwp?.A1A2A3));
+          }
         }
         const plants = normalizeToPlants(items);
         console.log(`[ec3-proxy] plants with coords: ${plants.length}, with gwp: ${plants.filter(p=>p.gwp_A1A3!=null).length}`);
