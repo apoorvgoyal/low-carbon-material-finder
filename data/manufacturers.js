@@ -97,7 +97,21 @@ window.MANUFACTURERS = {
         { label: 'Holcim ECOPact Product Page', url: 'https://www.holcim.com/what-we-do/our-building-solutions/ready-mix-concrete' }
       ],
       contactUrl: 'https://www.holcim.com/en-us/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Holcim US – Atlanta Metro', lat: 33.7490, lng: -84.3880, city: 'Atlanta', state: 'GA' },
+        { name: 'Holcim US – Charlotte', lat: 35.2271, lng: -80.8431, city: 'Charlotte', state: 'NC' },
+        { name: 'Holcim US – Nashville', lat: 36.1627, lng: -86.7816, city: 'Nashville', state: 'TN' },
+        { name: 'Holcim US – Dallas-Fort Worth', lat: 32.7767, lng: -96.7970, city: 'Dallas', state: 'TX' },
+        { name: 'Holcim US – Houston', lat: 29.7604, lng: -95.3698, city: 'Houston', state: 'TX' },
+        { name: 'Holcim US – Phoenix', lat: 33.4484, lng: -112.0740, city: 'Phoenix', state: 'AZ' },
+        { name: 'Holcim US – Denver', lat: 39.7392, lng: -104.9903, city: 'Denver', state: 'CO' },
+        { name: 'Holcim US – Chicago', lat: 41.8781, lng: -87.6298, city: 'Chicago', state: 'IL' },
+        { name: 'Holcim US – Philadelphia', lat: 39.9526, lng: -75.1652, city: 'Philadelphia', state: 'PA' },
+        { name: 'Holcim US – Seattle', lat: 47.6062, lng: -122.3321, city: 'Seattle', state: 'WA' },
+        { name: 'Holcim US – Los Angeles', lat: 34.0522, lng: -118.2437, city: 'Los Angeles', state: 'CA' },
+        { name: 'Holcim US – Miami', lat: 25.7617, lng: -80.1918, city: 'Miami', state: 'FL' }
+      ]
     },
 
     {
@@ -176,7 +190,18 @@ window.MANUFACTURERS = {
         { label: 'CEMEX Vertua Product Page', url: 'https://www.cemexusa.com/products-and-services/ready-mix-concrete/vertua' }
       ],
       contactUrl: 'https://www.cemexusa.com/contact-us',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'CEMEX USA – Houston Central', lat: 29.7604, lng: -95.3698, city: 'Houston', state: 'TX' },
+        { name: 'CEMEX USA – Dallas', lat: 32.7767, lng: -96.7970, city: 'Dallas', state: 'TX' },
+        { name: 'CEMEX USA – San Antonio', lat: 29.4241, lng: -98.4936, city: 'San Antonio', state: 'TX' },
+        { name: 'CEMEX USA – Phoenix', lat: 33.4484, lng: -112.0740, city: 'Phoenix', state: 'AZ' },
+        { name: 'CEMEX USA – Las Vegas', lat: 36.1699, lng: -115.1398, city: 'Las Vegas', state: 'NV' },
+        { name: 'CEMEX USA – Los Angeles', lat: 34.0522, lng: -118.2437, city: 'Los Angeles', state: 'CA' },
+        { name: 'CEMEX USA – Tampa', lat: 27.9506, lng: -82.4572, city: 'Tampa', state: 'FL' },
+        { name: 'CEMEX USA – Atlanta', lat: 33.7490, lng: -84.3880, city: 'Atlanta', state: 'GA' },
+        { name: 'CEMEX USA – Chicago', lat: 41.8781, lng: -87.6298, city: 'Chicago', state: 'IL' }
+      ]
     },
 
     {
@@ -237,7 +262,16 @@ window.MANUFACTURERS = {
         { label: 'Heidelberg Sustainability', url: 'https://www.heidelbergmaterials.us/home/sustainability' }
       ],
       contactUrl: 'https://www.heidelbergmaterials.us/home/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Heidelberg Materials – Irving, TX', lat: 32.8141, lng: -96.9489, city: 'Irving', state: 'TX' },
+        { name: 'Heidelberg Materials – Seattle, WA', lat: 47.6062, lng: -122.3321, city: 'Seattle', state: 'WA' },
+        { name: 'Heidelberg Materials – Denver, CO', lat: 39.7392, lng: -104.9903, city: 'Denver', state: 'CO' },
+        { name: 'Heidelberg Materials – Minneapolis, MN', lat: 44.9778, lng: -93.2650, city: 'Minneapolis', state: 'MN' },
+        { name: 'Heidelberg Materials – Columbus, OH', lat: 39.9612, lng: -82.9988, city: 'Columbus', state: 'OH' },
+        { name: 'Heidelberg Materials – Pittsburgh, PA', lat: 40.4406, lng: -79.9959, city: 'Pittsburgh', state: 'PA' },
+        { name: 'Heidelberg Materials – Baltimore, MD', lat: 39.2904, lng: -76.6122, city: 'Baltimore', state: 'MD' }
+      ]
     },
 
     {
@@ -279,7 +313,19 @@ window.MANUFACTURERS = {
         { label: 'NRMCA EPD Lookup', url: 'https://www.nrmca.org/association-resources/sustainability/environmental-product-declarations/epd-ready-mix-usa-materials-lookup/' }
       ],
       contactUrl: 'https://www.calportland.com/contact-us',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'CalPortland – Pleasanton, CA', lat: 37.6624, lng: -121.8747, city: 'Pleasanton', state: 'CA' },
+        { name: 'CalPortland – Rancho Cucamonga, CA', lat: 34.1064, lng: -117.5931, city: 'Rancho Cucamonga', state: 'CA' },
+        { name: 'CalPortland – Yucaipa, CA', lat: 34.0336, lng: -117.0431, city: 'Yucaipa', state: 'CA' },
+        { name: 'CalPortland – Bakersfield, CA', lat: 35.3733, lng: -119.0187, city: 'Bakersfield', state: 'CA' },
+        { name: 'CalPortland – Yakima, WA', lat: 46.6021, lng: -120.5059, city: 'Yakima', state: 'WA' },
+        { name: 'CalPortland – Spokane, WA', lat: 47.6588, lng: -117.4260, city: 'Spokane', state: 'WA' },
+        { name: 'CalPortland – Portland, OR', lat: 45.5231, lng: -122.6765, city: 'Portland', state: 'OR' },
+        { name: 'CalPortland – Tucson, AZ', lat: 32.2226, lng: -110.9747, city: 'Tucson', state: 'AZ' },
+        { name: 'CalPortland – Las Vegas, NV', lat: 36.1699, lng: -115.1398, city: 'Las Vegas', state: 'NV' },
+        { name: 'CalPortland – Boise, ID', lat: 43.6150, lng: -116.2023, city: 'Boise', state: 'ID' }
+      ]
     },
 
     {
@@ -320,7 +366,16 @@ window.MANUFACTURERS = {
         { label: 'CRH Americas Ready Mix', url: 'https://www.crhamericasmaterials.com/products-and-services/ready-mixed-concrete' }
       ],
       contactUrl: 'https://www.crhamericasmaterials.com/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'CRH Americas – Atlanta, GA', lat: 33.7490, lng: -84.3880, city: 'Atlanta', state: 'GA' },
+        { name: 'CRH Americas – Charlotte, NC', lat: 35.2271, lng: -80.8431, city: 'Charlotte', state: 'NC' },
+        { name: 'CRH Americas – Dallas, TX', lat: 32.7767, lng: -96.7970, city: 'Dallas', state: 'TX' },
+        { name: 'CRH Americas – Orlando, FL', lat: 28.5383, lng: -81.3792, city: 'Orlando', state: 'FL' },
+        { name: 'CRH Americas – Columbus, OH', lat: 39.9612, lng: -82.9988, city: 'Columbus', state: 'OH' },
+        { name: 'CRH Americas – Indianapolis, IN', lat: 39.7684, lng: -86.1581, city: 'Indianapolis', state: 'IN' },
+        { name: 'CRH Americas – Kansas City, MO', lat: 39.0997, lng: -94.5786, city: 'Kansas City', state: 'MO' }
+      ]
     },
 
     {
@@ -361,7 +416,17 @@ window.MANUFACTURERS = {
         { label: 'Argos USA Sustainability', url: 'https://www.argosusa.com/sustainability/' }
       ],
       contactUrl: 'https://www.argosusa.com/contact/',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Argos USA – Alpharetta, GA (HQ)', lat: 34.0760, lng: -84.2947, city: 'Alpharetta', state: 'GA' },
+        { name: 'Argos USA – Savannah, GA', lat: 32.0835, lng: -81.0998, city: 'Savannah', state: 'GA' },
+        { name: 'Argos USA – Charlotte, NC', lat: 35.2271, lng: -80.8431, city: 'Charlotte', state: 'NC' },
+        { name: 'Argos USA – Columbia, SC', lat: 33.9529, lng: -81.0662, city: 'Columbia', state: 'SC' },
+        { name: 'Argos USA – Jacksonville, FL', lat: 30.3322, lng: -81.4355, city: 'Jacksonville', state: 'FL' },
+        { name: 'Argos USA – Birmingham, AL', lat: 33.5186, lng: -86.8104, city: 'Birmingham', state: 'AL' },
+        { name: 'Argos USA – Nashville, TN', lat: 36.1627, lng: -86.7816, city: 'Nashville', state: 'TN' },
+        { name: 'Argos USA – Baltimore, MD', lat: 39.2904, lng: -76.6122, city: 'Baltimore', state: 'MD' }
+      ]
     },
 
     {
@@ -402,7 +467,16 @@ window.MANUFACTURERS = {
         { label: 'Martin Marietta Ready Mix', url: 'https://www.martinmarietta.com/products/ready-mixed-concrete/' }
       ],
       contactUrl: 'https://www.martinmarietta.com/contact/',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Martin Marietta – Raleigh, NC', lat: 35.7796, lng: -78.6382, city: 'Raleigh', state: 'NC' },
+        { name: 'Martin Marietta – Charlotte, NC', lat: 35.2271, lng: -80.8431, city: 'Charlotte', state: 'NC' },
+        { name: 'Martin Marietta – Austin, TX', lat: 30.2672, lng: -97.7431, city: 'Austin', state: 'TX' },
+        { name: 'Martin Marietta – Denver, CO', lat: 39.7392, lng: -104.9903, city: 'Denver', state: 'CO' },
+        { name: 'Martin Marietta – Des Moines, IA', lat: 41.5868, lng: -93.6250, city: 'Des Moines', state: 'IA' },
+        { name: 'Martin Marietta – Kansas City, MO', lat: 39.0997, lng: -94.5786, city: 'Kansas City', state: 'MO' },
+        { name: 'Martin Marietta – Baltimore, MD', lat: 39.2904, lng: -76.6122, city: 'Baltimore', state: 'MD' }
+      ]
     },
 
     {
@@ -443,7 +517,15 @@ window.MANUFACTURERS = {
         { label: 'Thomas Concrete Sustainability', url: 'https://thomasconcrete.com/sustainability/' }
       ],
       contactUrl: 'https://thomasconcrete.com/contact/',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Thomas Concrete – Kennesaw, GA (HQ)', lat: 34.0234, lng: -84.6155, city: 'Kennesaw', state: 'GA' },
+        { name: 'Thomas Concrete – Atlanta, GA', lat: 33.7490, lng: -84.3880, city: 'Atlanta', state: 'GA' },
+        { name: 'Thomas Concrete – Birmingham, AL', lat: 33.5186, lng: -86.8104, city: 'Birmingham', state: 'AL' },
+        { name: 'Thomas Concrete – Charlotte, NC', lat: 35.2271, lng: -80.8431, city: 'Charlotte', state: 'NC' },
+        { name: 'Thomas Concrete – Jacksonville, FL', lat: 30.3322, lng: -81.4355, city: 'Jacksonville', state: 'FL' },
+        { name: 'Thomas Concrete – Columbia, SC', lat: 33.9529, lng: -81.0662, city: 'Columbia', state: 'SC' }
+      ]
     },
 
     /* ─── Emerging & Licensed Technologies ─────────────────── */
@@ -1099,7 +1181,29 @@ window.MANUFACTURERS = {
         { label: 'Nucor Sustainability 2023', url: 'https://nucor.com/sustainability' }
       ],
       contactUrl: 'https://nucor.com/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Nucor Steel Crawfordsville', lat: 39.9842, lng: -86.8997, city: 'Crawfordsville', state: 'IN', address: '4500 County Road 350 W' },
+        { name: 'Nucor Steel Hickman', lat: 35.9093, lng: -89.9175, city: 'Blytheville', state: 'AR', address: '1901 Highway 18' },
+        { name: 'Nucor Steel Berkeley', lat: 33.0618, lng: -79.8209, city: 'Huger', state: 'SC' },
+        { name: 'Nucor Steel Gallatin', lat: 38.7284, lng: -85.0017, city: 'Ghent', state: 'KY' },
+        { name: 'Nucor Steel Decatur', lat: 34.5952, lng: -86.9834, city: 'Decatur', state: 'AL' },
+        { name: 'Nucor Steel Seattle', lat: 47.5612, lng: -122.3925, city: 'Seattle', state: 'WA', address: '2424 SW Andover St' },
+        { name: 'Nucor Steel Jewett', lat: 31.3599, lng: -96.1486, city: 'Jewett', state: 'TX' },
+        { name: 'Nucor Steel Norfolk', lat: 41.9852, lng: -97.4195, city: 'Norfolk', state: 'NE' },
+        { name: 'Nucor Steel Marion', lat: 40.5893, lng: -83.1282, city: 'Marion', state: 'OH' },
+        { name: 'Nucor Steel Darlington', lat: 34.2947, lng: -79.8923, city: 'Darlington', state: 'SC' },
+        { name: 'Nucor Steel Connecticut', lat: 41.4570, lng: -72.8231, city: 'Wallingford', state: 'CT' },
+        { name: 'Nucor Steel Auburn', lat: 42.9326, lng: -76.5682, city: 'Auburn', state: 'NY' },
+        { name: 'Nucor Steel Kankakee', lat: 41.1628, lng: -87.8979, city: 'Bourbonnais', state: 'IL' },
+        { name: 'Nucor Steel Plymouth', lat: 41.8802, lng: -112.1467, city: 'Plymouth', state: 'UT' },
+        { name: 'Nucor Steel Brandenburg', lat: 37.9996, lng: -86.1703, city: 'Brandenburg', state: 'KY' },
+        { name: 'Nucor Steel Tuscaloosa', lat: 33.2098, lng: -87.5698, city: 'Tuscaloosa', state: 'AL' },
+        { name: 'Nucor Steel Hertford County', lat: 36.3029, lng: -76.9052, city: 'Cofield', state: 'NC' },
+        { name: 'Nucor Steel Jackson', lat: 32.2988, lng: -90.1848, city: 'Flowood', state: 'MS' },
+        { name: 'Nucor Steel Memphis', lat: 35.1495, lng: -90.0490, city: 'Memphis', state: 'TN' },
+        { name: 'Nucor Steel Kingman', lat: 35.1895, lng: -114.0530, city: 'Kingman', state: 'AZ' }
+      ]
     },
 
     {
@@ -1141,7 +1245,10 @@ window.MANUFACTURERS = {
         { label: 'Big River Steel Sustainability', url: 'https://www.bigriversteel.com/sustainability/' }
       ],
       contactUrl: 'https://www.bigriversteel.com/contact/',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Big River Steel Flex Mill® – Osceola, AR', lat: 35.6918, lng: -89.9626, city: 'Osceola', state: 'AR', address: '1 Steel Drive' }
+      ]
     },
 
     {
@@ -1202,7 +1309,12 @@ window.MANUFACTURERS = {
         { label: 'XCarb® Program', url: 'https://corporate.arcelormittal.com/climate-action/low-carbon-emissions-steel-standard/' }
       ],
       contactUrl: 'https://constructalia.arcelormittal.com/en/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'ArcelorMittal Burns Harbor', lat: 41.6220, lng: -87.1386, city: 'Burns Harbor', state: 'IN' },
+        { name: 'ArcelorMittal Cleveland', lat: 41.4993, lng: -81.6944, city: 'Cleveland', state: 'OH' },
+        { name: 'ArcelorMittal Indiana Harbor (East & West)', lat: 41.6567, lng: -87.4479, city: 'East Chicago', state: 'IN' }
+      ]
     },
 
     {
@@ -1243,7 +1355,14 @@ window.MANUFACTURERS = {
         { label: 'Steel Dynamics Sustainability', url: 'https://www.steeldynamics.com/sustainability' }
       ],
       contactUrl: 'https://www.steeldynamics.com/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'SDI Flat Roll – Butler, IN', lat: 41.4259, lng: -85.0013, city: 'Butler', state: 'IN' },
+        { name: 'SDI Flat Roll – Columbus, MS', lat: 33.4959, lng: -88.4278, city: 'Columbus', state: 'MS' },
+        { name: 'SDI Flat Roll – Sinton, TX', lat: 28.0383, lng: -97.5089, city: 'Sinton', state: 'TX' },
+        { name: 'SDI Structural & Rail – Columbia City, IN', lat: 41.3220, lng: -85.4891, city: 'Columbia City', state: 'IN' },
+        { name: 'SDI Roanoke Bar Products – Pittsboro, IN', lat: 39.8635, lng: -86.4601, city: 'Pittsboro', state: 'IN' }
+      ]
     },
 
     {
@@ -1284,7 +1403,14 @@ window.MANUFACTURERS = {
         { label: 'CMC Sustainability', url: 'https://www.cmc.com/sustainability' }
       ],
       contactUrl: 'https://www.cmc.com/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'CMC Steel Texas – Seguin, TX', lat: 29.5688, lng: -97.9645, city: 'Seguin', state: 'TX' },
+        { name: 'CMC Steel South Carolina – Cayce, SC', lat: 33.9529, lng: -81.0662, city: 'Cayce', state: 'SC' },
+        { name: 'CMC Steel Arizona – Mesa, AZ', lat: 33.4152, lng: -111.8315, city: 'Mesa', state: 'AZ' },
+        { name: 'CMC Steel Sayreville – Sayreville, NJ', lat: 40.4621, lng: -74.3410, city: 'Sayreville', state: 'NJ' },
+        { name: 'CMC Steel Oklahoma – Durant, OK', lat: 33.9937, lng: -96.3708, city: 'Durant', state: 'OK' }
+      ]
     },
 
     {
@@ -1325,7 +1451,15 @@ window.MANUFACTURERS = {
         { label: 'Gerdau Sustainability', url: 'https://www.gerdau.com/en/sustainability' }
       ],
       contactUrl: 'https://www.gerdau.com/en/contact',
-      ec3SearchUrl: 'https://www.buildingtransparency.org/'
+      ec3SearchUrl: 'https://www.buildingtransparency.org/',
+      plants: [
+        { name: 'Gerdau – Jacksonville, FL', lat: 30.3322, lng: -81.4355, city: 'Jacksonville', state: 'FL' },
+        { name: 'Gerdau – Cartersville, GA', lat: 34.1651, lng: -84.7997, city: 'Cartersville', state: 'GA' },
+        { name: 'Gerdau – Knoxville, TN', lat: 35.9606, lng: -83.9207, city: 'Knoxville', state: 'TN' },
+        { name: 'Gerdau – Midlothian, TX', lat: 32.4776, lng: -96.9939, city: 'Midlothian', state: 'TX' },
+        { name: 'Gerdau – Perth Amboy, NJ', lat: 40.5121, lng: -74.2637, city: 'Perth Amboy', state: 'NJ' },
+        { name: 'Gerdau – Wilton, IA', lat: 41.5902, lng: -91.0193, city: 'Wilton', state: 'IA' }
+      ]
     },
 
     /* ─── Global Steel ──────────────────────────────────────── */

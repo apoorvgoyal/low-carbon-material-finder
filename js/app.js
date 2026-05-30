@@ -386,7 +386,8 @@ const App = (() => {
     if (sheetProfileBtn) {
       sheetProfileBtn.addEventListener('click', () => {
         if (S.activeSheet?.id) {
-          window.location.href = `manufacturer.html?id=${encodeURIComponent(S.activeSheet.id)}`;
+          const navId = S.activeSheet._baseId || S.activeSheet.id;
+          window.location.href = `manufacturer.html?id=${encodeURIComponent(navId)}`;
         }
       });
     }
@@ -595,9 +596,28 @@ const App = (() => {
     return db[S.material] || [];
   }
 
+  // Expand a manufacturer with a plants[] array into individual pin entries.
+  // Each pin inherits all manufacturer data but overrides hq with the plant location.
+  function expandToPlants(m) {
+    if (!m.plants || !m.plants.length) return [m];
+    return m.plants.map((plant, i) => ({
+      ...m,
+      id: `${m.id}__plant${i}`,
+      _baseId: m.id,
+      isPlantPin: true,
+      plantName: plant.name,
+      hq: {
+        lat: plant.lat,
+        lng: plant.lng,
+        label: [plant.name, plant.city, plant.state].filter(Boolean).join(', ')
+      }
+    }));
+  }
+
   function runFilter() {
     if (!S.center) return;
     S.results = getAllManufacturers()
+      .flatMap(m => expandToPlants(m))
       .filter(m => matchesRegion(m))
       .map(m => ({ ...m, distanceMi: haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng) }))
       .sort(sorter());
@@ -607,9 +627,10 @@ const App = (() => {
     renderHistogram();
     updateStats();
 
+    const uniqueMfrs = new Set(S.results.map(m => m._baseId || m.id)).size;
     const msg = S.results.length === 0
-      ? `No ${S.material} manufacturers found. Try increasing the radius or switching to GWP Target mode.`
-      : `${S.results.length} ${S.material} manufacturer${S.results.length !== 1 ? 's' : ''} within ${radiusDisplay()}.`;
+      ? `No ${S.material} plants found. Try increasing the radius or switching to GWP Target mode.`
+      : `${S.results.length} plant${S.results.length !== 1 ? 's' : ''} (${uniqueMfrs} manufacturer${uniqueMfrs !== 1 ? 's' : ''}) within ${radiusDisplay()}.`;
     setMeta(msg);
   }
 
@@ -621,6 +642,7 @@ const App = (() => {
         const g = p.gwpVerified != null ? p.gwpVerified : p.gwpEstimate;
         return g != null && g <= S.gwpTarget;
       }))
+      .flatMap(m => expandToPlants(m))
       .map(m => ({
         ...m,
         distanceMi: S.center ? haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng) : null
@@ -631,12 +653,15 @@ const App = (() => {
     renderSidebar();
     renderHistogram();
     updateStats();
-    setMeta(`${S.results.length} manufacturer${S.results.length !== 1 ? 's' : ''} can produce ${S.material} at ≤ ${S.gwpTarget} ${cfg.unit}.`);
+    const uniqueMfrs = new Set(S.results.map(m => m._baseId || m.id)).size;
+    setMeta(`${uniqueMfrs} manufacturer${uniqueMfrs !== 1 ? 's' : ''} (${S.results.length} plant${S.results.length !== 1 ? 's' : ''}) can produce ${S.material} at ≤ ${S.gwpTarget} ${cfg.unit}.`);
   }
 
   function matchesRegion(m) {
     const dist = haversine(S.center.lat, S.center.lng, m.hq.lat, m.hq.lng);
     if (dist <= S.radiusMiles) return true;
+    // Plant pins: distance-only match — no national/state fallback for specific locations
+    if (m.isPlantPin) return dist <= S.radiusMiles * 2;
     const mCountry = m.country || 'US';
     const uCountry = S.userCountry || 'US';
     if (m.coverage === 'national' && mCountry === uCountry) return true;
@@ -781,10 +806,14 @@ const App = (() => {
 
       // Meta line
       const parts = [];
-      if (m.hq && m.hq.label) parts.push(m.hq.label.split(',')[0]);
-      if (m.plantCount) parts.push(`${m.plantCount} plants`);
+      if (m.isPlantPin && m.plantName) {
+        parts.push(m.plantName);
+      } else if (m.hq && m.hq.label) {
+        parts.push(m.hq.label.split(',')[0]);
+      }
+      if (!m.isPlantPin && m.plantCount) parts.push(`${m.plantCount} plants`);
       if (m.distanceMi != null) parts.push(distDisplay(m.distanceMi));
-      if (m.coverage === 'national') parts.push('National');
+      if (!m.isPlantPin && m.coverage === 'national') parts.push('National');
       const metaLine = parts.join(' · ');
 
       // Tech chips
