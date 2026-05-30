@@ -1,5 +1,7 @@
 'use strict';
 
+const { createClient } = require('@supabase/supabase-js');
+
 const EC3_CATEGORY = {
   concrete: 'Concrete >> ReadyMix',
   steel:    'Steel >> StructuralSteel',
@@ -27,16 +29,33 @@ function parseGwp(v) {
 }
 
 // Extract GWP from all known EC3/openEPD field names and paths.
+//
+// openEPD v2 structure (confirmed from openepd Python library + sample EPDs):
+//   item.impacts is keyed by methodology name ("TRACI 2.1", "EF 3.0", etc.)
+//   → impacts["TRACI 2.1"].gwp.A1A2A3  (A1A2A3 = "Sum of A1..A3", NOT "A1A3")
+//
+// Legacy EC3 API: flat field gwp_a1a3 as a plain number.
+// openEPD top-level gwp: ScopeSetGwp object → gwp.A1A2A3
 function extractGwp(item) {
-  return parseGwp(item.gwp_a1a3)
-      ?? parseGwp(item.gwp_A1A3)
-      ?? parseGwp(item.declared_gwp)
-      ?? parseGwp(item.gwp)
-      ?? parseGwp(item.impacts?.gwp?.A1A3)
-      ?? parseGwp(item.impacts?.GWP?.A1A3)
-      ?? parseGwp(item.impacts?.gwp?.a1a3)
-      ?? parseGwp(item.kg_co2e_per_m3)
-      ?? null;
+  // 1. Flat legacy fields
+  let v = parseGwp(item.gwp_a1a3) ?? parseGwp(item.gwp_A1A3) ?? parseGwp(item.declared_gwp);
+  if (v != null) return v;
+
+  // 2. Top-level gwp object (ScopeSetGwp): gwp.A1A2A3
+  v = parseGwp(item.gwp?.A1A2A3) ?? parseGwp(item.gwp?.A1A3);
+  if (v != null) return v;
+
+  // 3. impacts keyed by methodology name → methodology.gwp.A1A2A3
+  if (item.impacts && typeof item.impacts === 'object') {
+    for (const method of Object.values(item.impacts)) {
+      if (!method || typeof method !== 'object') continue;
+      v = parseGwp(method.gwp?.A1A2A3) ?? parseGwp(method.gwp?.A1A3);
+      if (v != null) return v;
+    }
+  }
+
+  // 4. Legacy numeric kg/m³ field
+  return parseGwp(item.kg_co2e_per_m3) ?? null;
 }
 
 // EC3 openEPD format: plant_or_group can be:
@@ -131,6 +150,34 @@ function normalizeToPlants(items) {
   return plants;
 }
 
+async function cacheToSupabase(plants, category) {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return;
+  const supabase = createClient(url, key);
+  const now  = new Date().toISOString();
+  const rows = plants.map(p => ({
+    id:           p.id || `${(+p.latitude).toFixed(4)}|${(+p.longitude).toFixed(4)}`,
+    plant_name:   p.plant_name || null,
+    latitude:     +p.latitude,
+    longitude:    +p.longitude,
+    address:      p.address    || null,
+    city:         p.city       || null,
+    country:      p.country    || null,
+    gwp_a1a3:     p.gwp_A1A3  ?? null,
+    product_name: p.product_name || null,
+    category:     category,
+    epd_url:      p.epd_url   || null,
+    synced_at:    now,
+  })).filter(r => r.latitude && r.longitude);
+
+  const CHUNK = 100;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await supabase.from('ec3_plants')
+      .upsert(rows.slice(i, i + CHUNK), { onConflict: 'id' });
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -149,32 +196,22 @@ module.exports = async function handler(req, res) {
   const ec3Category = EC3_CATEGORY[category] || category;
   const headers = { 'Authorization': `Bearer ${apiKey}`, 'Accept': 'application/json' };
 
-  // Try strategies in priority order.
-  // Key rule: keep trying even on 200 if we extracted 0 plants — the endpoint
-  // may exist but not embed location data, so fall through to the next variant.
   const strategies = [];
-
   const addStrategy = (url) => strategies.push(url);
 
-  // Plants endpoint
-  const withCat = new URLSearchParams({ page_size, page, product_class: ec3Category });
-  const noCat   = new URLSearchParams({ page_size, page });
-  if (jurisdiction) {
-    addStrategy(`${BASE}/plants/?${withCat}&jurisdiction=${jurisdiction}`);
-  }
-  addStrategy(`${BASE}/plants/?${withCat}`);
-  if (jurisdiction) {
-    addStrategy(`${BASE}/plants/?${noCat}&jurisdiction=${jurisdiction}`);
-  }
-  addStrategy(`${BASE}/plants/?${noCat}`);
+  const epdParams   = new URLSearchParams({ page_size, page, category: ec3Category });
+  const plantParams = new URLSearchParams({ page_size, page, product_class: ec3Category });
 
-  // EPDs endpoint (location embedded in plant_or_group)
-  const epdWithJ  = new URLSearchParams({ page_size, page, category: ec3Category });
-  const epdNoJ    = new URLSearchParams({ page_size, page, category: ec3Category });
+  // EPDs first — they carry both location (plant_or_group) AND declared GWP.
+  // Plants endpoint has location only, no GWP, so it comes last as a fallback.
   if (jurisdiction) {
-    addStrategy(`${BASE}/epds/?${epdWithJ}&jurisdiction=${jurisdiction}`);
+    addStrategy(`${BASE}/epds/?${epdParams}&jurisdiction=${jurisdiction}`);
   }
-  addStrategy(`${BASE}/epds/?${epdNoJ}`);
+  addStrategy(`${BASE}/epds/?${epdParams}`);
+  if (jurisdiction) {
+    addStrategy(`${BASE}/plants/?${plantParams}&jurisdiction=${jurisdiction}`);
+  }
+  addStrategy(`${BASE}/plants/?${plantParams}`);
 
   let lastStatus = 502;
   let lastData   = {};
@@ -188,23 +225,33 @@ module.exports = async function handler(req, res) {
       const items = Array.isArray(data) ? data : (data.results || []);
       console.log(`[ec3-proxy] ← ${r.status}, items: ${items.length}`);
 
-      if (r.status === 401) return res.status(401).json(data);
+      // 401 on one endpoint doesn't mean the key is bad — try remaining strategies
+      // before giving up (EPDs and plants may have different auth requirements).
+      if (r.status === 401) { lastStatus = 401; lastData = data; continue; }
 
       if (r.ok) {
         gotAny200 = true;
-        // Log GWP fields present on first item to help diagnose missing GWP
+        // Log GWP fields to help diagnose missing GWP
         if (items.length > 0) {
-          const sample = items[0];
-          const gwpFields = ['gwp_a1a3','gwp_A1A3','declared_gwp','gwp','kg_co2e_per_m3'];
-          const found = gwpFields.filter(f => sample[f] != null);
-          const impactKeys = Object.keys(sample.impacts || {});
-          console.log(`[ec3-proxy] sample GWP fields: [${found.join(',')}] impacts: [${impactKeys.join(',')}]`);
-          if (found.length > 0) console.log(`[ec3-proxy] sample gwp raw:`, JSON.stringify(sample[found[0]]));
+          const s = items[0];
+          const flatFields = ['gwp_a1a3','gwp_A1A3','declared_gwp','kg_co2e_per_m3'];
+          const found = flatFields.filter(f => s[f] != null);
+          const impactKeys = Object.keys(s.impacts || {});
+          const gwpScopeKeys = s.gwp ? Object.keys(s.gwp) : [];
+          console.log(`[ec3-proxy] flat GWP fields: [${found.join(',')}]`);
+          console.log(`[ec3-proxy] gwp scope keys: [${gwpScopeKeys.join(',')}]`);
+          console.log(`[ec3-proxy] impacts methodologies: [${impactKeys.join(',')}]`);
+          if (impactKeys.length > 0) {
+            const meth = s.impacts[impactKeys[0]];
+            console.log(`[ec3-proxy] impacts.${impactKeys[0]}.gwp.A1A2A3:`, JSON.stringify(meth?.gwp?.A1A2A3));
+          }
         }
         const plants = normalizeToPlants(items);
         console.log(`[ec3-proxy] plants with coords: ${plants.length}, with gwp: ${plants.filter(p=>p.gwp_A1A3!=null).length}`);
         if (plants.length > 0) {
           res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
+          // Cache to Supabase in background so search-plants can serve future users
+          cacheToSupabase(plants, category).catch(() => {});
           return res.status(200).json(plants);
         }
         // Got 200 but 0 plants — try next strategy before giving up
