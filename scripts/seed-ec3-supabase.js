@@ -155,12 +155,26 @@ async function fetchPage(endpoint, params) {
   const url = `${BASE}/${endpoint}?${new URLSearchParams(params)}`;
   const res = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${EC3_API_KEY}`,
-      Accept: 'application/json',
+      // Full Chrome browser headers — EC3's WAF checks these
+      'Authorization':       `Bearer ${EC3_API_KEY}`,
+      'Accept':              'application/json, text/plain, */*',
+      'Accept-Language':     'en-US,en;q=0.9',
+      'Accept-Encoding':     'gzip, deflate, br',
+      'User-Agent':          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Referer':             'https://buildingtransparency.org/ec3/materials',
+      'Origin':              'https://buildingtransparency.org',
+      'Sec-Fetch-Dest':      'empty',
+      'Sec-Fetch-Mode':      'cors',
+      'Sec-Fetch-Site':      'same-origin',
+      'Sec-Ch-Ua':           '"Chromium";v="124", "Google Chrome";v="124", "Not-A.Brand";v="99"',
+      'Sec-Ch-Ua-Mobile':    '?0',
+      'Sec-Ch-Ua-Platform':  '"Windows"',
+      'Cache-Control':       'no-cache',
+      'Pragma':              'no-cache',
     }
   });
   if (res.status === 401) throw Object.assign(new Error('401 Unauthorized — key rejected'), { code: 401 });
-  if (res.status === 403) throw Object.assign(new Error('403 Forbidden — WAF blocked this IP'), { code: 403 });
+  if (res.status === 403) throw Object.assign(new Error('403 WAF blocked — try the browser-save method instead (see instructions)'), { code: 403 });
   if (!res.ok) throw new Error(`HTTP ${res.status} from EC3`);
   return res.json();
 }
