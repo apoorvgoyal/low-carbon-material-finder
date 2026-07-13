@@ -1,12 +1,12 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-07-06",
+  "lastUpdated": "2026-07-13",
   "description": "Community-submitted low-carbon material manufacturers. Submitted via submit.html and reviewed by admin before status is set to 'approved'.",
   "autoSync": {
     "enabled": false,
     "source": "EC3",
     "frequency": "weekly",
-    "lastSync": "2026-07-06T09:58:33.705Z"
+    "lastSync": "2026-07-13T08:52:07.315Z"
   },
   "manufacturers": [],
   "technologies": [
